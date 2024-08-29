@@ -25,10 +25,10 @@ package com.slinky.jellysmash.model.physics;
  * debugging purposes.
  * </p>
  * 
- * @version 1.0
- * @since   0.0.1
- * @author  Kheagen Haskins
- * @see     EntityManager
+ * @version  1.0
+ * @since    0.1.0
+ * @author   Kheagen Haskins
+ * @see      EntityManager
  */
 public record Entity(long id) {
 
