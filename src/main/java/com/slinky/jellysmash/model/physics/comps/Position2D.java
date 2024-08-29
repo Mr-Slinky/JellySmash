@@ -28,12 +28,12 @@ public class Position2D implements Position {
     /**
      * The x coordinate of the position.
      */
-    private double x;
+    protected double x;
 
     /**
      * The y coordinate of the position.
      */
-    private double y;
+    protected double y;
 
     // =========================== Constructors ============================= //
     /**

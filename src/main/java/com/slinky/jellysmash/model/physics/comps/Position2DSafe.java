@@ -32,8 +32,8 @@ package com.slinky.jellysmash.model.physics.comps;
  * @see Position2D
  */
 public class Position2DSafe extends Position2D {
-    // =========================== Constructors ============================= //
 
+    // =========================== Constructors ============================= //
     /**
      * Constructs a new {@code Position2DSafe} instance with the specified
      * {@code x} and {@code y} coordinates.
