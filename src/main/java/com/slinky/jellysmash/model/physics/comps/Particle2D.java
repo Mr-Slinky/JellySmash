@@ -22,10 +22,10 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * <p>
- * This class is essential for developers implementing a 2D physics engine using
- * the Entity Component System (ECS) pattern, as it provides the basic building
- * blocks for creating and manipulating physical entities within the simulation.
- * By adhering to the {@link Particle} interface, {@code Particle2D} ensures
+ * This class is essential for implementing a 2D physics engine using the Entity
+ * Component System (ECS) pattern, as it provides the basic building blocks for
+ * creating and manipulating physical entities within the simulation. By
+ * adhering to the {@link Particle} interface, {@code Particle2D} ensures
  * compatibility and interoperability with other components and systems within
  * the ECS framework.
  * </p>
@@ -136,6 +136,19 @@ public class Particle2D implements Particle {
      */
     private Vector acceleration;
 
+    /**
+     * The resultant force vector representing the cumulative effect of all
+     * forces acting on this particle within the current physics tick.
+     *
+     * <p>
+     * This vector accumulates all forces applied to the particle during a
+     * single simulation tick, including gravitational, applied, and interaction
+     * forces. It is reset at the beginning of each tick to accurately reflect
+     * the forces acting on the particle within that specific time frame.
+     * </p>
+     */
+    private Vector actingForce;
+
     // =========================== Constructors ============================= //
     /**
      * Constructs a new {@code Particle2D} with specified position, velocity,
@@ -171,16 +184,18 @@ public class Particle2D implements Particle {
      * negative.
      */
     public Particle2D(Position position, Vector velocity, Vector acceleration, double mass, double damping, double restitution, boolean isStatic) {
-        throwIfNegative("mass", mass);
+        throwIfNonPositive("mass", mass);
         throwIfNegative("dampining coefficient", damping);
         throwIfNegative("restitution", restitution);
+
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = acceleration;
+        this.actingForce = new Vector2D(0, 0);
 
         this.mass = mass;
         this.dampCoef = damping;
         this.restt = restitution;
-        this.position = position;
-        this.velocity = velocity;
-        this.acceleration = acceleration;
         this.isStatic = isStatic;
     }
 
@@ -214,13 +229,13 @@ public class Particle2D implements Particle {
 
     /**
      * Constructs a new {@code Particle2D} with a specified mass and static
-     * flag, initializing the particle's position at the origin and setting its
+     * flag, initialising the particle's position at the origin and setting its
      * velocity and acceleration to zero.
      *
      * <p>
      * This constructor provides a convenient way to create a particle with
      * default motion parameters, while allowing for the specification of mass
-     * and whether the particle is static. The position is initialized at (0,
+     * and whether the particle is static. The position is initialised at (0,
      * 0), and both the velocity and acceleration vectors are set to zero,
      * indicating no movement or change in movement. The damping coefficient and
      * restitution are set to zero, meaning the particle experiences no decay in
@@ -286,6 +301,14 @@ public class Particle2D implements Particle {
      * {@inheritDoc}
      */
     @Override
+    public Vector getActingForce() {
+        return actingForce;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public double getDampingCoefficient() {
         return dampCoef;
     }
@@ -340,9 +363,36 @@ public class Particle2D implements Particle {
     }
 
     // ========================== Helper Methods ============================ //
+    /**
+     * Throws an {@link IllegalArgumentException} if the specified field is
+     * negative.
+     *
+     * @param varName the name of the variable to include in the exception
+     * message
+     * @param field the value to check; if this value is less than 0, an
+     * exception is thrown
+     * @throws IllegalArgumentException if the field is negative
+     */
     private void throwIfNegative(String varName, double field) {
         if (field < 0) {
             throw new IllegalArgumentException(varName + " cannot be negative (" + field + ")");
         }
     }
+
+    /**
+     * Throws an {@link IllegalArgumentException} if the specified field is
+     * non-positive.
+     *
+     * @param varName the name of the variable to include in the exception
+     * message
+     * @param field the value to check; if this value is less than or equal to
+     * 0, an exception is thrown
+     * @throws IllegalArgumentException if the field is non-positive
+     */
+    private void throwIfNonPositive(String varName, double field) {
+        if (field <= 0) {
+            throw new IllegalArgumentException(varName + " must be positive (" + field + ")");
+        }
+    }
+
 }

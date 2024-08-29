@@ -26,6 +26,18 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * <p>
+ * Notably, this interface does not provide setters for the {@link Vector}
+ * properties such as position, velocity, acceleration, and acting forces.
+ * Instead, these properties are mutable themselves, allowing direct
+ * manipulation after retrieval via their respective getter methods. This design
+ * choice ensures that while the vector properties can be manipulated in terms
+ * of their components, the references to these vectors remain constant after
+ * the particle's instantiation. This approach prioritises ease of use and
+ * consistency within the simulation, even though it deviates from the Law of
+ * Demeter for convenience.
+ * </p>
+ *
+ * <p>
  * This interface is intended to be implemented by classes that manage the
  * physical properties of entities in a simulation, providing a standard way to
  * interact with these properties across different systems within the ECS
@@ -37,9 +49,9 @@ package com.slinky.jellysmash.model.physics.comps;
  *
  * @author  Kheagen Haskins
  *
- * @see     Component
- * @see     Position
- * @see     Vector
+ * @see Component
+ * @see Position
+ * @see Vector
  */
 public interface Particle extends Component {
 
@@ -103,6 +115,23 @@ public interface Particle extends Component {
      * @return the acceleration of the particle.
      */
     Vector getAcceleration();
+
+    /**
+     * Returns the resultant force currently acting on this particle as a
+     * {@link Vector}.
+     *
+     * <p>
+     * The acting force represents the cumulative force that has been applied to
+     * the particle during the current physics tick. This includes all forces
+     * such as gravity, applied forces, and other interactions. The acting force
+     * is reset to zero at the start of each tick. For static particles, which
+     * do not move, the acting force is always zero.
+     * </p>
+     *
+     * @return the resultant force acting on the particle during the current
+     * physics tick.
+     */
+    Vector getActingForce();
 
     /**
      * Retrieves the damping coefficient of this particle.
@@ -241,4 +270,5 @@ public interface Particle extends Component {
      * particle.
      */
     void setStatic(boolean isStatic);
+
 }
