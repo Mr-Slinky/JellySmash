@@ -47,11 +47,11 @@ public interface Position extends Component {
     void setY(double y);
 
     /**
-     * Sets both the x and y coordinates of the position.
+     * Sets both the x and y components of the position.
      *
      * @param x the new x coordinate
      * @param y the new y coordinate
      */
-    void setPosition(double x, double y);
+    void setComponents(double x, double y);
 
 }

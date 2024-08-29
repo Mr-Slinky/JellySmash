@@ -91,7 +91,7 @@ public class Position2D implements Position {
      * @param x the new x coordinate
      * @param y the new y coordinate
      */
-    public void setPosition(double x, double y) {
+    public void setComponents(double x, double y) {
         this.x = x;
         this.y = y;
     }

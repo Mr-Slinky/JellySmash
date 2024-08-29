@@ -105,8 +105,8 @@ public class Position2DSafe extends Position2D {
      * @param y the new y coordinate
      */
     @Override
-    public synchronized void setPosition(double x, double y) {
-        super.setPosition(x, y);
+    public synchronized void setComponents(double x, double y) {
+        super.setComponents(x, y);
     }
 
 }
