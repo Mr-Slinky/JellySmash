@@ -1,46 +1,86 @@
 package com.slinky.jellysmash.model.physics.comps;
 
 /**
- * The {@code Vector} interface serves as a marker interface, extending the
- * {@link Position} interface within the Entity-Component-System (ECS)
- * architecture of the JellySmash physics engine.
+ * The {@code Vector} interface represents a mathematical vector in a
+ * two-dimensional space, encapsulating both an x-coordinate and a y-coordinate.
+ * This interface extends the {@link Component} interface, making it a part of
+ * the component-based architecture used in the Entity Component System (ECS)
+ * design pattern.
+ * 
  * <p>
- * This interface does not introduce any new methods or fields beyond those
- * inherited from {@link Position}. Its primary purpose is to provide a semantic
- * distinction between components that represent different types of spatial data
- * within the physics engine, specifically identifying components that function
- * as vectors rather than just positions.
- * <p>
- * In the context of physics simulations, a vector often represents both a
- * direction and a magnitude, such as <strong>velocity</strong> or
- * <strong>acceleration</strong>. By using the {@code Vector} interface as a
- * marker, the design facilitates the organisation of vector-related data into
- * contiguous blocks of memory, which is a core principle of Data-Oriented
- * Programming (DOP). This approach enhances cache efficiency and overall
- * performance, particularly in computation-heavy scenarios typical in physics
- * simulations.
- * <p>
- * The separation of vectors from positions using this marker interface allows
- * the ECS architecture to store and process vector data independently,
- * optimising access patterns and reducing cache misses. This is critical for
- * the performance of the physics engine, as it enables the system to handle
- * large volumes of vector data (such as forces or velocities) efficiently,
- * adhering to the DOP paradigm where data layout is optimised for processing
- * speed.
- * <p>
- * Furthermore, this design decision aligns with the ECS principles by allowing
- * components to be easily identified and managed based on their roles within
- * the system, without compromising type safety. The ability to distinguish
- * between vector and position components through this interface also promotes
- * clarity and extensibility, ensuring that the codebase remains maintainable
- * and scalable as new spatial components are introduced.
- *
- * @version 1.0
- * @since 0.1.0
- *
- * @author Kheagen Haskins
+ * Vectors are fundamental in physics simulations, providing a way to represent
+ * directions, velocities, accelerations, and forces. Implementing classes are
+ * expected to manage the state of the vector, offering methods to retrieve and
+ * modify the x and y coordinates.
+ * </p>
  *
  * @see Component
  * @see Position
+ * @see Vector2D
  */
-public interface Vector extends Position {}
+public interface Vector extends Component {
+
+    // ============================== Getters =============================== //
+    /**
+     * Retrieves the x-coordinate of the vector.
+     * <p>
+     * The x-coordinate represents the horizontal component of the vector in a
+     * two-dimensional Cartesian coordinate system.
+     * </p>
+     *
+     * @return the x-coordinate of the vector.
+     */
+    double getX();
+
+    /**
+     * Retrieves the y-coordinate of the vector.
+     * <p>
+     * The y-coordinate represents the vertical component of the vector in a
+     * two-dimensional Cartesian coordinate system.
+     * </p>
+     *
+     * @return the y-coordinate of the vector.
+     */
+    double getY();
+
+    // ============================== Setters =============================== //
+    /**
+     * Sets the x-coordinate of the vector.
+     * <p>
+     * This method allows modification of the horizontal component of the
+     * vector. It's typically used to adjust the vector's direction or magnitude
+     * in simulations where the x-component plays a role.
+     * </p>
+     *
+     * @param x the new x-coordinate value to be set for this vector.
+     */
+    void setX(double x);
+
+    /**
+     * Sets the y-coordinate of the vector.
+     * <p>
+     * This method allows modification of the vertical component of the vector.
+     * It's typically used to adjust the vector's direction or magnitude in
+     * simulations where the y-component plays a role.
+     * </p>
+     *
+     * @param y the new y-coordinate value to be set for this vector.
+     */
+    void setY(double y);
+
+    /**
+     * Sets both the x and y coordinates of the vector.
+     * <p>
+     * This method provides a convenient way to update both components of the
+     * vector simultaneously, which can be more efficient than setting each
+     * component individually. It's particularly useful in scenarios where a
+     * vector's direction or magnitude needs to be recalculated based on new
+     * data.
+     * </p>
+     *
+     * @param x the new x-coordinate value to be set.
+     * @param y the new y-coordinate value to be set.
+     */
+    void setComponents(double x, double y);
+
+}

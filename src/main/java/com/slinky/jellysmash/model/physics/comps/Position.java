@@ -1,57 +1,30 @@
 package com.slinky.jellysmash.model.physics.comps;
 
 /**
- * Represents a 2D position with x and y coordinates. This interface defines the
- * methods required for accessing and modifying these coordinates.
+ * The {@code Position} interface is a marker interface representing a specific
+ * type of {@link Vector} that is used to denote positional data in the
+ * JellySmash soft-body physics engine. While it does not add any new behaviour
+ * or properties beyond what is provided by the {@link Vector} interface, it
+ * allows instances of classes implementing {@code Position} to be easily
+ * organised into groups, following a data-oriented design approach.
+ * 
  * <p>
- * Implementations of this interface can provide additional functionality or
- * behaviour, but they must at least provide the basic operations defined here.
+ * This design choice facilitates efficient processing of positional data,
+ * enabling the engine to treat positional vectors separately from other types
+ * of vectors such as velocities or accelerations, even though they share the
+ * same underlying structure and behaviour.
  * </p>
+ * 
  * <p>
- * This interface extends the {@link Component} marker interface, so all
- * implementers of {@code Position} will be marked as components.
+ * By categorising vectors as positions, the physics engine can optimise certain
+ * operations, such as collision detection or spatial partitioning, by focusing
+ * specifically on positional data. This also aids in code readability and
+ * maintainability by clearly indicating the intent of a vector's use within the
+ * physics system.
  * </p>
  *
- * @author Kheagen Haskins
+ * @author Kheagen
+ * @see    Vector
+ * @see    Component
  */
-public interface Position extends Component {
-
-    // ============================== Getters =============================== //
-    /**
-     * Returns the x coordinate of the position.
-     *
-     * @return the x coordinate
-     */
-    double getX();
-
-    /**
-     * Returns the y coordinate of the position.
-     *
-     * @return the y coordinate
-     */
-    double getY();
-
-    // ============================== Setters =============================== //
-    /**
-     * Sets the x coordinate of the position.
-     *
-     * @param x the new x coordinate
-     */
-    void setX(double x);
-
-    /**
-     * Sets the y coordinate of the position.
-     *
-     * @param y the new y coordinate
-     */
-    void setY(double y);
-
-    /**
-     * Sets both the x and y components of the position.
-     *
-     * @param x the new x coordinate
-     * @param y the new y coordinate
-     */
-    void setComponents(double x, double y);
-
-}
+public interface Position extends Vector {}
