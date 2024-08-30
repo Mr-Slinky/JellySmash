@@ -58,7 +58,7 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  * @see Vector
  * @see Vector2D
  */
-abstract class VectorSystem2D implements System {
+public abstract class VectorSystem2D implements System {
 
     // ============================ API Methods ============================= //
     /**
