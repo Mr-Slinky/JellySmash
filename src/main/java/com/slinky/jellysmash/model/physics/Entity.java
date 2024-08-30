@@ -1,82 +1,91 @@
 package com.slinky.jellysmash.model.physics;
 
 /**
- * The {@code Entity} class represents a uniquely identifiable entity within the system.
- * 
+ * The {@code Entity} class represents a uniquely identifiable object within the
+ * system. Each instance of {@code Entity} is assigned a unique identifier at
+ * the time of creation, which ensures that every entity can be distinctly
+ * identified and managed within the system.
+ *
  * <p>
- * Each instance of {@code Entity} is assigned a unique identifier upon creation. 
- * The unique identifier is managed through a static counter, ensuring that 
- * each entity is distinctly identifiable. This class is particularly useful in 
- * scenarios where entities need to be tracked or managed uniquely within a 
- * system, such as in games, simulations, or data management contexts.
+ * The unique identifier for each {@code Entity} is generated and assigned by
+ * the external {@link EntityFactory} class. This design enforces the integrity
+ * of the identifier, ensuring that no two entities share the same identifier.
+ * The {@link EntityFactory} is solely responsible for the creation of
+ * {@code Entity} instances, which promotes consistency and centralises control
+ * over the entity creation process.
  * </p>
- * 
+ *
  * <p>
- * The class leverages the Java record feature, which is a compact and immutable 
- * data structure, making it an ideal choice for representing simple entities 
- * with only an identifier.
+ * The constructor of the {@code Entity} class is deliberately made
+ * package-private, restricting direct instantiation by other classes. This
+ * design choice ensures that entities can only be created through the
+ * {@link EntityFactory}, further enforcing the uniqueness and integrity of the
+ * entity identifiers.
  * </p>
- * 
+ *
  * <p>
- * This class provides a constructor for creating an entity with a specified 
- * identifier, and it maintains a static counter to keep track of the number of 
- * entities created. Additionally, it provides a static method to retrieve the 
- * current count of entities, which can be useful for various tracking or 
- * debugging purposes.
+ * This class is a core component of the system's architecture, as it provides
+ * the foundational building block for entities managed by the system. Entities
+ * created using this class are typically managed by the {@link EntityFactory},
+ * which handles the lifecycle, storage, and retrieval of entities.
  * </p>
- * 
- * @version  1.0
- * @since    0.1.0
- * @author   Kheagen Haskins
- * @see      EntityManager
+ *
+ * @version 2.0
+ * @since 0.1.0
+ *
+ * @author Kheagen Haskins
+ *
+ * @see EntityFactory
  */
-public record Entity(long id) {
+public final class Entity {
 
     /**
-     * A static counter that is used to generate unique identifiers for entities.
-     * 
+     * A unique identifier assigned to each {@code Entity} instance.
      * <p>
-     * This counter is incremented automatically each time a new entity is created 
-     * via the default constructor (not provided here). The counter ensures that 
-     * each entity has a distinct identifier. The value of this counter represents 
-     * the total number of entities that have been instantiated.
+     * The {@code ID} is a long value that uniquely identifies the entity within
+     * the system. This ID is immutable and is set during the construction of
+     * the entity. It is intended to be globally unique, ensuring that no two
+     * entities share the same identifier.
+     * </p>
+     *
+     * <p>
+     * The ID is assigned by the {@link EntityFactory} at the time of creation
+     * and cannot be modified afterwards, reinforcing the integrity of the
+     * entity's identity.
      * </p>
      */
-    private static long globalIDCounter = 0; // Counter to generate unique IDs
+    private final long ID;
 
     /**
-     * Returns the current number of entities that have been created. 
-     * 
+     * Constructs an {@code Entity} with the specified unique identifier.
      * <p>
-     * The value returned by this method is equivalent to the number of 
-     * entities that have been instantiated, which also corresponds to 
-     * the next unique identifier that will be assigned.
+     * This constructor is package-private to restrict the creation of entities
+     * to the {@link EntityFactory} class only. By passing the responsibility of
+     * generating and assigning the ID to {@link EntityFactory}, this design
+     * ensures that each {@code Entity} is assigned a unique and consistent
+     * identifier at the time of its creation.
      * </p>
-     * 
-     * @return the current count of entities created, which represents the 
-     *         next unique identifier to be assigned.
+     *
+     * @param id The unique identifier to be assigned to this entity. This value
+     * is managed and provided by {@link EntityFactory}.
      */
-    public static long getEntityCount() {
-        return globalIDCounter;
+    Entity(long id) {
+        this.ID = id;
     }
 
     /**
-     * Constructs a new {@code Entity} with the specified identifier.
-     * 
+     * Retrieves the unique identifier of this {@code Entity}.
      * <p>
-     * This constructor allows for the creation of an entity with a pre-defined 
-     * identifier. This might be useful in scenarios where entities need to be 
-     * restored from a persistent state or when specific IDs need to be assigned 
-     * for testing or debugging purposes.
+     * The {@code id} method returns the immutable ID that was assigned to this
+     * entity at the time of its creation. This ID is used to uniquely identify
+     * the entity within the system, allowing it to be referenced, stored, and
+     * retrieved reliably.
      * </p>
-     * 
-     * @param id the unique identifier to be assigned to this entity. It is 
-     *           expected that the identifier is unique within the context of 
-     *           the system managing these entities.
+     *
+     * @return The unique identifier of this entity.
      */
-    public Entity(long id) {
-        this.id = id;
-        globalIDCounter++;
+    public long id() {
+        return ID;
     }
 
 }
