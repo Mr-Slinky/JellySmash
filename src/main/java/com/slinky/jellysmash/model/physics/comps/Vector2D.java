@@ -31,6 +31,21 @@ package com.slinky.jellysmash.model.physics.comps;
  */
 public class Vector2D implements Component {
 
+    // ============================== Static ================================ //
+    /**
+     * A static, immutable instance of {@code Vector2D} representing the zero
+     * vector (0, 0). This vector is useful as a default or neutral value in
+     * various physics calculations where no movement or displacement is
+     * desired. It is also particularly valuable for equality checks and testing
+     * scenarios where a consistent and unmodifiable reference to the zero
+     * vector is required.
+     *
+     * <p>
+     * Since this vector is immutable, any attempt to modify its components will
+     * result in an {@code UnsupportedOperationException}.</p>
+     */
+    public static final Vector2D ZERO = new ImmutableVector(0, 0);
+
     // ============================== Fields ================================ //
     /**
      * The x coordinate of the position.
@@ -101,6 +116,49 @@ public class Vector2D implements Component {
     public void setComponents(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    // ============================== Inner Classes ================================ //
+    /**
+     * A private inner class representing an immutable vector. The
+     * {@code ImmutableVector} extends {@code Vector2D} but overrides the setter
+     * methods to prevent any modification to its components. Any attempt to
+     * change the x or y coordinates of this vector will result in an
+     * {@code UnsupportedOperationException}.
+     *
+     * <p>
+     * This class is used to create immutable instances of {@code Vector2D},
+     * such as {@link Vector2D#ZERO}, ensuring that they remain constant and
+     * unchanged throughout their lifecycle.
+     * </p>
+     */
+    private static class ImmutableVector extends Vector2D {
+
+        /**
+         * Constructs an immutable vector with the specified x and y
+         * coordinates.
+         *
+         * @param x the x coordinate of the vector
+         * @param y the y coordinate of the vector
+         */
+        public ImmutableVector(double x, double y) {
+            super(x, y);
+        }
+
+        @Override
+        public void setX(double x) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public void setY(double y) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public void setComponents(double x, double y) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
     }
 
 }
