@@ -1,11 +1,10 @@
 package com.slinky.jellysmash.model.physics.systems;
 
-import com.slinky.jellysmash.model.physics.comps.Vector;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 /**
  * The {@code VectorSystem2D} abstract class provides a foundational framework
- * for any system that aims to work with {@link Vector} objects within a 2D
+ * for any system that aims to work with {@link Vector2D} objects within a 2D
  * space in an Entity-Component-System (ECS) architecture.
  *
  * <p>
@@ -24,8 +23,8 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  * vector operations:
  * <ul>
  * <li><b>Target-modifying methods:</b> These methods, such as
- * {@code addTarget(Vector v1, Vector v2)} and
- * {@code subTarget(Vector v1, Vector v2)}, modify the components of the first
+ * {@code addTarget(Vector2D v1, Vector2D v2)} and
+ * {@code subTarget(Vector2D v1, Vector2D v2)}, modify the components of the first
  * vector ({@code v1}) directly by adding or subtracting the corresponding
  * components of the second vector ({@code v2}).</li>
  * <li><b>Non-mutating methods:</b> These methods, such as
@@ -55,7 +54,6 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  * @author Kheagen Haskins
  *
  * @see System
- * @see Vector
  * @see Vector2D
  */
 public abstract class VectorSystem2D implements System {
@@ -86,8 +84,8 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Subtracts the components of one {@code Vector} ({@code v2}) from another
-     * {@code Vector} ({@code v1}).
+     * Subtracts the components of one {@code Vector2D} ({@code v2}) from another
+     * {@code Vector2D} ({@code v1}).
      *
      * <p>
      * This operation modifies the target vector {@code v1} by subtracting the
@@ -102,7 +100,7 @@ public abstract class VectorSystem2D implements System {
      * vector.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public void subTarget(Vector v1, Vector v2) {
+    public void subTarget(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         v1.setComponents(v1.getX() - v2.getX(), v1.getY() - v2.getY());
     }
@@ -134,8 +132,8 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Adds the components of one {@code Vector} ({@code v2}) to another
-     * {@code Vector} ({@code v1}).
+     * Adds the components of one {@code Vector2D} ({@code v2}) to another
+     * {@code Vector2D} ({@code v1}).
      *
      * <p>
      * This operation modifies the target vector {@code v1} by adding the
@@ -149,7 +147,7 @@ public abstract class VectorSystem2D implements System {
      * @param v2 the vector whose components will be added to the target vector.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public void addTarget(Vector v1, Vector v2) {
+    public void addTarget(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         v1.setComponents(v1.getX() + v2.getX(), v1.getY() + v2.getY());
     }
@@ -173,7 +171,7 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Scales a {@code Vector} by a given scalar value, modifying the original
+     * Scales a {@code Vector2D} by a given scalar value, modifying the original
      * vector.
      *
      * <p>
@@ -186,13 +184,13 @@ public abstract class VectorSystem2D implements System {
      * @param scalar the value by which to scale the vector.
      * @return the modified vector after scaling.
      */
-    public Vector scaleTarget(Vector v, double scalar) {
+    public Vector2D scaleTarget(Vector2D v, double scalar) {
         v.setComponents(v.getX() * scalar, v.getY() * scalar);
         return v;
     }
 
     /**
-     * Divides the components of the given {@code Vector} by a scalar value and
+     * Divides the components of the given {@code Vector2D} by a scalar value and
      * returns a new {@code Vector2D} with the resulting components.
      *
      * <p>
@@ -211,7 +209,7 @@ public abstract class VectorSystem2D implements System {
      * @throws ArithmeticException if the scalar is zero, as division by zero is
      * undefined.
      */
-    public Vector2D divTarget(Vector v, double scalar) {
+    public Vector2D divTarget(Vector2D v, double scalar) {
         return new Vector2D(
                 v.getX() / scalar,
                 v.getY() / scalar
@@ -219,7 +217,7 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Divides the components of the given {@code Vector} by a scalar value and
+     * Divides the components of the given {@code Vector2D} by a scalar value and
      * modifies the original vector with the resulting components.
      *
      * <p>
@@ -238,7 +236,7 @@ public abstract class VectorSystem2D implements System {
      * @throws ArithmeticException if the scalar is zero, as division by zero is
      * undefined.
      */
-    public Vector div(Vector v, double scalar) {
+    public Vector2D div(Vector2D v, double scalar) {
         v.setComponents(
                 v.getX() / scalar,
                 v.getY() / scalar
@@ -248,7 +246,7 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Returns the magnitude (length) of a {@code Vector}.
+     * Returns the magnitude (length) of a {@code Vector2D}.
      * <p>
      * The magnitude is calculated as the Euclidean norm, defined as
      * {@code sqrt(x^2 + y^2)}. It represents the distanceBetween of the point
@@ -258,7 +256,7 @@ public abstract class VectorSystem2D implements System {
      * @param v the vector whose magnitude is to be calculated.
      * @return the magnitude of the vector.
      */
-    public double magnitude(Vector v) {
+    public double magnitude(Vector2D v) {
         return Math.sqrt((v.getX() * v.getX()) + (v.getY() * v.getY()));
     }
 
@@ -275,7 +273,7 @@ public abstract class VectorSystem2D implements System {
      * @return the dot product of the two vectors.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public double dotProduct(Vector v1, Vector v2) {
+    public double dotProduct(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         return (v1.getX() * v2.getX()) + (v1.getY() * v2.getY());
     }
@@ -294,7 +292,7 @@ public abstract class VectorSystem2D implements System {
      * @return the cross product of the two vectors.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public double crossProduct(Vector v1, Vector v2) {
+    public double crossProduct(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         return (v1.getX() * v2.getY()) - (v1.getY() * v2.getX());
     }
@@ -311,7 +309,7 @@ public abstract class VectorSystem2D implements System {
      * @return the angle between the two vectors in radians.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public double angleBetween(Vector v1, Vector v2) {
+    public double angleBetween(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         double dot = dotProduct(v1, v2);
         double mags = magnitude(v1) * magnitude(v2);
@@ -331,7 +329,7 @@ public abstract class VectorSystem2D implements System {
      * @return a new vector representing the reflection.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public Vector reflect(Vector v, Vector normal) {
+    public Vector2D reflect(Vector2D v, Vector2D normal) {
         throwMismatch(v, normal);
         double dot = dotProduct(v, normal);
         return new Vector2D(
@@ -352,7 +350,7 @@ public abstract class VectorSystem2D implements System {
      * @param angle the angle in radians by which to rotate the vector.
      * @return a new vector representing the rotated vector.
      */
-    public Vector rotate(Vector v, double angle) {
+    public Vector2D rotate(Vector2D v, double angle) {
         double cosTheta = Math.cos(angle);
         double sinTheta = Math.sin(angle);
         return new Vector2D(
@@ -374,7 +372,7 @@ public abstract class VectorSystem2D implements System {
      * {@code v2}.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public Vector project(Vector v1, Vector v2) {
+    public Vector2D project(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         double dot = dotProduct(v1, v2);
         double magSq = magnitude(v2) * magnitude(v2);
@@ -396,7 +394,7 @@ public abstract class VectorSystem2D implements System {
      * @return the distanceBetween between the two vectors.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public double distanceBetween(Vector v1, Vector v2) {
+    public double distanceBetween(Vector2D v1, Vector2D v2) {
         throwMismatch(v1, v2);
         return Math.sqrt(Math.pow(v2.getX() - v1.getX(), 2) + Math.pow(v2.getY() - v1.getY(), 2));
     }
@@ -416,7 +414,7 @@ public abstract class VectorSystem2D implements System {
      * @return a new vector representing the interpolated result.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    public Vector lerp(Vector v1, Vector v2, double t) {
+    public Vector2D lerp(Vector2D v1, Vector2D v2, double t) {
         throwMismatch(v1, v2);
         return new Vector2D(
                 v1.getX() + t * (v2.getX() - v1.getX()),
@@ -425,7 +423,7 @@ public abstract class VectorSystem2D implements System {
     }
 
     /**
-     * Normalises a {@code Vector}, making its magnitude equal to 1.
+     * Normalises a {@code Vector2D}, making its magnitude equal to 1.
      * <p>
      * Normalising a vector involves scaling it so that its magnitude becomes 1,
      * while maintaining its direction. If the vector is a zero vector
@@ -434,7 +432,7 @@ public abstract class VectorSystem2D implements System {
      *
      * @param v the vector to be normalised.
      */
-    public void normalize(Vector v) {
+    public void normalize(Vector2D v) {
         double mag = magnitude(v);
 
         if (mag != 0) {
@@ -447,7 +445,7 @@ public abstract class VectorSystem2D implements System {
      * Throws an {@link IllegalArgumentException} if the provided vectors are
      * not of the same type.
      * <p>
-     * This method checks whether the two provided {@code Vector} instances are
+     * This method checks whether the two provided {@code Vector2D} instances are
      * of the same class. If they are not, it throws an
      * {@code IllegalArgumentException} with a message indicating a vector type
      * mismatch. This utility method is useful for ensuring that operations
@@ -458,9 +456,9 @@ public abstract class VectorSystem2D implements System {
      * @param v2 the second vector to check.
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
-    private static void throwMismatch(Vector v1, Vector v2) {
+    private static void throwMismatch(Vector2D v1, Vector2D v2) {
         if (!v1.getClass().equals(v2.getClass())) {
-            throw new IllegalArgumentException("Vector type mismatch.");
+            throw new IllegalArgumentException("Vector2D type mismatch.");
         }
     }
 

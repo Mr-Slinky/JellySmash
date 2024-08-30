@@ -1,8 +1,5 @@
 package com.slinky.jellysmash.model.physics.systems.util;
 
-import com.slinky.jellysmash.model.physics.comps.Position;
-import com.slinky.jellysmash.model.physics.comps.Position2D;
-import com.slinky.jellysmash.model.physics.comps.Vector;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 /**
@@ -49,7 +46,6 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  *
  * @see Vector
  * @see Vector2D
- * @see Position
  */
 public interface IntegrationMethod {
 
@@ -104,6 +100,6 @@ public interface IntegrationMethod {
      * @return a new {@code Position2D} representing the updated position of the
      * particle.
      */
-    Position2D updatePosition(Position2D p, Vector2D v, double deltaTime);
+    Vector2D updatePosition(Vector2D p, Vector2D v, double deltaTime);
 
 }

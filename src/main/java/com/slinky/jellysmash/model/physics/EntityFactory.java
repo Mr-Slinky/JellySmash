@@ -1,9 +1,7 @@
 package com.slinky.jellysmash.model.physics;
 
 import com.slinky.jellysmash.model.physics.comps.ComponentManager;
-import com.slinky.jellysmash.model.physics.comps.Position;
-import com.slinky.jellysmash.model.physics.comps.Position2D;
-import com.slinky.jellysmash.model.physics.comps.Vector;
+import com.slinky.jellysmash.model.physics.comps.Particle2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 import java.util.Collections;
@@ -33,27 +31,17 @@ import java.util.concurrent.atomic.AtomicLong;
  * separation of concerns, making it easier to manage and extend the ECS.
  * </p>
  *
- * <p>
- * The {@code EntityFactory} is essential for systems that require dynamic
- * creation and destruction of entities, such as in simulations, games, or any
- * application leveraging the ECS pattern. It is designed to integrate
- * seamlessly with the overall architecture, ensuring that entities are properly
- * initialised and maintained throughout their life cycle.
- * </p>
+ * @version 1.0
+ * @since 0.1.0
  *
- * @version  1.0
- * @since    0.1.0
- * 
- * @author   Kheagen Haskins
- * 
- * @see     Entity
- * @see     ComponentManager
- * @see     Position2D
- * @see     Vector2D
+ * @author Kheagen Haskins
+ *
+ * @see Entity
+ * @see ComponentManager
+ * @see Vector2D
  */
 public class EntityFactory {
 
-    // ============================== Static ================================ //
     // ============================== Fields ================================ //
     /**
      * An {@link AtomicLong} used to generate unique identifiers for entities.
@@ -114,8 +102,6 @@ public class EntityFactory {
     }
 
     // ============================== Getters =============================== //
-    // ============================== Setters =============================== //
-    // ============================ API Methods ============================= //
     /**
      * Retrieves an entity by its ID.
      * <p>
@@ -129,38 +115,6 @@ public class EntityFactory {
      */
     public Entity getEntity(long id) {
         return entities.get(id);
-    }
-
-    /**
-     * Creates a new entity with a unique identifier.
-     * <p>
-     * This method generates a new entity with a unique ID, safely incremented
-     * using an atomic counter. The newly created entity is stored in the
-     * internal entity map and returned to the caller.
-     * </p>
-     *
-     * @return the newly created entity
-     */
-    public Entity createEntity() {
-        long id = nextId.getAndIncrement(); // Safely increments the ID
-        Entity newEntity = new Entity(id);
-        entities.put(id, newEntity);
-        return newEntity;
-    }
-
-    /**
-     * Destroys an entity, removing it from the system.
-     * <p>
-     * This method removes the specified entity from the internal map,
-     * effectively destroying the entity within the system. Any components
-     * associated with the entity should also be removed by the
-     * {@code ComponentManager} as part of the entity's lifecycle management.
-     * </p>
-     *
-     * @param entity the entity to destroy
-     */
-    public void destroyEntity(Entity entity) {
-        entities.remove(entity.id());
     }
 
     /**
@@ -178,43 +132,138 @@ public class EntityFactory {
         return Collections.unmodifiableMap(entities);
     }
 
+    // ============================ API Methods ============================= //
     /**
-     * Creates a new entity representing a point with a specific position.
+     * Destroys an entity, removing it from the system.
      * <p>
-     * This method creates a new entity, assigns a {@link Position2D} component
-     * representing the point's position in 2D space, and stores the entity in
-     * the system. The new entity is then returned to the caller.
+     * This method removes the specified entity from the internal map,
+     * effectively destroying the entity within the system. Any components
+     * associated with the entity should also be removed by the
+     * {@code ComponentManager} as part of the entity's lifecycle management.
      * </p>
      *
-     * @param x the x-coordinate of the point
-     * @param y the y-coordinate of the point
-     * @return the newly created point entity
+     * @param entity the entity to destroy
      */
-    public Entity createPoint(double x, double y) {
-        Entity pointEntity = createEntity();
-        Position position = new Position2D(x, y);
-        componentManager.addComponent(pointEntity, position);
-        return pointEntity;
+    public void destroyEntity(Entity entity) {
+        entities.remove(entity.id());
+        // TODO REMOVE COMPONENTS
+    }
+
+    // ========================== Factory Methods =========================== //
+    /**
+     * Creates a new entity representing a point mass with specified physical
+     * properties.
+     *
+     * <p>
+     * This method allows for the creation of a fully customised particle entity
+     * within the Entity Component System (ECS). The particle's position,
+     * velocity, acceleration, mass, damping coefficient, restitution, and
+     * static flag are all specified, providing fine-grained control over its
+     * behaviour in the simulation. The method creates a new entity, attaches a
+     * {@link Particle2D} component with the given properties, and adds it to
+     * the system.
+     * </p>
+     *
+     * @param position the initial position of the particle in the simulation
+     * space, represented as a {@link Position}.
+     * @param velocity the initial velocity of the particle, determining its
+     * speed and direction, represented as a {@link Vector2D}.
+     * @param acceleration the initial acceleration of the particle,
+     * representing the rate of change of velocity, represented as a
+     * {@link Vector2D}.
+     * @param mass the mass of the particle, which must be a non-negative value.
+     * @param damping the damping coefficient, controlling how quickly the
+     * particle's motion decays, which must be a non-negative value.
+     * @param restitution the restitution (bounciness) of the particle,
+     * determining how much kinetic energy is conserved in collisions, which
+     * must be a non-negative value.
+     * @param isStatic a flag indicating whether the particle is static
+     * (immovable). If {@code true}, the particle will not respond to forces or
+     * acceleration.
+     *
+     * @return the newly created particle entity.
+     *
+     * @throws IllegalArgumentException if mass, damping, or restitution are
+     * negative.
+     */
+    public Entity createPointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
+        Entity particleEntity = createEntity();
+        Particle2D particleComponent = new Particle2D(position, velocity, acceleration, mass, damping, restitution, isStatic);
+        componentManager.addComponent(particleEntity, particleComponent);
+        return particleEntity;
     }
 
     /**
-     * Creates a new entity representing a vector with specific x and y
-     * components.
+     * Creates a new entity representing a point mass with a specified mass and
+     * static flag.
+     *
      * <p>
-     * This method creates a new entity, assigns a {@link Vector2D} component
-     * representing the vector in 2D space, and stores the entity in the system.
-     * The new vector entity is then returned to the caller.
+     * This method provides a convenient way to create a particle entity with
+     * default motion parameters. The particle's mass and static state are
+     * specified, while its position is set to the origin, and both velocity and
+     * acceleration are initialized to zero. This method creates a new entity,
+     * attaches a {@link Particle2D} component with the given mass and static
+     * flag, and adds it to the system.
      * </p>
      *
-     * @param x the x-component of the vector
-     * @param y the y-component of the vector
-     * @return the newly created vector entity
+     * @param mass the mass of the particle, which must be a non-negative value.
+     * @param isStatic a flag indicating whether the particle is static
+     * (immovable). If {@code true}, the particle will not respond to forces or
+     * acceleration.
+     *
+     * @return the newly created particle entity.
+     *
+     * @throws IllegalArgumentException if mass is negative.
      */
-    public Entity createVector(double x, double y) {
-        Entity vectorEntity = createEntity();
-        Vector vector = new Vector2D(x, y);
-        componentManager.addComponent(vectorEntity, vector);
-        return vectorEntity;
+    public Entity createParticle(double mass, boolean isStatic) {
+        Entity particleEntity = createEntity();
+        Particle2D particleComponent = new Particle2D(mass, isStatic);
+        componentManager.addComponent(particleEntity, particleComponent);
+        return particleEntity;
+    }
+
+    /**
+     * Creates a new entity representing a particle with a specified mass.
+     *
+     * <p>
+     * This method creates a particle entity with the given mass and default
+     * values for other properties. The particle's position is initialized at
+     * the origin, and both velocity and acceleration are set to zero, making it
+     * static by default. This method is useful for quickly creating simple
+     * particles in the simulation. The method creates a new entity, attaches a
+     * {@link Particle2D} component with the specified mass, and adds it to the
+     * system.
+     * </p>
+     *
+     * @param mass the mass of the particle, which must be a non-negative value.
+     *
+     * @return the newly created particle entity.
+     *
+     * @throws IllegalArgumentException if mass is negative.
+     */
+    public Entity createParticle(double mass) {
+        Entity particleEntity = createEntity();
+        Particle2D particleComponent = new Particle2D(mass);
+        componentManager.addComponent(particleEntity, particleComponent);
+        return particleEntity;
+    }
+
+    // ========================== Helper Methods ============================ //
+    /**
+     * Creates a new entity with a unique identifier.
+     * <p>
+     * This method generates a new entity with a unique ID, safely incremented
+     * using an atomic counter. The newly created entity is stored in the
+     * internal entity map and returned to the caller.
+     * </p>
+     *
+     * @return the newly created entity
+     */
+    private Entity createEntity() {
+        long id = nextId.getAndIncrement(); // Safely increments the ID
+        Entity newEntity = new Entity(id);
+        entities.put(id, newEntity);
+        return newEntity;
     }
 
 }

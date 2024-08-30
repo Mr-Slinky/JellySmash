@@ -1,7 +1,6 @@
 package com.slinky.jellysmash.model.physics.systems.util;
 
 import com.slinky.jellysmash.model.physics.systems.VectorSystem2D;
-import com.slinky.jellysmash.model.physics.comps.Position2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 /**
@@ -40,7 +39,6 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  * 
  * @see     IntegrationMethod
  * @see     Vector2D
- * @see     Position2D
  * @see     VectorSystem2D
  */
 public class IntegrationMethods {
@@ -120,7 +118,7 @@ public class IntegrationMethods {
          * @return the updated position.
          */
         @Override
-        public Position2D updatePosition(Position2D p, Vector2D vNew, double deltaTime) {
+        public Vector2D updatePosition(Vector2D p, Vector2D vNew, double deltaTime) {
             // Implements pNew = pOld + (vAverage * deltaTime)
 
             // Add old and new vectors, then half them (turns utilVector from vOld to vAverage)

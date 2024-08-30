@@ -1,9 +1,7 @@
 package com.slinky.jellysmash.model.physics.comps;
 
 /**
- * The {@code Particle2D} class provides a concrete implementation of the
- * {@link Particle} interface, representing a 2-dimensional particle in a
- * physics simulation.
+ * Represents a 2-dimensional particle in the physics engine.
  *
  * <p>
  * This class encapsulates the core physical properties of a particle, including
@@ -25,7 +23,7 @@ package com.slinky.jellysmash.model.physics.comps;
  * This class is essential for implementing a 2D physics engine using the Entity
  * Component System (ECS) pattern, as it provides the basic building blocks for
  * creating and manipulating physical entities within the simulation. By
- * adhering to the {@link Particle} interface, {@code Particle2D} ensures
+ * adhering to the {@link Particle2D} interface, {@code Particle2D} ensures
  * compatibility and interoperability with other components and systems within
  * the ECS framework.
  * </p>
@@ -35,12 +33,11 @@ package com.slinky.jellysmash.model.physics.comps;
  *
  * @author Kheagen Haskins
  *
- * @see Particle
- * @see Position
- * @see Vector
+ * @see Particle2D
+ * @see Vector2D
  * @see Component
  */
-public class Particle2D implements Particle {
+public class Particle2D implements Component {
 
     // ============================== Fields ================================ //
     /**
@@ -108,10 +105,10 @@ public class Particle2D implements Particle {
      * as the particle moves.
      * </p>
      */
-    private Position position;
+    private Vector2D position;
 
     /**
-     * The velocity of the particle, represented as a {@link Vector}.
+     * The velocity of the particle, represented as a {@link Vector2D}.
      *
      * <p>
      * The velocity indicates the speed and direction of the particle's movement
@@ -121,10 +118,10 @@ public class Particle2D implements Particle {
      * simulation as forces are applied.
      * </p>
      */
-    private Vector velocity;
+    private Vector2D velocity;
 
     /**
-     * The acceleration of the particle, represented as a {@link Vector}.
+     * The acceleration of the particle, represented as a {@link Vector2D}.
      *
      * <p>
      * The acceleration represents the rate of change of velocity over time and
@@ -134,7 +131,7 @@ public class Particle2D implements Particle {
      * external forces like gravity or user-applied forces in the simulation.
      * </p>
      */
-    private Vector acceleration;
+    private Vector2D acceleration;
 
     /**
      * The resultant force vector representing the cumulative effect of all
@@ -147,7 +144,7 @@ public class Particle2D implements Particle {
      * the forces acting on the particle within that specific time frame.
      * </p>
      */
-    private Vector actingForce;
+    private Vector2D actingForce;
 
     // =========================== Constructors ============================= //
     /**
@@ -166,10 +163,10 @@ public class Particle2D implements Particle {
      * @param position the initial position of the particle in the simulation
      * space, represented as a {@link Position}.
      * @param velocity the initial velocity of the particle, determining its
-     * speed and direction of movement, represented as a {@link Vector}.
+     * speed and direction of movement, represented as a {@link Vector2D}.
      * @param acceleration the initial acceleration of the particle,
      * representing the rate of change of velocity, represented as a
-     * {@link Vector}.
+     * {@link Vector2D}.
      * @param mass the mass of the particle, which must be a non-negative value.
      * @param damping the damping coefficient, controlling how quickly the
      * particle's motion decays, which must be a non-negative value.
@@ -183,7 +180,7 @@ public class Particle2D implements Particle {
      * @throws IllegalArgumentException if mass, damping, or restitution are
      * negative.
      */
-    public Particle2D(Position position, Vector velocity, Vector acceleration, double mass, double damping, double restitution, boolean isStatic) {
+    public Particle2D(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         throwIfNonPositive("mass", mass);
         throwIfNegative("dampining coefficient", damping);
         throwIfNegative("restitution", restitution);
@@ -220,7 +217,7 @@ public class Particle2D implements Particle {
      */
     public Particle2D(double mass) {
         this(
-                new Position2D(0, 0),
+                new Vector2D(0, 0),
                 new Vector2D(0, 0),
                 new Vector2D(0, 0),
                 mass, 0, 0, false
@@ -257,7 +254,7 @@ public class Particle2D implements Particle {
      */
     public Particle2D(double mass, boolean isStatic) {
         this(
-                new Position2D(0, 0),
+                new Vector2D(0, 0),
                 new Vector2D(0, 0),
                 new Vector2D(0, 0),
                 mass, 0, 0, isStatic
@@ -265,99 +262,51 @@ public class Particle2D implements Particle {
     }
 
     // ============================== Getters =============================== //
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public double getMass() {
         return mass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Position getPosition() {
+    public Vector2D getPosition() {
         return position;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Vector getVelocity() {
+    public Vector2D getVelocity() {
         return velocity;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Vector getAcceleration() {
+    public Vector2D getAcceleration() {
         return acceleration;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Vector getActingForce() {
+    public Vector2D getActingForce() {
         return actingForce;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public double getDampingCoefficient() {
         return dampCoef;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public double getRestitution() {
         return restt;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean isStatic() {
         return isStatic;
     }
 
-// ============================== Setters =============================== //
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+    // ============================== Setters =============================== //
     public void setMass(double mass) {
         this.mass = mass;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setDampingCoefficient(double damping) {
         this.dampCoef = damping;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setRestitution(double restitution) {
         this.restt = restitution;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void setStatic(boolean isStatic) {
         this.isStatic = isStatic;
     }
