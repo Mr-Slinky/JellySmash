@@ -1,7 +1,5 @@
 package com.slinky.jellysmash.model.physics.comps;
 
-import com.slinky.jellysmash.model.physics.base.Component;
-
 /**
  * Represents a 2-dimensional particle in the physics engine.
  *
@@ -274,7 +272,7 @@ public class Particle2D implements Component {
      *
      * @return The mass of the particle.
      */
-    public double getMass() {
+    public double mass() {
         return mass;
     }
 
@@ -288,7 +286,7 @@ public class Particle2D implements Component {
      *
      * @return The current position of the particle as a {@link Vector2D}.
      */
-    public Vector2D getPosition() {
+    public Vector2D position() {
         return position;
     }
 
@@ -302,7 +300,7 @@ public class Particle2D implements Component {
      *
      * @return The current velocity of the particle as a {@link Vector2D}.
      */
-    public Vector2D getVelocity() {
+    public Vector2D velocity() {
         return velocity;
     }
 
@@ -316,7 +314,7 @@ public class Particle2D implements Component {
      *
      * @return The current acceleration of the particle as a {@link Vector2D}.
      */
-    public Vector2D getAcceleration() {
+    public Vector2D acceleration() {
         return acceleration;
     }
 
@@ -331,7 +329,7 @@ public class Particle2D implements Component {
      *
      * @return The net force acting on the particle as a {@link Vector2D}.
      */
-    public Vector2D getActingForce() {
+    public Vector2D force() {
         return actingForce;
     }
 
@@ -345,7 +343,7 @@ public class Particle2D implements Component {
      *
      * @return The damping coefficient of the particle.
      */
-    public double getDampingCoefficient() {
+    public double dampingCoefficient() {
         return dampCoef;
     }
 
@@ -360,7 +358,7 @@ public class Particle2D implements Component {
      *
      * @return The restitution coefficient of the particle.
      */
-    public double getRestitution() {
+    public double restitution() {
         return restitution;
     }
 
