@@ -1,4 +1,4 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
 import java.util.HashMap;
 import java.util.Map;

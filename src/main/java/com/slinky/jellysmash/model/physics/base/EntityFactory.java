@@ -1,4 +1,4 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
 import com.slinky.jellysmash.model.physics.comps.Particle2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;

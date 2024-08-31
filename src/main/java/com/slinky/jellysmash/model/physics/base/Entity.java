@@ -1,4 +1,4 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
 /**
  * The {@code Entity} class represents a uniquely identifiable object within the

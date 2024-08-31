@@ -1,4 +1,4 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
 /**
  * The {@code EntityType} enum represents the various types of entities that can
