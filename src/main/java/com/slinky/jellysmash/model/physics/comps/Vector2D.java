@@ -1,6 +1,6 @@
 package com.slinky.jellysmash.model.physics.comps;
 
-import com.slinky.jellysmash.model.physics.Component;
+import com.slinky.jellysmash.model.physics.base.Component;
 
 /**
  * Represents a two-dimensional vector component within the ECS (Entity
@@ -77,7 +77,7 @@ public class Vector2D implements Component {
      *
      * @return the x coordinate
      */
-    public double getX() {
+    public double x() {
         return x;
     }
 
@@ -86,7 +86,7 @@ public class Vector2D implements Component {
      *
      * @return the y coordinate
      */
-    public double getY() {
+    public double y() {
         return y;
     }
 

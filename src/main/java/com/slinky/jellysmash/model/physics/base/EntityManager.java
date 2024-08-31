@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * The {@code EntityFactory} class is responsible for managing the life cycle of
+ * The {@code EntityManager} class is responsible for managing the life cycle of
  * entities within an Entity Component System (ECS) architecture. It provides
  * functionality for creating, retrieving, and destroying entities, as well as
  * managing their associated components through integration with a
  * {@link ComponentManager}.
  *
  * <p>
- * The {@code EntityFactory} ensures that each entity is assigned a unique
+ * The {@code EntityManager} ensures that each entity is assigned a unique
  * identifier in a thread-safe manner using an {@link AtomicLong} for ID
  * generation. Entities are stored in an internal map, which allows for
  * efficient retrieval and management of entities within the system.
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class also includes methods for creating specific types of entities,
  * such as points and vectors, with corresponding components like
  * {@link Vector2D}. By delegating component management to the
- * {@code ComponentManager}, the {@code EntityFactory} maintains a clear
+ * {@code ComponentManager}, the {@code EntityManager} maintains a clear
  * separation of concerns, making it easier to manage and extend the ECS.
  * </p>
  *
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see ComponentManager
  * @see Vector2D
  */
-public class EntityFactory {
+public class EntityManager {
 
     // ============================== Fields ================================ //
     /**
@@ -75,7 +75,7 @@ public class EntityFactory {
      * This field is responsible for handling the addition, retrieval, and
      * removal of components for entities managed by this factory. By delegating
      * component management to a dedicated {@code ComponentManager}, the
-     * {@code EntityFactory} maintains a clear separation of concerns, improving
+     * {@code EntityManager} maintains a clear separation of concerns, improving
      * modularity and maintainability.
      * </p>
      */
@@ -83,7 +83,7 @@ public class EntityFactory {
 
     // =========================== Constructors ============================= //
     /**
-     * Constructs a new {@code EntityFactory} with the specified
+     * Constructs a new {@code EntityManager} with the specified
      * {@link ComponentManager}.
      *
      * <p>
@@ -97,9 +97,9 @@ public class EntityFactory {
      * @param componentManager the {@link ComponentManager} responsible for
      * managing components of entities
      */
-    public EntityFactory(ComponentManager componentManager) {
+    public EntityManager(ComponentManager componentManager) {
         if (componentManager == null) {
-            throw new IllegalArgumentException("EntityFactory cannot be instantiated with a null ComponentManager");
+            throw new IllegalArgumentException("EntityManager cannot be instantiated with a null ComponentManager");
         }
 
         this.componentManager = componentManager;

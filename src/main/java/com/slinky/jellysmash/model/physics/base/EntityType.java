@@ -18,12 +18,6 @@ package com.slinky.jellysmash.model.physics.base;
  * <pre><code>
  *     void someLogicOnEntities(EntityType e) {
  *         switch (e) {
- *             case POINT:
- *                 // Handle point entity logic
- *                 break;
- *             case VECTOR:
- *                 // Handle vector entity logic
- *                 break;
  *             case PARTICLE:
  *                 // Handle particle entity logic
  *                 break;
@@ -39,46 +33,11 @@ package com.slinky.jellysmash.model.physics.base;
  * @author  Kheagen Haskins
  *
  * @see Entity
- * @see EntityFactory
+ * @see EntityManager
  *
  */
 public enum EntityType {
 
-    /**
-     * Represents a single point in a 2D space, defined by an x and y
-     * coordinate.
-     * <p>
-     * Points are often used as the basic units in geometrical calculations,
-     * representing specific locations within the game world. This type of
-     * entity does not have any other physical properties such as mass or
-     * velocity.
-     * </p>
-     * <p>
-     * Use cases for {@code POINT} entities include:</p>
-     * <ul>
-     * <li>Marking positions on a grid or plane</li>
-     * <li>Defining vertices of polygons or other shapes</li>
-     * <li>Serving as reference points in calculations</li>
-     * </ul>
-     */
-    POINT,
-    /**
-     * Represents a vector in 2D space, originating from the origin (0,0) and
-     * extending to a specified x and y coordinate.
-     * <p>
-     * Vectors are used to describe directions and magnitudes, and are essential
-     * in operations such as translation, rotation, and determining forces
-     * within the physics system.
-     * </p>
-     * <p>
-     * Use cases for {@code VECTOR} entities include:</p>
-     * <ul>
-     * <li>Indicating direction and magnitude of velocity or acceleration</li>
-     * <li>Representing forces applied to other entities</li>
-     * <li>Describing movement patterns or trajectories</li>
-     * </ul>
-     */
-    VECTOR,
     /**
      * Represents a particle, which is a basic physical body in the system,
      * characterized by properties such as mass, position, velocity, and

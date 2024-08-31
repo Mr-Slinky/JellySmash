@@ -1,6 +1,6 @@
 package com.slinky.jellysmash.model.physics.comps;
 
-import com.slinky.jellysmash.model.physics.Component;
+import com.slinky.jellysmash.model.physics.base.Component;
 
 /**
  * Represents a 2-dimensional particle in the physics engine.

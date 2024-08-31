@@ -1,5 +1,9 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
+import com.slinky.jellysmash.model.physics.base.ComponentManager;
+import com.slinky.jellysmash.model.physics.base.EntityManager;
+import com.slinky.jellysmash.model.physics.base.Entity;
+import com.slinky.jellysmash.model.physics.base.Component;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
@@ -29,22 +33,21 @@ public class EntityFactoryTest {
     private static class MockComponent2 implements Component {
     }
 
-    private EntityFactory factory;
+    private EntityManager factory;
     private ComponentManager componentManager;
 
     @BeforeEach
     public void setUp() {
         componentManager = new ComponentManager();
-        factory = new EntityFactory(componentManager);
+        factory = new EntityManager(componentManager);
     }
 
     @ParameterizedTest
     @NullSource
     @DisplayName("Test EntityFactory Constructor Against null Input")
     public void testEntityFactoryConstructor_NullInput_Throws(ComponentManager nullCompMan) {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new EntityFactory(nullCompMan)
+        assertThrows(IllegalArgumentException.class,
+                () -> new EntityManager(nullCompMan)
         );
     }
 

@@ -1,5 +1,8 @@
-package com.slinky.jellysmash.model.physics;
+package com.slinky.jellysmash.model.physics.base;
 
+import com.slinky.jellysmash.model.physics.base.ComponentManager;
+import com.slinky.jellysmash.model.physics.base.Entity;
+import com.slinky.jellysmash.model.physics.base.Component;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;

@@ -95,7 +95,7 @@ public class IntegrationMethods {
             scaleTarget(a, deltaTime);
 
             // Cache vOld in utility vector for position update
-            utilVector.setComponents(v.getX(), v.getY());
+            utilVector.setComponents(v.x(), v.y());
 
             // vNew = vOld + scaled acceleration
             addTarget(v, a);

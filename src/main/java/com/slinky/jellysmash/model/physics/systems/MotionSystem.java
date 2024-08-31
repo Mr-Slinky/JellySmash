@@ -129,20 +129,26 @@ public class MotionSystem extends VectorSystem2D {
 
     /**
      * Calculates and updates the acceleration of each particle in the specified
-     * list using the formula {@code a = F/m}, where {@code F} is the total
-     * acting force on the particle, and {@code m} is the particle's mass.
+     * list based on the formula {@code a = F/m}, where {@code F} is the total
+     * force acting on the particle, and {@code m} is the particle's mass.
      *
      * <p>
-     * This method should only be invoked after all forces have been applied to
-     * the particles, as it relies on the total force acting on each particle to
-     * compute the acceleration.</p>
+     * This method should be called only after all relevant forces have been
+     * applied to the particles, as it depends on the total force acting on each
+     * particle to accurately compute the resulting acceleration. If no force is
+     * acting on a particle, its acceleration remains unchanged, in accordance
+     * with Newton's First Law of Motion (Law of Inertia).
+     * </p>
      *
      * <p>
-     * <b>Important:</b> This method assumes that the acting force has already
-     * been computed and stored in each particle before it is called.</p>
+     * <b>Note:</b> It is crucial that all forces acting on the particles have
+     * been calculated and stored within each particle object before this method
+     * is invoked. Failure to do so will result in incorrect acceleration
+     * values.
+     * </p>
      *
-     * @param particles The list of {@code Particle2D} objects whose
-     * accelerations will be calculated.
+     * @param particles The list of {@code Particle2D} objects for which
+     * accelerations will be calculated and updated.
      */
     public void calculateAccelerations(List<Particle2D> particles) {
         for (Particle2D p : particles) {
@@ -154,7 +160,7 @@ public class MotionSystem extends VectorSystem2D {
             double mass = p.getMass();
 
             // a = F / m
-            p.getAcceleration().setComponents(force.getX() / mass, force.getY() / mass);
+            p.getAcceleration().setComponents(force.x() / mass, force.y() / mass);
         }
     }
 

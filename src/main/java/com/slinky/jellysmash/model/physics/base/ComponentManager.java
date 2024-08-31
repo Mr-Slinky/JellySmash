@@ -135,7 +135,7 @@ public class ComponentManager {
      * </p>
      *
      * <b>Implementation Note:</b> This method is only called by the
-     * {@link EntityFactory} class when a new, pre-defined, entity is created.
+     * {@link EntityManager} class when a new, pre-defined, entity is created.
      *
      * @param entity the entity to which the component should be added
      * @param component the component to add
