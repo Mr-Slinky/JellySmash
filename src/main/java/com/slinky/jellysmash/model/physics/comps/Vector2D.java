@@ -1,5 +1,7 @@
 package com.slinky.jellysmash.model.physics.comps;
 
+import com.slinky.jellysmash.model.physics.Component;
+
 /**
  * Represents a two-dimensional vector component within the ECS (Entity
  * Component System) design pattern used in the JellySmash game. This class
@@ -116,6 +118,28 @@ public class Vector2D implements Component {
     public void setComponents(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    // ============================ API Methods ============================= //
+    /**
+     * Compares this {@code Vector2D} object to the specified {@code Vector2D}
+     * object for equality. The vectors are considered equal if both their x and
+     * y coordinates are exactly the same.
+     *
+     * <p>
+     * This method performs a direct comparison using the {@code ==} operator,
+     * so it does not account for potential floating-point precision issues. It
+     * is primarily intended for cases where exact equality is required, such as
+     * when comparing vectors with known discrete values.
+     * </p>
+     *
+     * @param otherVector the {@code Vector2D} object to be compared with this
+     * vector
+     * @return {@code true} if the x and y coordinates of both vectors are
+     * equal; {@code false} otherwise
+     */
+    public boolean equals(Vector2D otherVector) {
+        return x == otherVector.x && y == otherVector.y;
     }
 
     // ============================== Inner Classes ================================ //

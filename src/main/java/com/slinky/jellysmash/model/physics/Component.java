@@ -1,4 +1,4 @@
-package com.slinky.jellysmash.model.physics.comps;
+package com.slinky.jellysmash.model.physics;
 
 /**
  * Marker interface for all components in the Entity-Component-System (ECS)

@@ -1,5 +1,7 @@
 package com.slinky.jellysmash.model.physics.comps;
 
+import com.slinky.jellysmash.model.physics.Component;
+
 /**
  * Represents a 2-dimensional particle in the physics engine.
  *
@@ -29,13 +31,13 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * @version 1.0
- * @since 0.1.0
+ * @since   0.1.0
  *
- * @author Kheagen Haskins
+ * @author  Kheagen Haskins
  *
- * @see Particle2D
- * @see Vector2D
- * @see Component
+ * @see     Particle2D
+ * @see     Vector2D
+ * @see     Component
  */
 public class Particle2D implements Component {
 
@@ -78,7 +80,7 @@ public class Particle2D implements Component {
      * during initialisation.
      * </p>
      */
-    private double restt;
+    private double restitution;
 
     /**
      * A flag indicating whether the particle is static (immovable).
@@ -182,8 +184,8 @@ public class Particle2D implements Component {
      */
     public Particle2D(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         throwIfNonPositive("mass", mass);
-        throwIfNegative("dampining coefficient", damping);
-        throwIfNegative("restitution", restitution);
+        throwIfOutOfRange("dampining coefficient", damping, 0, 1);
+        throwIfOutOfRange("restitution", restitution, 0, 1);
 
         this.position = position;
         this.velocity = velocity;
@@ -192,7 +194,7 @@ public class Particle2D implements Component {
 
         this.mass = mass;
         this.dampCoef = damping;
-        this.restt = restitution;
+        this.restitution = restitution;
         this.isStatic = isStatic;
     }
 
@@ -262,69 +264,225 @@ public class Particle2D implements Component {
     }
 
     // ============================== Getters =============================== //
+    /**
+     * Retrieves the mass of the particle.
+     * <p>
+     * The mass is a fundamental property of the particle, determining its
+     * resistance to acceleration when a force is applied. It is typically
+     * measured in kilograms (kg) and is a non-negative value.
+     * </p>
+     *
+     * @return The mass of the particle.
+     */
     public double getMass() {
         return mass;
     }
 
+    /**
+     * Retrieves the current position of the particle in 2D space.
+     * <p>
+     * The position is represented as a {@link Vector2D}, which contains the x
+     * and y coordinates of the particle. This determines the particle's
+     * location in the simulation or environment.
+     * </p>
+     *
+     * @return The current position of the particle as a {@link Vector2D}.
+     */
     public Vector2D getPosition() {
         return position;
     }
 
+    /**
+     * Retrieves the current velocity of the particle.
+     * <p>
+     * The velocity is represented as a {@link Vector2D}, indicating the speed
+     * and direction of the particle's motion. It is the rate of change of the
+     * particle's position with respect to time.
+     * </p>
+     *
+     * @return The current velocity of the particle as a {@link Vector2D}.
+     */
     public Vector2D getVelocity() {
         return velocity;
     }
 
+    /**
+     * Retrieves the current acceleration of the particle.
+     * <p>
+     * The acceleration is represented as a {@link Vector2D}, reflecting the
+     * rate of change of the particle's velocity with respect to time. It is
+     * directly influenced by the forces acting on the particle and its mass.
+     * </p>
+     *
+     * @return The current acceleration of the particle as a {@link Vector2D}.
+     */
     public Vector2D getAcceleration() {
         return acceleration;
     }
 
+    /**
+     * Retrieves the net force currently acting on the particle.
+     * <p>
+     * The acting force is represented as a {@link Vector2D} and is the sum of
+     * all forces applied to the particle. According to Newton's Second Law of
+     * Motion, this force determines the particle's acceleration based on its
+     * mass.
+     * </p>
+     *
+     * @return The net force acting on the particle as a {@link Vector2D}.
+     */
     public Vector2D getActingForce() {
         return actingForce;
     }
 
+    /**
+     * Retrieves the damping coefficient of the particle.
+     * <p>
+     * The damping coefficient is a scalar value that represents the resistive
+     * force acting against the particle's velocity. This is often used to
+     * simulate friction or air resistance in a simulation.
+     * </p>
+     *
+     * @return The damping coefficient of the particle.
+     */
     public double getDampingCoefficient() {
         return dampCoef;
     }
 
+    /**
+     * Retrieves the restitution coefficient of the particle.
+     * <p>
+     * The restitution coefficient, also known as the coefficient of restitution
+     * (CoR), is a scalar value that determines the elasticity of collisions. A
+     * value of 1.0 represents a perfectly elastic collision, while a value of
+     * 0.0 represents a perfectly inelastic collision.
+     * </p>
+     *
+     * @return The restitution coefficient of the particle.
+     */
     public double getRestitution() {
-        return restt;
+        return restitution;
     }
 
+    /**
+     * Checks if the particle is static.
+     * <p>
+     * A static particle is one that does not move, regardless of forces acting
+     * upon it. This may be used to represent fixed objects or boundaries in the
+     * simulation.
+     * </p>
+     *
+     * @return {@code true} if the particle is static and immovable,
+     * {@code false} otherwise.
+     */
     public boolean isStatic() {
         return isStatic;
     }
 
     // ============================== Setters =============================== //
+    /**
+     * Sets the mass of the particle.
+     * <p>
+     * The mass is a fundamental property of the particle that determines its
+     * resistance to acceleration when a force is applied. It is typically
+     * measured in kilograms (kg) and should be a non-negative value. Setting
+     * the mass to zero or a very small value could result in unrealistic
+     * behaviour in the simulation.
+     * </p>
+     *
+     * @param mass The new mass of the particle. Must be non-negative.
+     */
     public void setMass(double mass) {
+        throwIfNonPositive("mass", mass);
         this.mass = mass;
     }
 
+    /**
+     * Sets the damping coefficient of the particle.
+     * <p>
+     * The damping coefficient is a scalar value representing the resistive
+     * force that acts against the particle's velocity. This is often used to
+     * simulate friction or air resistance. Higher values of the damping
+     * coefficient will result in greater resistance to motion, effectively
+     * slowing the particle down more rapidly.
+     * </p>
+     *
+     * @param damping The new damping coefficient for the particle. Typically a
+     * value between 0 and 1.
+     */
     public void setDampingCoefficient(double damping) {
+        throwIfOutOfRange("dampining coefficient", damping, 0, 1);
         this.dampCoef = damping;
     }
 
+    /**
+     * Sets the restitution coefficient of the particle.
+     * <p>
+     * The restitution coefficient determines the elasticity of collisions. A
+     * value of 1.0 indicates a perfectly elastic collision where no kinetic
+     * energy is lost, while a value of 0.0 indicates a perfectly inelastic
+     * collision where all kinetic energy is lost. This coefficient influences
+     * how the particle bounces off other objects in the simulation.
+     * </p>
+     *
+     * @param restitution The new restitution coefficient for the particle.
+     * Typically a value between 0 and 1.
+     */
     public void setRestitution(double restitution) {
-        this.restt = restitution;
+        throwIfOutOfRange("restitution", restitution, 0, 1);
+        this.restitution = restitution;
     }
 
+    /**
+     * Sets the static state of the particle.
+     * <p>
+     * A static particle is one that does not move, regardless of any forces
+     * acting on it. This can be used to represent fixed objects or boundaries
+     * within the simulation. Once set to static, the particle's position will
+     * not change unless explicitly modified.
+     * </p>
+     *
+     * @param isStatic {@code true} to make the particle static and immovable,
+     * {@code false} to allow it to move freely.
+     */
     public void setStatic(boolean isStatic) {
         this.isStatic = isStatic;
     }
 
     // ========================== Helper Methods ============================ //
     /**
-     * Throws an {@link IllegalArgumentException} if the specified field is
-     * negative.
+     * Validates that a given numerical field is within a specified range, and
+     * throws an {@code IllegalArgumentException} if the field is out of range.
      *
-     * @param varName the name of the variable to include in the exception
-     * message
-     * @param field the value to check; if this value is less than 0, an
-     * exception is thrown
-     * @throws IllegalArgumentException if the field is negative
+     * @param varName The name of the variable or field being validated. This is
+     * used in the exception message to identify the offending variable if an
+     * exception is thrown. Must not be {@code null} or empty.
+     *
+     * @param field The numerical value of the field to validate. This value is
+     * compared against the specified minimum and maximum bounds (inclusive). It
+     * is typically a double to accommodate a wide range of numerical inputs,
+     * including those with fractional values.
+     *
+     * @param min The minimum allowable value (inclusive) for the {@code field}.
+     * If {@code field} is less than this value, an
+     * {@code IllegalArgumentException} will be thrown. Note that {@code min} is
+     * an {@code int}, which implies that the minimum value is integral.
+     *
+     * @param max The maximum allowable value (inclusive) for the {@code field}.
+     * If {@code field} exceeds this value, an {@code IllegalArgumentException}
+     * will be thrown. Similar to {@code min}, {@code max} is an {@code int},
+     * indicating an integral upper bound.
+     *
+     * @throws IllegalArgumentException If the {@code field} is less than
+     * {@code min} or greater than {@code max}. The exception message will
+     * contain {@code varName} to specify which field caused the validation
+     * failure and the invalid {@code field} value that triggered the exception.
+     *
+     * @see IllegalArgumentException
      */
-    private void throwIfNegative(String varName, double field) {
-        if (field < 0) {
-            throw new IllegalArgumentException(varName + " cannot be negative (" + field + ")");
+    private void throwIfOutOfRange(String varName, double field, int min, int max) {
+        if (field < min || field > max) {
+            throw new IllegalArgumentException(varName + " out of range (" + min + " >= " + field + " >= " + max + ")");
         }
     }
 

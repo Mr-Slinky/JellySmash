@@ -1,6 +1,4 @@
-package com.slinky.jellysmash.model.physics.comps;
-
-import com.slinky.jellysmash.model.physics.Entity;
+package com.slinky.jellysmash.model.physics;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +33,6 @@ import java.util.Map;
  *       }
  *     }
  * </code></pre>
- *
  * <p>
  * For example:
  * </p>
@@ -43,7 +40,7 @@ import java.util.Map;
  * <pre><code>
  *     {
  *       1001: {
- *         Vector2D.class: Vector2D(Position(10, 20)),
+ *         Vector2D.class:   Vector2D(Position(10, 20)),
  *         Particle2D.class: Particle2D(Mass(5.0))
  *       },
  *       1002: {
@@ -105,7 +102,9 @@ public class ComponentManager {
 
     // ============================ API Methods ============================= //
     /**
-     * Adds a component to the specified entity.
+     * Adds a component to the specified entity if its type has not yet been
+     * associated to the given entity.
+     *
      * <p>
      * This method associates the provided component with the specified entity
      * by storing it in the {@code components} map. If the entity does not
@@ -113,6 +112,7 @@ public class ComponentManager {
      * the entity's ID. The component is then stored in this inner map, keyed by
      * its class type, allowing for efficient retrieval and management.
      * </p>
+     *
      * <p>
      * By structuring the component storage in this way, the method ensures that
      * component data is stored contiguously in memory, improving cache
@@ -142,7 +142,21 @@ public class ComponentManager {
      * @param <T> the type of the component
      */
     public <T extends Component> void addComponent(Entity entity, T component) {
-        Map<Class<? extends Component>, Component> entityComponents = components.computeIfAbsent(entity.id(), k -> new HashMap<>());
+        if (entity == null) {
+            throw new IllegalArgumentException("Cannot map component with a null entity");
+        }
+
+        if (component == null) {
+            throw new IllegalArgumentException("Cannot map entity with a null component");
+        }
+
+        Map<Class<? extends Component>, Component> entityComponents = components.computeIfAbsent(entity.id(), v -> new HashMap<>());
+
+        // Prevent accidental overriding
+        if (entityComponents.get(component.getClass()) != null) {
+            throw new IllegalStateException("Entity " + entity.id() + " already has a " + component.getClass() + " component");
+        }
+
         entityComponents.put(component.getClass(), component);
     }
 
@@ -215,12 +229,17 @@ public class ComponentManager {
      * @param entity the entity from which to remove the component
      * @param componentClass the class of the component to remove
      * @param <T> the type of the component
+     * @return {@code true} if the component was associated to the entity and
+     * successfully removed, {@code false} if there was no association or no
+     * removal.
      */
-    public <T extends Component> void removeComponent(Entity entity, Class<T> componentClass) {
+    public <T extends Component> boolean removeComponent(Entity entity, Class<T> componentClass) {
         Map<Class<? extends Component>, Component> entityComponents = components.get(entity.id());
         if (entityComponents != null) {
-            entityComponents.remove(componentClass);
+            return (entityComponents.remove(componentClass) != null);
         }
+
+        return false;
     }
 
     /**

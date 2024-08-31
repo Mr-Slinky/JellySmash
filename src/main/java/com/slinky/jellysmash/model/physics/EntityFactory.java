@@ -1,7 +1,5 @@
 package com.slinky.jellysmash.model.physics;
 
-import com.slinky.jellysmash.model.physics.comps.Component;
-import com.slinky.jellysmash.model.physics.comps.ComponentManager;
 import com.slinky.jellysmash.model.physics.comps.Particle2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
@@ -147,7 +145,7 @@ public class EntityFactory {
      * associated with the entity are also removed by the
      * {@code ComponentManager} as part of the entity's life-cycle management.
      * </p>
-     * 
+     *
      * <p>
      * <b>Note:</b> While this method removes the given entity from the internal
      * map and cleans up its components, any external references to the entity
@@ -246,8 +244,14 @@ public class EntityFactory {
         Entity newEntity = new Entity(id);
         entities.put(id, newEntity);
 
-        for (int i = 0; i < components.length; i++) {
-            componentManager.addComponent(newEntity, components[i]);
+        if (components != null) {
+            for (int i = 0; i < components.length; i++) {
+                if (components[i] == null) {
+                    throw new NullPointerException("Cannot create a new entity with a null component (at varargs component array index " + i + " )");
+                }
+
+                componentManager.addComponent(newEntity, components[i]);
+            }
         }
 
         return newEntity;

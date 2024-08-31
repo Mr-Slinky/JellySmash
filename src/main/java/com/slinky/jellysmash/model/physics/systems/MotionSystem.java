@@ -21,13 +21,15 @@ import java.util.List;
  * positions and velocities over time. The system operates under the assumption
  * that the acceleration and velocity of particles are the final steps in their
  * state updates, meaning any external forces should be applied before invoking
- * this system to ensure accurate and realistic motion calculations.</p>
+ * this system to ensure accurate and realistic motion calculations.
+ * </p>
  *
  * <p>
  * This class is designed to be flexible and extendable, allowing for the
  * integration of additional forces beyond gravity by external systems or
  * classes. The class is structured to handle both static and dynamic particles,
- * with static particles being ignored in the motion calculations.</p>
+ * with static particles being ignored in the motion calculations.
+ * </p>
  *
  * <p>
  * One of the key features of the {@code MotionSystem} is its reliance on an
@@ -39,7 +41,8 @@ import java.util.List;
  * and passing this integrator to the {@link #calculateVelocitiesAndPositions}
  * method. This approach provides a high degree of flexibility and precision in
  * the way the physics system handles updates, making it adaptable to a variety
- * of scenarios within the game.</p>
+ * of scenarios within the game.
+ * </p>
  *
  * <p>
  * Usage of this system typically follows a three-step process:
@@ -53,7 +56,8 @@ import java.util.List;
  * {@link #calculateVelocitiesAndPositions}.</li>
  * </ol>
  * This ensures a clear and consistent update sequence, crucial for maintaining
- * the integrity of the physics simulation.</p>
+ * the integrity of the physics simulation.
+ * </p>
  *
  *
  * @version 1.0
@@ -70,7 +74,7 @@ public class MotionSystem extends VectorSystem2D {
     // ============================== Static ================================ //
     /**
      * Represents the acceleration due to Earth's gravity in metres per second
-     * squared (m/s²). This constant is used to apply a gravitational force to
+     * squared ( m/s² ). This constant is used to apply a gravitational force to
      * particles within the {@code MotionSystem}. The value is set to 9.81,
      * which is the standard gravitational acceleration on Earth.
      */
@@ -79,13 +83,14 @@ public class MotionSystem extends VectorSystem2D {
     // ============================== Fields ================================ //
     /**
      * The gravitational force vector applied to particles within the
-     * {@code MotionSystem}. This vector is initialized with a downward force
+     * {@code MotionSystem}. This vector is initialised with a downward force
      * equivalent to Earth's gravity, where the x-component is 0 and the
      * y-component is {@code GRAVITY_EARTH}.
      *
      * <p>
      * This vector is scaled based on the time step when applying motion forces
-     * to particles.</p>
+     * to particles.
+     * </p>
      */
     private final Vector2D FG = new Vector2D(0, GRAVITY_EARTH);
 
@@ -159,7 +164,7 @@ public class MotionSystem extends VectorSystem2D {
      * provided integration method.
      *
      * <p>
-     * This method utilizes the injected {@link IntegrationMethod} to perform
+     * This method utilises the injected {@link IntegrationMethod} to perform
      * the calculations, allowing for different numerical integration techniques
      * (e.g., Euler, Verlet) to be used depending on the specific needs of the
      * simulation.</p>
