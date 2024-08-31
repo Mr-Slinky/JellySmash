@@ -257,4 +257,49 @@ public class ComponentManager {
         components.remove(entity.id());
     }
 
+    /**
+     * Retrieves all components associated with a specified entity.
+     * <p>
+     * This method accesses the internal storage map to return all components
+     * that are associated with the given entity. The returned map contains the
+     * components keyed by their respective class types. If the entity has no
+     * components associated with it, an empty map is returned.
+     * </p>
+     *
+     * <p>
+     * <b>Example usage: </b>
+     * <pre><code>
+     *     // Assume entity has been created and components have been added
+     *     Map<Class<? extends Component>, Component> componentsMap = componentManager.getAllComponents(entity);
+     *
+     *     // Iterate over all components of the entity
+     *     for (Map.Entry<Class<? extends Component>, Component> entry : componentsMap.entrySet()) {
+     *         Class<? extends Component> componentClass = entry.getKey();
+     *         Component component = entry.getValue();
+     *
+     *         // Cast the component to its specific type and process it
+     *         if (componentClass.equals(Vector2D.class)) {
+     *             Vector2D vector = Vector2D.class.cast(component);
+     *             // Process Vector2D
+     *         } else if (componentClass.equals(Particle2D.class)) {
+     *             Particle2D particle = Particle2D.class.cast(component);
+     *             // Process Particle2D
+     *         }
+     *         // Add additional else-if blocks for other component types as needed
+     *     }
+     * </code></pre>
+     * </p>
+     *
+     * @param entity the entity whose components are to be retrieved
+     * @return a {@link Map} where the keys are the classes of the components
+     * and the values are the component instances associated with the specified
+     * entity. If the entity has no components, an empty map is returned.
+     *
+     * @see Component
+     * @see Entity
+     */
+    public Map<Class<? extends Component>, Component> getAllComponents(Entity entity) {
+        return components.get(entity.id());
+    }
+
 }
