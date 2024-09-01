@@ -1,12 +1,14 @@
 package com.slinky.jellysmash.model.physics.base;
 
+import com.slinky.jellysmash.model.physics.comps.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The {@code ComponentManager} class is responsible for managing the storage,
  * retrieval, and life-cycle of components associated with entities within the
- * Entity-Component-System (ECS) architecture of the JellySmash physics engine.
+ * the JellySmash physics engine.
  *
  * <p>
  * This class provides a centralised mechanism to add, access, and remove
@@ -73,15 +75,18 @@ import java.util.Map;
  * @version 1.0
  * @since 0.1.0
  *
- * @author Kheagen Haskins
- *
  * @see Component
  * @see Entity
  * @see Map
  * @see HashMap
  *
  */
-public class ComponentManager {
+class ComponentManager {
+    
+    /**
+     * Package-Private, should only be instantiated from the Entity class
+     */
+    ComponentManager() {}
 
     // ============================== Fields ================================ //
     /**
@@ -135,7 +140,7 @@ public class ComponentManager {
      * </p>
      *
      * <b>Implementation Note:</b> This method is only called by the
-     * {@link EntityManager} class when a new, pre-defined, entity is created.
+     * {@link Entities} class when a new, pre-defined, entity is created.
      *
      * @param entity the entity to which the component should be added
      * @param component the component to add

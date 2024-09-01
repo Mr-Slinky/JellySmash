@@ -1,6 +1,8 @@
 package com.slinky.jellysmash.model.physics.base;
 
+import com.slinky.jellysmash.model.physics.comps.Component;
 import com.slinky.jellysmash.model.physics.comps.Particle2D;
+import com.slinky.jellysmash.model.physics.comps.BallComponent;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 import java.util.Collections;
@@ -10,29 +12,27 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * The {@code EntityManager} class is responsible for managing the life cycle of
- * entities within an Entity Component System (ECS) architecture. It provides
- * functionality for creating, retrieving, and destroying entities, as well as
- * managing their associated components through integration with a
- * {@link ComponentManager}.
+ * A utility class responsible for managing the life cycle of entities within
+ * the ECS architecture. It provides functionality for creating, retrieving, and
+ * destroying entities.
  *
  * <p>
- * The {@code EntityManager} ensures that each entity is assigned a unique
- * identifier in a thread-safe manner using an {@link AtomicLong} for ID
- * generation. Entities are stored in an internal map, which allows for
- * efficient retrieval and management of entities within the system.
+ * The {@code Entities} ensures that each entity is assigned a unique identifier
+ * in a thread-safe manner using an {@link AtomicLong} for ID generation.
+ * Entities are stored in an internal map, which allows for efficient retrieval
+ * and management of entities within the system.
  * </p>
  *
  * <p>
  * This class also includes methods for creating specific types of entities,
  * such as points and vectors, with corresponding components like
  * {@link Vector2D}. By delegating component management to the
- * {@code ComponentManager}, the {@code EntityManager} maintains a clear
- * separation of concerns, making it easier to manage and extend the ECS.
+ * {@code ComponentManager}, the {@code Entities} maintains a clear separation
+ * of concerns, making it easier to manage and extend the ECS.
  * </p>
  *
- * @version 1.0
- * @since 0.1.0
+ * @version 2.0
+ * @since   0.1.0
  *
  * @author Kheagen Haskins
  *
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see ComponentManager
  * @see Vector2D
  */
-public class EntityManager {
+public class Entities {
 
     // ============================== Fields ================================ //
     /**
@@ -54,7 +54,7 @@ public class EntityManager {
      * conditions in a multi-threaded environment.
      * </p>
      */
-    private final AtomicLong nextId = new AtomicLong(1);
+    private static final AtomicLong nextId = new AtomicLong(1);
 
     /**
      * A map that stores all entities, keyed by their unique identifier.
@@ -66,44 +66,7 @@ public class EntityManager {
      * architecture.
      * </p>
      */
-    private final Map<Long, Entity> entities = new HashMap<>();
-
-    /**
-     * The {@link ComponentManager} instance used to manage components
-     * associated with entities.
-     * <p>
-     * This field is responsible for handling the addition, retrieval, and
-     * removal of components for entities managed by this factory. By delegating
-     * component management to a dedicated {@code ComponentManager}, the
-     * {@code EntityManager} maintains a clear separation of concerns, improving
-     * modularity and maintainability.
-     * </p>
-     */
-    private ComponentManager componentManager;
-
-    // =========================== Constructors ============================= //
-    /**
-     * Constructs a new {@code EntityManager} with the specified
-     * {@link ComponentManager}.
-     *
-     * <p>
-     * This constructor initialises the factory with a {@code ComponentManager},
-     * which is used to handle the component life-cycle for entities created by
-     * this factory. By passing in a {@code ComponentManager}, the factory can
-     * operate within the context of an existing ECS setup, ensuring that
-     * entities are properly integrated into the system.
-     * </p>
-     *
-     * @param componentManager the {@link ComponentManager} responsible for
-     * managing components of entities
-     */
-    public EntityManager(ComponentManager componentManager) {
-        if (componentManager == null) {
-            throw new IllegalArgumentException("EntityManager cannot be instantiated with a null ComponentManager");
-        }
-
-        this.componentManager = componentManager;
-    }
+    private static final Map<Long, Entity> entities = new HashMap<>();
 
     // ============================== Getters =============================== //
     /**
@@ -117,7 +80,7 @@ public class EntityManager {
      * @param id the ID of the entity to retrieve
      * @return the entity if found, {@code null} otherwise
      */
-    public Entity getEntity(long id) {
+    public static Entity getEntity(long id) {
         return entities.get(id);
     }
 
@@ -132,7 +95,7 @@ public class EntityManager {
      *
      * @return an unmodifiable map of entity IDs to entities
      */
-    public Map<Long, Entity> getAllEntities() {
+    public static Map<Long, Entity> getAllEntities() {
         return Collections.unmodifiableMap(entities);
     }
 
@@ -159,14 +122,15 @@ public class EntityManager {
      * @return {@code true} if the entity was found and removed, {@code false}
      * if the entity was not found.
      */
-    public boolean destroyEntity(Entity entity) {
+    public static boolean destroyEntity(Entity entity) {
         boolean removed = (entities.remove(entity.id()) != null);
-        componentManager.removeAllComponents(entity);
+        entity.removeAllComponents();
         return removed;
     }
 
     /**
      * Removes all entities and their associated components from the system.
+     *
      * <p>
      * This method iterates through all entities managed by the system and
      * invokes {@code removeAllComponents} on each entity to clear their
@@ -174,6 +138,7 @@ public class EntityManager {
      * entity from the internal storage, effectively cleaning up the entire
      * entity-component mapping.
      * </p>
+     *
      * <p>
      * This is useful for resetting the state of the system, for example, when
      * starting a new simulation or clearing resources for shutdown.
@@ -184,10 +149,9 @@ public class EntityManager {
      * their associated components will be removed from the system.
      * </p>
      */
-    public void clean() {
+    public static void clean() {
         for (Map.Entry<Long, Entity> entry : entities.entrySet()) {
-            Entity entity = entry.getValue();
-            componentManager.removeAllComponents(entity);
+            destroyEntity(entry.getValue());
         }
 
         entities.clear();
@@ -205,7 +169,7 @@ public class EntityManager {
      *
      * @return the newly created entity
      */
-    public Entity newEntity() {
+    public static Entity newEntity() {
         long id = nextId.getAndIncrement(); // Safely increments the ID
         Entity newEntity = new Entity(id);
         entities.put(id, newEntity);
@@ -239,7 +203,7 @@ public class EntityManager {
      * @see Entity
      *
      */
-    public Entity newEntity(Component... components) {
+    public static Entity newEntity(Component... components) {
         long id = nextId.getAndIncrement(); // Safely increments the ID
         Entity newEntity = new Entity(id);
         entities.put(id, newEntity);
@@ -247,10 +211,10 @@ public class EntityManager {
         if (components != null) {
             for (int i = 0; i < components.length; i++) {
                 if (components[i] == null) {
-                    throw new NullPointerException("Cannot create a new entity with a null component (at varargs component array index " + i + " )");
+                    throw new IllegalArgumentException("Cannot create a new entity with a null component (at varargs component array index " + i + " )");
                 }
 
-                componentManager.addComponent(newEntity, components[i]);
+                newEntity.addComponent(components[i]);
             }
         }
 
@@ -294,11 +258,24 @@ public class EntityManager {
      * @throws IllegalArgumentException if mass, damping, or restitution are
      * negative.
      */
-    public Entity createPointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
+    public static Entity createPointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         Entity particleEntity = newEntity();
         Particle2D particleComponent = new Particle2D(position, velocity, acceleration, mass, damping, restitution, isStatic);
-        componentManager.addComponent(particleEntity, particleComponent);
+        particleEntity.addComponent(particleComponent);
+
         return particleEntity;
+    }
+
+    /**
+     * Creates an entity using the given position vector and mass to build a
+     * moveable (non-static) Ball at rest.
+     *
+     * @param position
+     * @param mass
+     * @return
+     */
+    public static Entity createSolidBall(Vector2D position, double mass) {
+        return newEntity(new BallComponent(position, mass));
     }
 
 }
