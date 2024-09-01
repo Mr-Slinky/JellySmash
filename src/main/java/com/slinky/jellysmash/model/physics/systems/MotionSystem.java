@@ -4,6 +4,8 @@ import com.slinky.jellysmash.model.physics.comps.Particle2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethod;
 
+import java.util.ArrayList;
+
 import java.util.List;
 
 /**
@@ -94,35 +96,98 @@ public class MotionSystem extends VectorSystem2D {
      */
     private final Vector2D FG = new Vector2D(0, GRAVITY_EARTH);
 
+    /**
+     * A list of {@code Particle2D} objects managed by the {@code MotionSystem}.
+     * <p>
+     * This list stores all the particles that the motion system needs to manage
+     * and update during the simulation. Each {@code Particle2D} in the list
+     * represents an individual point mass with properties such as position,
+     * velocity, and acceleration, which the motion system will process to
+     * simulate movement and other physical interactions.
+     * </p>
+     * <p>
+     * The list is initialized during the construction of the
+     * {@code MotionSystem} and is populated through the {@code add} method.
+     * </p>
+     */
+    private final List<Particle2D> particles;
+
     // =========================== Constructors ============================= //
+    /**
+     * Constructs a new {@code MotionSystem} instance, initializing the internal
+     * list of particles.
+     * <p>
+     * This constructor creates an empty {@code ArrayList} to hold the
+     * {@code Particle2D} objects that will be managed by this motion system.
+     * The {@code particles} list is used by the motion system to track and
+     * update the state of each particle as part of the simulation process.
+     * </p>
+     */
     public MotionSystem() {
-        // hmm?
+        particles = new ArrayList<>();
     }
 
     // ============================ API Methods ============================= //
     /**
-     * Applies all motion forces, including gravity, to the specified list of
+     * Adds one or more {@code Particle2D} objects to the motion system for
+     * management.
+     *
+     * <p>
+     * This method allows for adding multiple {@code Particle2D} objects to the
+     * {@code MotionSystem}'s internal list in a single call. The method is
+     * variadic, accepting any number of {@code Particle2D} objects. Each
+     * non-null particle provided will be added to the system, enabling the
+     * motion system to manage its movement and interactions during the
+     * simulation.
+     * </p>
+     *
+     * <p>
+     * The method includes null checks to ensure that only valid, non-null
+     * particles are added to the system. If the input array is {@code null} or
+     * empty, or if any of the particles in the array are {@code null}, those
+     * invalid particles are ignored, and the method proceeds without adding
+     * them.
+     * </p>
+     *
+     *
+     * @param particles an array of {@code Particle2D} objects to be added to
+     * the motion system. Any {@code null} elements in the array are ignored.
+     */
+    public void add(Particle2D... particles) {
+        if (particles == null || particles.length == 0) {
+            return;
+        }
+
+        for (int i = 0; i < particles.length; i++) {
+            if (particles[i] == null) {
+                continue;
+            }
+
+            this.particles.add(particles[i]);
+        }
+    }
+    
+    public void removeAll() {
+        particles.clear();
+    }
+    
+    /**
+     * Applies all motion forces, including gravity, to the internal list of
      * particles. This method updates each particle's acting force by adding the
      * gravitational force vector ({@link #FG}) and any other applicable forces.
      *
      * <p>
-     * <b>Note:</b> Static particles are ignored as they do not undergo
-     * motion.</p>
-     *
-     * @param particles The list of {@code Particle2D} objects to which the
-     * forces will be applied.
-     * @param deltaTime The time in seconds used to scale the forces
-     * appropriately, ensuring that the force application is consistent with the
-     * simulation's time step.
+     * <b>Note:</b> Static particles are ignored as they do not undergo motion.
+     * </p>
      */
-    public void applyMotionForces(List<Particle2D> particles) {
+    public void applyMotionForces() {
         // Avoid recalculating gravity vector if delta time is consistent
         for (Particle2D p : particles) {
             if (p.isStatic()) {
                 continue;
             }
 
-            addTarget(p.getActingForce(), FG);
+            addTarget(p.force(), FG);
             // Other possible forces
         }
     }
@@ -136,8 +201,8 @@ public class MotionSystem extends VectorSystem2D {
      * This method should be called only after all relevant forces have been
      * applied to the particles, as it depends on the total force acting on each
      * particle to accurately compute the resulting acceleration. If no force is
-     * acting on a particle, its acceleration remains unchanged, in accordance
-     * with Newton's First Law of Motion (Law of Inertia).
+     * acting on a particle, its acceleration will be 0, in accordance with
+     * Newton's First Law of Motion (Law of Inertia).
      * </p>
      *
      * <p>
@@ -146,21 +211,18 @@ public class MotionSystem extends VectorSystem2D {
      * is invoked. Failure to do so will result in incorrect acceleration
      * values.
      * </p>
-     *
-     * @param particles The list of {@code Particle2D} objects for which
-     * accelerations will be calculated and updated.
      */
-    public void calculateAccelerations(List<Particle2D> particles) {
+    public void calculateAccelerations() {
         for (Particle2D p : particles) {
             if (p.isStatic()) {
                 continue;
             }
 
-            Vector2D force = p.getActingForce();
-            double mass = p.getMass();
+            Vector2D force = p.force();
+            double mass = p.mass();
 
             // a = F / m
-            p.getAcceleration().setComponents(force.x() / mass, force.y() / mass);
+            p.acceleration().setComponents(force.x() / mass, force.y() / mass);
         }
     }
 
@@ -180,25 +242,19 @@ public class MotionSystem extends VectorSystem2D {
      * position updates to maintain consistency with the simulation's time
      * step.</p>
      *
-     * @param particles The list of {@code Particle2D} objects whose velocities
-     * and positions will be updated.
      * @param iFunc The {@link IntegrationMethod} to be used for calculating the
      * velocity and position updates.
      * @param deltaTime The time in seconds used to scale the velocity and
      * position updates appropriately.
      */
-    public void calculateVelocitiesAndPositions(
-            List<Particle2D> particles,
-            IntegrationMethod iFunc,
-            double deltaTime
-    ) {
+    public void calculateVelocitiesAndPositions(IntegrationMethod iFunc, double deltaTime) {
         for (Particle2D p : particles) {
             if (p.isStatic()) {
                 continue;
             }
 
-            iFunc.updateVelocity(p.getVelocity(), p.getAcceleration(), deltaTime);
-            iFunc.updatePosition(p.getPosition(), p.getVelocity(), deltaTime);
+            iFunc.updateVelocity(p.velocity(), p.acceleration(), deltaTime);
+            iFunc.updatePosition(p.position(), p.velocity(), deltaTime);
         }
     }
 
