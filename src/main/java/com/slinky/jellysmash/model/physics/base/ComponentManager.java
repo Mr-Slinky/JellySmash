@@ -103,7 +103,7 @@ class ComponentManager {
      * (DOP) for optimised performance.
      * </p>
      */
-    private Map<Long, Map<Class<? extends Component>, Component>> components = new HashMap<>();
+    private Map<Entity, Map<Class<? extends Component>, Component>> components = new HashMap<>();
 
     // ============================ API Methods ============================= //
     /**
@@ -155,7 +155,7 @@ class ComponentManager {
             throw new IllegalArgumentException("Cannot map entity with a null component");
         }
 
-        Map<Class<? extends Component>, Component> entityComponents = components.computeIfAbsent(entity.id(), v -> new HashMap<>());
+        Map<Class<? extends Component>, Component> entityComponents = components.computeIfAbsent(entity, v -> new HashMap<>());
 
         // Prevent accidental overriding
         if (entityComponents.get(component.getClass()) != null) {
@@ -206,7 +206,7 @@ class ComponentManager {
      * component exists
      */
     public <T extends Component> T getComponent(Entity entity, Class<T> componentClass) {
-        Map<Class<? extends Component>, Component> entityComponents = components.get(entity.id());
+        Map<Class<? extends Component>, Component> entityComponents = components.get(entity);
         if (entityComponents != null) {
             return componentClass.cast(entityComponents.get(componentClass));
         }
@@ -239,7 +239,7 @@ class ComponentManager {
      * removal.
      */
     public <T extends Component> boolean removeComponent(Entity entity, Class<T> componentClass) {
-        Map<Class<? extends Component>, Component> entityComponents = components.get(entity.id());
+        Map<Class<? extends Component>, Component> entityComponents = components.get(entity);
         if (entityComponents != null) {
             return (entityComponents.remove(componentClass) != null);
         }
@@ -264,7 +264,7 @@ class ComponentManager {
      * otherwise
      */
     public <T extends Component> boolean hasComponent(Entity entity, Class<T> componentClass) {
-        Map<Class<? extends Component>, Component> entityComponents = components.get(entity.id());
+        Map<Class<? extends Component>, Component> entityComponents = components.get(entity);
         return entityComponents != null && entityComponents.containsKey(componentClass);
     }
 
@@ -278,7 +278,7 @@ class ComponentManager {
      * @param entity the entity for which to remove all components
      */
     public void removeAllComponents(Entity entity) {
-        components.remove(entity.id());
+        components.remove(entity);
     }
 
     /**
@@ -323,7 +323,7 @@ class ComponentManager {
      * @see Entity
      */
     public Map<Class<? extends Component>, Component> getAllComponents(Entity entity) {
-        return components.get(entity.id());
+        return components.get(entity);
     }
 
 }

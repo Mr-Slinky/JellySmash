@@ -80,7 +80,7 @@ public class Entities {
      * @param id the ID of the entity to retrieve
      * @return the entity if found, {@code null} otherwise
      */
-    public static Entity getEntity(long id) {
+    public static synchronized Entity getEntity(long id) {
         return entities.get(id);
     }
 
@@ -95,68 +95,11 @@ public class Entities {
      *
      * @return an unmodifiable map of entity IDs to entities
      */
-    public static Map<Long, Entity> getAllEntities() {
+    public static synchronized Map<Long, Entity> getAllEntities() {
         return Collections.unmodifiableMap(entities);
     }
 
     // ============================ API Methods ============================= //
-    /**
-     * Destroys an entity, removing it from the system.
-     * <p>
-     * This method removes the specified entity from the internal map,
-     * effectively destroying the entity within the system. Any components
-     * associated with the entity are also removed by the
-     * {@code ComponentManager} as part of the entity's life-cycle management.
-     * </p>
-     *
-     * <p>
-     * <b>Note:</b> While this method removes the given entity from the internal
-     * map and cleans up its components, any external references to the entity
-     * will keep it alive in memory. Therefore, if there are other global
-     * references to the entity, it will not be completely destroyed. The entity
-     * will only be removed from the internal map, but it will still exist in
-     * memory if referenced elsewhere.
-     * </p>
-     *
-     * @param entity the entity to destroy
-     * @return {@code true} if the entity was found and removed, {@code false}
-     * if the entity was not found.
-     */
-    public static boolean destroyEntity(Entity entity) {
-        boolean removed = (entities.remove(entity.id()) != null);
-        entity.removeAllComponents();
-        return removed;
-    }
-
-    /**
-     * Removes all entities and their associated components from the system.
-     *
-     * <p>
-     * This method iterates through all entities managed by the system and
-     * invokes {@code removeAllComponents} on each entity to clear their
-     * associated components. After clearing all components, it removes each
-     * entity from the internal storage, effectively cleaning up the entire
-     * entity-component mapping.
-     * </p>
-     *
-     * <p>
-     * This is useful for resetting the state of the system, for example, when
-     * starting a new simulation or clearing resources for shutdown.
-     * </p>
-     *
-     * <p>
-     * <b>Note:</b> that this operation cannot be undone, and all entities and
-     * their associated components will be removed from the system.
-     * </p>
-     */
-    public static void clean() {
-        for (Map.Entry<Long, Entity> entry : entities.entrySet()) {
-            destroyEntity(entry.getValue());
-        }
-
-        entities.clear();
-    }
-
     /**
      * Creates a new entity with a unique identifier and no associated
      * components.
@@ -169,7 +112,7 @@ public class Entities {
      *
      * @return the newly created entity
      */
-    public static Entity newEntity() {
+    public static synchronized Entity newEntity() {
         long id = nextId.getAndIncrement(); // Safely increments the ID
         Entity newEntity = new Entity(id);
         entities.put(id, newEntity);
@@ -203,7 +146,7 @@ public class Entities {
      * @see Entity
      *
      */
-    public static Entity newEntity(Component... components) {
+    public static synchronized Entity newEntity(Component... components) {
         long id = nextId.getAndIncrement(); // Safely increments the ID
         Entity newEntity = new Entity(id);
         entities.put(id, newEntity);
@@ -219,6 +162,64 @@ public class Entities {
         }
 
         return newEntity;
+    }
+    
+    /**
+     * Destroys an entity, removing it from the system.
+     * <p>
+     * This method removes the specified entity from the internal map,
+     * effectively destroying the entity within the system. Any components
+     * associated with the entity are also removed by the
+     * {@code ComponentManager} as part of the entity's life-cycle management.
+     * </p>
+     *
+     * <p>
+     * <b>Note:</b> While this method removes the given entity from the internal
+     * map and cleans up its components, any external references to the entity
+     * will keep it alive in memory. Therefore, if there are other global
+     * references to the entity, it will not be completely destroyed. The entity
+     * will only be removed from the internal map, but it will still exist in
+     * memory if referenced elsewhere.
+     * </p>
+     *
+     * @param entity the entity to destroy
+     * @return {@code true} if the entity was found and removed, {@code false}
+     * if the entity was not found.
+     */
+    public static synchronized boolean destroyEntity(Entity entity) {
+        boolean removed = entities.remove(entity.id()) != null;
+        entity.removeAllComponents();
+        return removed;
+    }
+
+    /**
+     * Removes all entities and their associated components from the system.
+     *
+     * <p>
+     * This method iterates through all entities managed by the system and
+     * invokes {@code removeAllComponents} on each entity to clear their
+     * associated components. After clearing all components, it removes each
+     * entity from the internal storage, effectively cleaning up the entire
+     * entity-component mapping.
+     * </p>
+     *
+     * <p>
+     * This is useful for resetting the state of the system, for example, when
+     * starting a new simulation or clearing resources for shutdown.
+     * </p>
+     *
+     * <p>
+     * <b>Note:</b> that this operation cannot be undone, and all entities and
+     * their associated components will be removed from the system.
+     * </p>
+     */
+    public static synchronized void clean() {
+        for (Map.Entry<Long, Entity> entry : entities.entrySet()) {
+            entry.getValue().removeAllComponents();
+        }
+
+        entities.clear();
+        nextId.set(1);
     }
 
     // ========================== Factory Methods =========================== //
