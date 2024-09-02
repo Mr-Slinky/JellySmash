@@ -1,8 +1,6 @@
 package com.slinky.jellysmash.model.physics;
 
 import com.slinky.jellysmash.model.physics.base.Entities;
-import com.slinky.jellysmash.model.physics.base.Entity;
-import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 import com.slinky.jellysmash.model.physics.systems.MotionSystem;
 import com.slinky.jellysmash.model.physics.systems.CollisionSystem;
@@ -23,7 +21,7 @@ public final class PhysicsEngine extends VectorSystem2D {
     // =========================== Constructors ============================= //
     public PhysicsEngine(int width, int height) {
         createEntities();
-        this.motionSystem = new MotionSystem();
+        this.motionSystem = new MotionSystem(IntegrationMethods.EULER);
         this.collisionSystem = new CollisionSystem(width, height);
     }
 
@@ -34,12 +32,8 @@ public final class PhysicsEngine extends VectorSystem2D {
      * @param deltaTime time since last frame, in seconds
      */
     public void update(double deltaTime) {
-        deltaTime = Math.min(deltaTime, 0.5);
-        // Loop through each subsystem in an appropriate order:
-        motionSystem.applyMotionForces();
-        motionSystem.calculateAccelerations(deltaTime);
-        motionSystem.calculateVelocitiesAndPositions(IntegrationMethods.EULER);
-        
+        // Max delta time to half a second to prevent large, unstable updateas
+        motionSystem.update(Math.min(deltaTime, 0.5));
         collisionSystem.update();
     }
 

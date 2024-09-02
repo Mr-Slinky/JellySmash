@@ -9,7 +9,6 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethod;
 
 import java.util.ArrayList;
-
 import java.util.List;
 
 /**
@@ -40,18 +39,17 @@ import java.util.List;
  * <p>
  * One of the key features of the {@code MotionSystem} is its reliance on an
  * {@code IntegrationMethod} for updating velocities and positions. This method
- * is injected as a dependency during the calculation process, allowing for
- * different integration techniques to be applied depending on the specific
- * needs of the simulation. For example, you can choose to use the Euler method
- * by selecting {@code IntegrationMethod integrator = IntegrationMethod.EULER;}
- * and passing this integrator to the {@link #calculateVelocitiesAndPositions}
- * method. This approach provides a high degree of flexibility and precision in
- * the way the physics system handles updates, making it adaptable to a variety
- * of scenarios within the game.
+ * is injected as a dependency during instantiation. For example, you can choose
+ * to use the Euler method by selecting
+ * {@code IntegrationMethod integrator = IntegrationMethod.EULER;} and passing
+ * this integrator to the constructor method. This approach provides a high
+ * degree of flexibility and precision in the way the physics system handles
+ * updates, making it adaptable to a variety of scenarios within the game.
  * </p>
  *
  * <p>
- * Usage of this system typically follows a three-step process:
+ * Calling the {@code update()} method of this system invokes the following
+ * three-step process:
  * <ol>
  * <li>Apply motion forces (e.g., gravity) using the {@link #applyMotionForces}
  * method.</li>
@@ -65,6 +63,12 @@ import java.util.List;
  * the integrity of the physics simulation.
  * </p>
  *
+ * <p>
+ * <b>Instantiation Example</b>
+ * <pre><code>
+ *     MotionSystem ms = new MotionSystem(IntegrationMethods.EULER);
+ * </code></pre>
+ * </p>
  *
  * @version 1.0
  * @since 0.1.0
@@ -84,7 +88,7 @@ public class MotionSystem extends VectorSystem2D {
      * particles within the {@code MotionSystem}. The value is set to 9.81,
      * which is the standard gravitational acceleration on Earth.
      */
-    public static final double GRAVITY_EARTH = 9.81; 
+    public static final double GRAVITY_EARTH = 9.81;
 
     // ============================== Fields ================================ //
     /**
@@ -99,6 +103,12 @@ public class MotionSystem extends VectorSystem2D {
      * </p>
      */
     private final Vector2D FG = new Vector2D(0, GRAVITY_EARTH);
+
+    /**
+     * The integration method used for calculating the motion of particles. This
+     * determines how the motion equations are applied during the update.
+     */
+    private IntegrationMethod iFunc;
 
     /**
      * A list of {@code PointMass} objects managed by the {@code MotionSystem}.
@@ -117,7 +127,15 @@ public class MotionSystem extends VectorSystem2D {
     private final List<PointMass> particles = new ArrayList<>();
 
     // =========================== Constructors ============================= //
-    public MotionSystem() {
+    /**
+     * Constructs a {@code MotionSystem} with the specified integration method.
+     *
+     * @param integrationMethod the integration method to be used for motion
+     * calculations. This method is injected and determines how the system will
+     * calculate the motion of particles.
+     */
+    public MotionSystem(IntegrationMethod integrationMethod) {
+        this.iFunc = integrationMethod;
         List<Entity> ents = Entities.getEntitiesWith(PointMass.class);
         for (Entity ent : ents) {
             particles.add(ent.getComponent(PointMass.class));
@@ -164,20 +182,47 @@ public class MotionSystem extends VectorSystem2D {
         }
     }
 
+    /**
+     * Removes all particles from the motion system.
+     *
+     * <p>
+     * This method clears the list of particles, effectively resetting the
+     * motion system. After this call, the system will contain no particles
+     * until new ones are added.
+     * </p>
+     */
     public void removeAll() {
         particles.clear();
     }
 
+
+    /**
+     * Updates the state of the motion system based on the elapsed time since
+     * the last update. This method applies forces, calculates accelerations,
+     * and updates velocities and positions for all particles in the system.
+     *
+     * <p>
+     * <b>Note:</b> Static particles are ignored as they do not undergo motion.
+     * </p>
+     *
+     * @param deltaTime the amount of time elapsed since the last update, in
+     * seconds
+     */
+    public void update(double deltaTime) {
+        applyMotionForces();
+        calculateAccelerations(deltaTime);
+        calculateVelocitiesAndPositions();
+    }
+
+    // ========================== Helper Methods ============================ //
     /**
      * Applies all motion forces, including gravity, to the internal list of
      * particles. This method updates each particle's acting force by adding the
      * gravitational force vector ({@link #FG}) and any other applicable forces.
      *
-     * <p>
-     * <b>Note:</b> Static particles are ignored as they do not undergo motion.
-     * </p>
+     *
      */
-    public void applyMotionForces() {
+    private void applyMotionForces() {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
@@ -215,7 +260,7 @@ public class MotionSystem extends VectorSystem2D {
      * @param deltaTime the amount of time that has elapsed since the last
      * update, in seconds. Used to scale the acceleration.
      */
-    public void calculateAccelerations(double deltaTime) {
+    private void calculateAccelerations(double deltaTime) {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
@@ -232,24 +277,16 @@ public class MotionSystem extends VectorSystem2D {
 
     /**
      * Calculates and updates the velocities and positions of the specified
-     * particles based on their current accelerations and velocities, using the
-     * provided integration method.
+     * particles based on their current accelerations and velocities.
      *
      * <p>
      * This method uses the injected {@link IntegrationMethod} to perform the
      * calculations, allowing for different numerical integration techniques
      * (e.g., Euler, Verlet) to be used depending on the specific needs of the
-     * simulation.</p>
-     *
-     * <p>
-     * The {@code deltaTime} parameter is crucial for scaling the velocity and
-     * position updates to maintain consistency with the simulation's time step.
+     * simulation.
      * </p>
-     *
-     * @param iFunc The {@link IntegrationMethod} to be used for calculating the
-     * velocity and position updates.
      */
-    public void calculateVelocitiesAndPositions(IntegrationMethod iFunc) {
+    private void calculateVelocitiesAndPositions() {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
