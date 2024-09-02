@@ -5,15 +5,15 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
 /**
  * The {@code IntegrationMethod} interface defines the contract for numerical
  * integration methods used in physics simulations to update the velocity and
- * position of particles over discrete time steps.
+ * position of particles.
  *
  * <p>
  * Numerical integration is a fundamental technique in physics engines, enabling
  * the approximation of the continuous equations of motion by discrete updates.
  * This interface provides methods for updating both velocity and position,
- * given the current state of a particle and the elapsed time step. Implementing
- * classes can apply different integration methods, such as Euler, Verlet, or
- * Runge-Kutta, depending on the specific needs of the simulation.
+ * given the current state of a particle. Implementing classes can apply
+ * different integration methods, such as Euler, Verlet, or Runge-Kutta,
+ * depending on the specific needs of the simulation.
  * </p>
  *
  * <p>
@@ -37,8 +37,8 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  * Example usage:
  * <pre><code>
  *     IntegrationMethod integrator = IntegrationMethod<b>s</b>.EULER;
- *     Vector newVelocity = integrator.updateVelocity(currentVelocity, currentAcceleration, deltaTime);
- *     Position newPosition = integrator.updatePosition(currentPosition, newVelocity, deltaTime);
+ *     Vector   newVelocity = integrator.updateVelocity(currentVelocity, currentAcceleration);
+ *     Position newPosition = integrator.updatePosition(currentPosition, newVelocity);
  * </code></pre>
  * </p>
  *
@@ -51,8 +51,7 @@ public interface IntegrationMethod {
 
     // ============================ API Methods ============================= //
     /**
-     * Updates the velocity of a particle based on its current acceleration and
-     * the elapsed time step.
+     * Updates the velocity of a particle based on its current acceleration.
      *
      * <p>
      * This method applies the selected numerical integration technique to
@@ -69,22 +68,18 @@ public interface IntegrationMethod {
      *
      * @param v the current velocity vector of the particle.
      * @param a the current acceleration vector acting on the particle.
-     * @param deltaTime the time step over which to update the velocity,
-     * typically expressed in seconds.
      * @return a new {@code Vector2D} representing the updated velocity of the
      * particle.
      */
-    Vector2D updateVelocity(Vector2D v, Vector2D a, double deltaTime);
+    Vector2D updateVelocity(Vector2D v, Vector2D a);
 
     /**
-     * Updates the position of a particle based on its current velocity and the
-     * elapsed time step.
+     * Updates the position of a particle based on its current velocity.
      *
      * <p>
      * This method applies the selected numerical integration technique to
      * compute the new position of the particle. The integration considers the
-     * current position, the velocity of the particle, and the time step over
-     * which the update is applied.
+     * current position and the velocity of the particle.
      * </p>
      *
      * <p>
@@ -95,11 +90,9 @@ public interface IntegrationMethod {
      *
      * @param p the current position of the particle.
      * @param v the current velocity vector of the particle.
-     * @param deltaTime the time step over which to update the position,
-     * typically expressed in seconds.
      * @return a new {@code Position2D} representing the updated position of the
      * particle.
      */
-    Vector2D updatePosition(Vector2D p, Vector2D v, double deltaTime);
+    Vector2D updatePosition(Vector2D p, Vector2D v);
 
 }

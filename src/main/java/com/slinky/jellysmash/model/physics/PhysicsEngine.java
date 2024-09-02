@@ -1,6 +1,7 @@
 package com.slinky.jellysmash.model.physics;
 
 import com.slinky.jellysmash.model.physics.base.Entities;
+import com.slinky.jellysmash.model.physics.base.Entity;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 import com.slinky.jellysmash.model.physics.systems.MotionSystem;
@@ -32,12 +33,12 @@ public final class PhysicsEngine extends VectorSystem2D {
     public void update(double deltaTime) {
         // Loop through each subsystem in an appropriate order:
         motionSystem.applyMotionForces();
-        motionSystem.calculateAccelerations();
-        motionSystem.calculateVelocitiesAndPositions(IntegrationMethods.EULER, deltaTime);
+        motionSystem.calculateAccelerations(deltaTime);
+        motionSystem.calculateVelocitiesAndPositions(IntegrationMethods.EULER);
     }
 
     private void createEntities() {
-        Entities.createSolidBall(new Vector2D(10, 10), 5);
+        Entity ball = Entities.createSolidBall(new Vector2D(10, 10), 10);
     }
 
 }

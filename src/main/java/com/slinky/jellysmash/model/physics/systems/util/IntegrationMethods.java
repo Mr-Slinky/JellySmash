@@ -34,9 +34,9 @@ import com.slinky.jellysmash.model.physics.comps.Vector2D;
  *
  * @version 1.0
  * @since   0.1.0
- * 
+ *
  * @author  Kheagen Haskins
- * 
+ *
  * @see     IntegrationMethod
  * @see     Vector2D
  * @see     VectorSystem2D
@@ -79,25 +79,20 @@ public class IntegrationMethods {
          *
          * <p>
          * This method calculates the new velocity by adding the product of the
-         * acceleration and the time step to the current velocity.
+         * acceleration to the current velocity.
          * </p>
          *
          * @param v the current velocity vector of the particle.
          * @param a the current acceleration vector acting on the particle.
-         * @param deltaTime the time step over which to update the velocity.
          * @return the updated velocity vector.
          */
         @Override
-        public Vector2D updateVelocity(Vector2D v, Vector2D a, double deltaTime) {
+        public Vector2D updateVelocity(Vector2D v, Vector2D a) {
             // Implements vNew = vOld + (a * deltaTime)
-
-            // a * deltaTime
-            scaleTarget(a, deltaTime);
 
             // Cache vOld in utility vector for position update
             utilVector.setComponents(v.x(), v.y());
-            
-            
+
             // vNew = vOld + scaled acceleration
             addTarget(v, a);
             return v;
@@ -110,16 +105,15 @@ public class IntegrationMethods {
          * <p>
          * This method calculates the new position by adding the product of the
          * average velocity (calculated as the average of the old and new
-         * velocities) and the time step to the current position.
+         * velocities) to the current position.
          * </p>
          *
          * @param p the current position of the particle.
          * @param vNew the updated velocity vector of the particle.
-         * @param deltaTime the time step over which to update the position. <b>IGNORED</b>
          * @return the updated position.
          */
         @Override
-        public Vector2D updatePosition(Vector2D p, Vector2D vNew, double deltaTime) {
+        public Vector2D updatePosition(Vector2D p, Vector2D vNew) {
             // Implements pNew = pOld + (vAverage * deltaTime)
 
             // Add old and new vectors, then half them (turns utilVector from vOld to vAverage)

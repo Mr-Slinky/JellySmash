@@ -77,18 +77,12 @@ public class MotionSystem extends VectorSystem2D {
 
     // ============================== Static ================================ //
     /**
-     * A scale amount for all vectors to give them more impact but keep them
-     * relatively the same compared to each other.
-     */
-    public static final double SCALE = 100;
-
-    /**
      * Represents the acceleration due to Earth's gravity in metres per second
      * squared ( m/s² ). This constant is used to apply a gravitational force to
      * particles within the {@code MotionSystem}. The value is set to 9.81,
      * which is the standard gravitational acceleration on Earth.
      */
-    public static final double GRAVITY_EARTH = 9.81; //  * SCALE;
+    public static final double GRAVITY_EARTH = 9.81; 
 
     // ============================== Fields ================================ //
     /**
@@ -151,8 +145,8 @@ public class MotionSystem extends VectorSystem2D {
      * </p>
      *
      *
-     * @param particles an array of {@code PointMass} objects to be added to
-     * the motion system. Any {@code null} elements in the array are ignored.
+     * @param particles an array of {@code PointMass} objects to be added to the
+     * motion system. Any {@code null} elements in the array are ignored.
      */
     public void add(PointMass... particles) {
         if (particles == null || particles.length == 0) {
@@ -215,8 +209,11 @@ public class MotionSystem extends VectorSystem2D {
      * is invoked. Failure to do so will result in incorrect acceleration
      * values.
      * </p>
+     *
+     * @param deltaTime the amount of time that has elapsed since the last
+     * update, in seconds. Used to scale the acceleration.
      */
-    public void calculateAccelerations() {
+    public void calculateAccelerations(double deltaTime) {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
@@ -227,6 +224,7 @@ public class MotionSystem extends VectorSystem2D {
 
             // a = F / m
             p.acceleration().setComponents(force.x() / mass, force.y() / mass);
+            scaleTarget(p.acceleration(), deltaTime);
         }
     }
 
@@ -236,29 +234,27 @@ public class MotionSystem extends VectorSystem2D {
      * provided integration method.
      *
      * <p>
-     * This method utilises the injected {@link IntegrationMethod} to perform
-     * the calculations, allowing for different numerical integration techniques
+     * This method uses the injected {@link IntegrationMethod} to perform the
+     * calculations, allowing for different numerical integration techniques
      * (e.g., Euler, Verlet) to be used depending on the specific needs of the
      * simulation.</p>
      *
      * <p>
      * The {@code deltaTime} parameter is crucial for scaling the velocity and
-     * position updates to maintain consistency with the simulation's time
-     * step.</p>
+     * position updates to maintain consistency with the simulation's time step.
+     * </p>
      *
      * @param iFunc The {@link IntegrationMethod} to be used for calculating the
      * velocity and position updates.
-     * @param deltaTime The time in seconds used to scale the velocity and
-     * position updates appropriately.
      */
-    public void calculateVelocitiesAndPositions(IntegrationMethod iFunc, double deltaTime) {
+    public void calculateVelocitiesAndPositions(IntegrationMethod iFunc) {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
             }
 
-            iFunc.updateVelocity(p.velocity(), p.acceleration(), deltaTime);
-            iFunc.updatePosition(p.position(), p.velocity(), deltaTime);
+            iFunc.updateVelocity(p.velocity(), p.acceleration());
+            iFunc.updatePosition(p.position(), p.velocity());
         }
     }
 
