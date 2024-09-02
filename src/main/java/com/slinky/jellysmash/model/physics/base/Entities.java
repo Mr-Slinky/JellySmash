@@ -1,15 +1,18 @@
 package com.slinky.jellysmash.model.physics.base;
 
+import com.slinky.jellysmash.model.physics.comps.Circle;
 import com.slinky.jellysmash.model.physics.comps.Component;
-import com.slinky.jellysmash.model.physics.comps.Particle2D;
-import com.slinky.jellysmash.model.physics.comps.BallComponent;
+import com.slinky.jellysmash.model.physics.comps.PointMass;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
+import static java.lang.Math.sqrt;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * A utility class responsible for managing the life cycle of entities within
@@ -32,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * </p>
  *
  * @version 2.0
- * @since   0.1.0
+ * @since 0.1.0
  *
  * @author Kheagen Haskins
  *
@@ -95,8 +98,45 @@ public class Entities {
      *
      * @return an unmodifiable map of entity IDs to entities
      */
-    public static synchronized Map<Long, Entity> getAllEntities() {
+    public static synchronized Map<Long, Entity> getEntityMap() {
         return Collections.unmodifiableMap(entities);
+    }
+
+    /**
+     * Retrieves a list of entities that contain all of the specified component
+     * types.
+     * 
+     * <p>
+     * This method filters through the existing entities within the system and
+     * returns those that have all the specified components. The method uses
+     * Java Streams to iterate over the entities, applying a filter that checks
+     * whether each entity contains the required components. The result is a
+     * list of entities that match the given criteria.
+     * </p>
+     *
+     * <p>
+     * This method is particularly useful in scenarios where a system or process
+     * needs to operate only on entities that have a specific set of components.
+     * For example, in a physics simulation, you might need to find all entities
+     * that have both a {@code Position} and a {@code Velocity} component to
+     * update their positions based on their velocities.
+     * </p>
+     *
+     * @param componentClasses The classes of the components to check for in
+     * each entity. The method will return only those entities that contain all
+     * the specified components.
+     * @param <T> The type of the components being checked. This can be any
+     * class that implements the {@link Component} interface.
+     * @return A list of {@link Entity} objects that contain all of the
+     * specified component types. If no entities match the criteria, an empty
+     * list is returned.
+     *
+     * @see Entity#hasComponents(Class[])
+     */
+    public static synchronized <T extends Component> List<Entity> getEntitiesWith(Class<T>... componentClasses) {
+        return entities.values().stream()
+                .filter(entity -> entity.hasComponents(componentClasses))
+                .collect(Collectors.toList());
     }
 
     // ============================ API Methods ============================= //
@@ -163,7 +203,7 @@ public class Entities {
 
         return newEntity;
     }
-    
+
     /**
      * Destroys an entity, removing it from the system.
      * <p>
@@ -233,7 +273,7 @@ public class Entities {
      * velocity, acceleration, mass, damping coefficient, restitution, and
      * static flag are all specified, providing fine-grained control over its
      * behaviour in the simulation. The method creates a new entity, attaches a
-     * {@link Particle2D} component with the given properties, and adds it to
+     * {@link PointMass} component with the given properties, and adds it to
      * the system.
      * </p>
      *
@@ -261,22 +301,42 @@ public class Entities {
      */
     public static Entity createPointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         Entity particleEntity = newEntity();
-        Particle2D particleComponent = new Particle2D(position, velocity, acceleration, mass, damping, restitution, isStatic);
+        PointMass particleComponent = new PointMass(position, velocity, acceleration, mass, damping, restitution, isStatic);
         particleEntity.addComponent(particleComponent);
 
         return particleEntity;
     }
 
     /**
-     * Creates an entity using the given position vector and mass to build a
-     * moveable (non-static) Ball at rest.
+     * Creates an entity that represents a solid, movable (non-static) ball at
+     * rest, using the provided position vector and mass.
      *
-     * @param position
-     * @param mass
-     * @return
+     * <p>
+     * The ball is constructed using the specified position and mass, with an
+     * initial velocity and acceleration of zero. The resulting ball is dynamic
+     * (not static) and can participate in physics simulations, such as
+     * collisions and other interactions within the system.
+     * </p>
+     *
+     * @param position the initial position of the ball, represented as a
+     * {@link Vector2D}. This determines where the ball will be placed in the
+     * simulation or game world.
+     * @param mass the mass of the ball, which influences its physical
+     * properties such as inertia and how it interacts with other entities. The
+     * mass is also used to calculate the radius of the ball.
+     *
+     * @return an {@link Entity} representing the newly created solid ball,
+     * ready to be added to the entity-component system.
+     *
+     * @throws IllegalArgumentException if {@code mass} is negative.
      */
     public static Entity createSolidBall(Vector2D position, double mass) {
-        return newEntity(new BallComponent(position, mass));
+        PointMass pointMass = new PointMass(position, new Vector2D(0, 0), new Vector2D(0, 0), mass, 0, 0, false);
+        Circle circle = new Circle(sqrt(mass) * 10);
+        return newEntity(
+                pointMass,
+                circle
+        );
     }
 
 }

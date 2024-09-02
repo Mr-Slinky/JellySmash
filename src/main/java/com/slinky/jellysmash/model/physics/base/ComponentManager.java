@@ -6,9 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The {@code ComponentManager} class is responsible for managing the storage,
- * retrieval, and life-cycle of components associated with entities within the
- * the JellySmash physics engine.
+ * Responsible for managing the storage, retrieval, and life-cycle of components
+ * associated with entities within the the JellySmash physics engine.
+ *
+ * <p>
+ * The {@code ComponentManager} is designed to be package-private, reinforcing
+ * its exclusive use within the {@link Entity} class. This encapsulation ensures
+ * that component management is tightly controlled and integrated directly with
+ * the entity management system, avoiding unintended usage and maintaining the
+ * integrity of the ECS architecture.
+ * </p>
  *
  * <p>
  * This class provides a centralised mechanism to add, access, and remove
@@ -37,7 +44,7 @@ import java.util.Map;
  * </code></pre>
  * <p>
  * For example:
- * </p>
+ * </p><br/>
  *
  * <pre><code>
  *     {
@@ -72,8 +79,14 @@ import java.util.Map;
  * improving code maintainability.
  * </p>
  *
+ * <p>
+ * <b>Implementation Note:</b> The {@code ComponentManager} is intended to be
+ * used exclusively by the {@link Entity} class, and its methods are accessed
+ * indirectly through the {@link Entity} instances to manage their components.
+ * </p>
+ *
  * @version 1.0
- * @since 0.1.0
+ * @since   0.1.0
  *
  * @see Component
  * @see Entity
@@ -82,11 +95,12 @@ import java.util.Map;
  *
  */
 class ComponentManager {
-    
+
     /**
-     * Package-Private, should only be instantiated from the Entity class
+     * Package-Private, should only be instantiated and used by Entity class
      */
-    ComponentManager() {}
+    ComponentManager() {
+    }
 
     // ============================== Fields ================================ //
     /**
@@ -212,6 +226,41 @@ class ComponentManager {
         }
 
         return null;
+    }
+
+    /**
+     * Checks if the specified entity contains all of the given components.
+     *
+     * <p>
+     * This method checks whether the specified entity has all the components
+     * provided as arguments. It returns {@code true} only if all of the
+     * specified components are present in the entity.
+     * </p>
+     *
+     * <p>
+     * The method iterates over the provided component classes and verifies if
+     * each one is associated with the entity using the
+     * {@link #hasComponent(Class)} method.
+     * </p>
+     *
+     * @param entity The entity to check.
+     * @param componentClasses The component classes to check for.
+     * @return {@code true} if the entity has all the specified components,
+     * {@code false} otherwise.
+     */
+    public <T extends Component> boolean hasComponents(Entity entity, Class<T>... componentClasses) {
+        Map<Class<? extends Component>, Component> entityComponents = components.get(entity);
+        if (entityComponents == null) {
+            return false;
+        }
+
+        for (Class<T> componentClass : componentClasses) {
+            if (!entityComponents.containsKey(componentClass)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

@@ -4,41 +4,49 @@ import com.slinky.jellysmash.model.physics.comps.Component;
 import java.util.Map;
 
 /**
- * The {@code Entity} class represents a uniquely identifiable object within the
- * system. Each instance of {@code Entity} is assigned a unique identifier at
- * the time of creation, which ensures that every entity can be distinctly
- * identified and managed within the system.
+ * Represents a unique entity within the JellySmash backend ECS system that is
+ * associated with various {@link Component} implementations upon instantiation.
+ * The creation and management of entities are handled by the {@link Entities}
+ * utility class, which provides functionality for creating, retrieving, and
+ * destroying entities within the system.
  *
  * <p>
- * The unique identifier for each {@code Entity} is generated and assigned by
- * the external {@link Entities} class. This design enforces the integrity of
- * the identifier, ensuring that no two entities share the same identifier. The
- * {@link Entities} is solely responsible for the creation of {@code Entity}
- * instances, which promotes consistency and centralises control over the entity
- * creation process.
+ * This class maintains a reference to the {@link ComponentManager} singleton
+ * instance, ensuring that all component-related operations are centralised and
+ * managed efficiently. The {@code ComponentManager} is package-private, which
+ * restricts its direct access to the {@code Entity} class, enforcing a tight
+ * coupling between these two classes. This design ensures that component
+ * management is handled exclusively through the {@code Entity} class, promoting
+ * encapsulation and reducing the potential for mismanagement of components.
  * </p>
  *
  * <p>
- * The constructor of the {@code Entity} class is deliberately made
- * package-private, restricting direct instantiation by other classes. This
- * design choice ensures that entities can only be created through the
- * {@link Entities}, further enforcing the uniqueness and integrity of the
- * entity identifiers.
+ * The {@code ComponentManager} class provides a centralised mechanism for
+ * adding, accessing, and removing components tied to specific entities. When
+ * component-related methods are called on an {@code Entity}, the entity passes
+ * a reference to itself to the {@code ComponentManager}, allowing components to
+ * be managed in a way that appears as if each entity has its own component
+ * manager. This design simplifies the interaction with components, allowing
+ * them to be accessed directly from the {@code Entity} instance while
+ * maintaining a clear separation of concerns between entity management and
+ * component management.
  * </p>
  *
  * <p>
- * This class is a core component of the system's architecture, as it provides
- * the foundational building block for entities managed by the system. Entities
- * created using this class are typically managed by the {@link Entities}, which
- * handles the lifecycle, storage, and retrieval of entities.
+ * By centralising entity and component management within a single
+ * {@code ComponentManager} instance, this design ensures that all entities
+ * share a common mechanism for managing components, optimising resource usage
+ * and enhancing the performance of the system.
  * </p>
  *
  * @version 3.0
- * @since 0.1.0
+ * @since   0.1.0
  *
- * @author Kheagen Haskins
+ * @author  Kheagen Haskins
  *
- * @see Entities
+ * @see     Entities
+ * @see     Component
+ * @see     ComponentManager
  */
 public final class Entity {
 
@@ -49,6 +57,7 @@ public final class Entity {
      */
     private static final ComponentManager componentManager = new ComponentManager();
 
+    // ============================== Fields ================================ //
     /**
      * A unique identifier assigned to each {@code Entity} instance.
      * <p>
@@ -203,6 +212,36 @@ public final class Entity {
      */
     public <T extends Component> boolean hasComponent(Class<T> componentClass) {
         return componentManager.hasComponent(this, componentClass);
+    }
+
+    /**
+     * Checks if this entity contains all of the specified component types.
+     * <p>
+     * This method delegates to the {@link ComponentManager} to determine if the
+     * entity contains all of the given component types. It returns {@code true}
+     * only if the entity has all the specified components; otherwise, it
+     * returns {@code false}.
+     * </p>
+     *
+     * <p>
+     * <b>Example Usage:</b>
+     * <pre><code>
+     *     // Check if the entity has both a Vector2D and Particle2D component
+     *     boolean hasAll = entity.hasComponents(Vector2D.class, Particle2D.class);
+     *
+     *     if (hasAll) {
+     *     // Proceed with logic requiring both components
+     *     }
+     * </code></pre>
+     * </p>
+     *
+     * @param componentClasses The classes of the components to check for
+     * @param <T> the type of the components
+     * @return {@code true} if the entity has all the specified components,
+     * {@code false} otherwise
+     */
+    public <T extends Component> boolean hasComponents(Class<T>... componentClasses) {
+        return componentManager.hasComponents(this, componentClasses);
     }
 
     /**
