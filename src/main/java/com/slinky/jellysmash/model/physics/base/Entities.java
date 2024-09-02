@@ -105,7 +105,7 @@ public class Entities {
     /**
      * Retrieves a list of entities that contain all of the specified component
      * types.
-     * 
+     *
      * <p>
      * This method filters through the existing entities within the system and
      * returns those that have all the specified components. The method uses
@@ -137,6 +137,49 @@ public class Entities {
         return entities.values().stream()
                 .filter(entity -> entity.hasComponents(componentClasses))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves a list of entities that match the specified {@link EntityType}.
+     *
+     * <p>
+     * This method filters and returns all entities that contain the set of
+     * components associated with the given {@code EntityType}. The filtering is
+     * based on the component classes defined in the {@link EntityType}. This
+     * allows for a more generic and type-safe way of querying entities, making
+     * it easier to retrieve entities based on their type rather than directly
+     * specifying component classes.
+     * </p>
+     *
+     * <p>
+     * By using the {@link EntityType#getComponentClasses()} method, this
+     * approach leverages the predefined configuration of components associated
+     * with each {@code EntityType}, ensuring that the returned entities conform
+     * to the expected structure defined by the type. This method enhances the
+     * flexibility of the ECS architecture by simplifying the process of
+     * retrieving entities with specific characteristics.
+     * </p>
+     *
+     * <p>
+     * <b>Example Usage:</b>
+     * <pre>{@code
+     *     List<Entity> balls = Entities.getEntitiesOfType(EntityType.BALL);
+     *     // Iterate through the list of ball entities and perform operations
+     * }</pre>
+     * </p>
+     *
+     * @param type the {@link EntityType} that defines the components to filter
+     * entities by
+     * @param <T> the type of the component (inferred from the
+     * {@code EntityType})
+     * @return a list of {@link Entity} objects that match the specified
+     * {@code EntityType}
+     *
+     * @see EntityType
+     * @see #getEntitiesWith(Class[])
+     */
+    public static <T extends Component> List<Entity> getEntitiesOfType(EntityType type) {
+        return getEntitiesWith(type.getComponentClasses());
     }
 
     // ============================ API Methods ============================= //
@@ -264,52 +307,8 @@ public class Entities {
 
     // ========================== Factory Methods =========================== //
     /**
-     * Creates a new entity representing a point mass with specified physical
-     * properties.
-     *
-     * <p>
-     * This method allows for the creation of a fully customised particle entity
-     * within the Entity Component System (ECS). The particle's position,
-     * velocity, acceleration, mass, damping coefficient, restitution, and
-     * static flag are all specified, providing fine-grained control over its
-     * behaviour in the simulation. The method creates a new entity, attaches a
-     * {@link PointMass} component with the given properties, and adds it to
-     * the system.
-     * </p>
-     *
-     * @param position the initial position of the particle in the simulation
-     * space, represented as a {@link Position}.
-     * @param velocity the initial velocity of the particle, determining its
-     * speed and direction, represented as a {@link Vector2D}.
-     * @param acceleration the initial acceleration of the particle,
-     * representing the rate of change of velocity, represented as a
-     * {@link Vector2D}.
-     * @param mass the mass of the particle, which must be a non-negative value.
-     * @param damping the damping coefficient, controlling how quickly the
-     * particle's motion decays, which must be a non-negative value.
-     * @param restitution the restitution (bounciness) of the particle,
-     * determining how much kinetic energy is conserved in collisions, which
-     * must be a non-negative value.
-     * @param isStatic a flag indicating whether the particle is static
-     * (immovable). If {@code true}, the particle will not respond to forces or
-     * acceleration.
-     *
-     * @return the newly created particle entity.
-     *
-     * @throws IllegalArgumentException if mass, damping, or restitution are
-     * negative.
-     */
-    public static Entity createPointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
-        Entity particleEntity = newEntity();
-        PointMass particleComponent = new PointMass(position, velocity, acceleration, mass, damping, restitution, isStatic);
-        particleEntity.addComponent(particleComponent);
-
-        return particleEntity;
-    }
-
-    /**
      * Creates an entity that represents a solid, movable (non-static) ball at
-     * rest, using the provided position vector and mass.
+     * rest, using the provided position components and mass.
      *
      * <p>
      * The ball is constructed using the specified position and mass, with an
@@ -330,13 +329,33 @@ public class Entities {
      *
      * @throws IllegalArgumentException if {@code mass} is negative.
      */
-    public static Entity createSolidBall(Vector2D position, double mass) {
-        PointMass pointMass = new PointMass(position, new Vector2D(0, 0), new Vector2D(0, 0), mass, 0, 0, false);
-        Circle circle = new Circle(sqrt(mass) * 10);
-        return newEntity(
-                pointMass,
-                circle
+    public static Entity createSolidBall(double x, double y, double mass) {
+        return createSolidBall(x, y, 0, 0, mass);
+    }
+
+    public static Entity createSolidBall(double x, double y, double vx, double vy, double mass) {
+        PointMass pointMass = new PointMass(
+                new Vector2D(x, y),
+                new Vector2D(vx, vy),
+                new Vector2D(0, 0),
+                mass,
+                0, // damping
+                normalise(mass), // restitution
+                false
         );
+
+        return newEntity(pointMass, new Circle(sqrt(mass) * 10));
+    }
+
+    /**
+     *
+     * @param mass The input number to be scaled.
+     * @return A number between 0 and 1.
+     */
+    private static double normalise(double mass) {
+        double val = 2 / sqrt(mass);
+        System.out.println("Mass of " + mass + " = " + val);
+        return val;
     }
 
 }
