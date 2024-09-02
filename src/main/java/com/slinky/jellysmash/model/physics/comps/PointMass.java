@@ -12,7 +12,7 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * <p>
- * The {@code Particle2D} class is designed to be flexible and extensible,
+ * The {@code PointMass} class is designed to be flexible and extensible,
  * allowing it to be used in various types of physics simulations, from simple
  * point masses to more complex physical objects. The class ensures that all
  * physical properties are initialised with valid, non-negative values, throwing
@@ -23,21 +23,20 @@ package com.slinky.jellysmash.model.physics.comps;
  * This class is essential for implementing a 2D physics engine using the Entity
  * Component System (ECS) pattern, as it provides the basic building blocks for
  * creating and manipulating physical entities within the simulation. By
- * adhering to the {@link Particle2D} interface, {@code Particle2D} ensures
+ * adhering to the {@link PointMass} interface, {@code PointMass} ensures
  * compatibility and interoperability with other components and systems within
  * the ECS framework.
  * </p>
  *
- * @version 1.0
+ * @version 2.0
  * @since   0.1.0
  *
- * @author  Kheagen Haskins
+ * @author Kheagen Haskins
  *
- * @see     Particle2D
  * @see     Vector2D
  * @see     Component
  */
-public class Particle2D implements Component {
+public class PointMass implements Component {
 
     // ============================== Fields ================================ //
     /**
@@ -144,7 +143,7 @@ public class Particle2D implements Component {
      * the forces acting on the particle within that specific time frame.
      * </p>
      */
-    private Vector2D actingForce;
+    private Vector2D force;
 
     // =========================== Constructors ============================= //
     /**
@@ -180,7 +179,7 @@ public class Particle2D implements Component {
      * @throws IllegalArgumentException if mass, damping, or restitution are
      * negative.
      */
-    public Particle2D(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
+    public PointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         throwIfNonPositive("mass", mass);
         throwIfOutOfRange("dampining coefficient", damping, 0, 1);
         throwIfOutOfRange("restitution", restitution, 0, 1);
@@ -188,7 +187,7 @@ public class Particle2D implements Component {
         this.position = position;
         this.velocity = velocity;
         this.acceleration = acceleration;
-        this.actingForce = new Vector2D(0, 0);
+        this.force = new Vector2D(0, 0);
 
         this.mass = mass;
         this.dampCoef = damping;
@@ -215,7 +214,7 @@ public class Particle2D implements Component {
      *
      * @throws IllegalArgumentException if mass is negative.
      */
-    public Particle2D(double mass) {
+    public PointMass(double mass) {
         this(
                 new Vector2D(0, 0),
                 new Vector2D(0, 0),
@@ -252,7 +251,7 @@ public class Particle2D implements Component {
      *
      * @throws IllegalArgumentException if mass is negative.
      */
-    public Particle2D(double mass, boolean isStatic) {
+    public PointMass(double mass, boolean isStatic) {
         this(
                 new Vector2D(0, 0),
                 new Vector2D(0, 0),
@@ -288,6 +287,36 @@ public class Particle2D implements Component {
      */
     public Vector2D position() {
         return position;
+    }
+
+    /**
+     * Retrieves the x-coordinate of the particle's position in 2D space.
+     * <p>
+     * This method returns the horizontal position (x) of the particle, which is
+     * a fundamental aspect of its location in the simulation space. The
+     * x-coordinate is typically used to determine the particle's interactions
+     * with other entities along the horizontal axis.
+     * </p>
+     *
+     * @return The x-coordinate of the particle's position as a {@code double}.
+     */
+    public double x() {
+        return position.x();
+    }
+
+    /**
+     * Retrieves the y-coordinate of the particle's position in 2D space.
+     * <p>
+     * This method returns the vertical position (y) of the particle, which is a
+     * fundamental aspect of its location in the simulation space. The
+     * y-coordinate is typically used to determine the particle's interactions
+     * with other entities along the vertical axis.
+     * </p>
+     *
+     * @return The y-coordinate of the particle's position as a {@code double}.
+     */
+    public double y() {
+        return position.y();
     }
 
     /**
@@ -330,7 +359,7 @@ public class Particle2D implements Component {
      * @return The net force acting on the particle as a {@link Vector2D}.
      */
     public Vector2D force() {
-        return actingForce;
+        return force;
     }
 
     /**
@@ -378,6 +407,36 @@ public class Particle2D implements Component {
     }
 
     // ============================== Setters =============================== //
+    /**
+     * Sets the x-coordinate of the particle's position in 2D space.
+     * <p>
+     * This method updates the horizontal position (x) of the particle within
+     * the simulation space. Adjusting the x-coordinate can be used to move the
+     * particle along the horizontal axis, influencing its interactions with
+     * other entities and boundaries in the simulation.
+     * </p>
+     *
+     * @param x The new x-coordinate for the particle's position.
+     */
+    public void setX(double x) {
+        position.setX(x);
+    }
+
+    /**
+     * Sets the y-coordinate of the particle's position in 2D space.
+     * <p>
+     * This method updates the vertical position (y) of the particle within the
+     * simulation space. Adjusting the y-coordinate can be used to move the
+     * particle along the vertical axis, influencing its interactions with other
+     * entities and boundaries in the simulation.
+     * </p>
+     *
+     * @param y The new y-coordinate for the particle's position.
+     */
+    public void setY(double y) {
+        position.setY(y);
+    }
+
     /**
      * Sets the mass of the particle.
      * <p>
@@ -447,6 +506,48 @@ public class Particle2D implements Component {
         this.isStatic = isStatic;
     }
 
+    // ============================ API Methods ============================= //
+    /**
+     * Applies an external force to the particle, contributing to its motion in
+     * the simulation.
+     *
+     * <p>
+     * This method directly adds the components of the given force vector to the
+     * internal force accumulator of the particle, effectively "pushing" the
+     * particle in a direction specified by the force vector. The accumulated
+     * force is used later in the physics simulation to calculate acceleration,
+     * velocity, and position updates according to Newton's Second Law of
+     * Motion.
+     * </p>
+     *
+     * <p>
+     * <b>Example Usage:</b>
+     * <pre><code>
+     *     // Create a force vector representing a force of 10 units in the x-direction
+     *     Vector2D force = new Vector2D(10, 0);
+     *
+     *     // Apply this force to the particle
+     *     particle.applyForce(force);
+     * </code></pre>
+     * </p>
+     *
+     * <p>
+     * <b>Note:</b> This method modifies the internal state of the particle by
+     * altering the force accumulator. It does not immediately result in visible
+     * movement but instead influences the physics calculations that will
+     * determine the particle's subsequent motion.
+     * </p>
+     *
+     * @param force the {@link Vector2D} representing the force to be applied to
+     * this particle. The vector's components (x and y) are added to the
+     * particle's current accumulated force.
+     *
+     */
+    public void applyForce(Vector2D force) {
+        this.force.x += force.x;
+        this.force.y += force.y;
+    }
+    
     // ========================== Helper Methods ============================ //
     /**
      * Validates that a given numerical field is within a specified range, and
