@@ -5,6 +5,7 @@ import com.slinky.jellysmash.model.physics.base.Entity;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 import com.slinky.jellysmash.model.physics.systems.MotionSystem;
+import com.slinky.jellysmash.model.physics.systems.CollisionSystem;
 import com.slinky.jellysmash.model.physics.systems.VectorSystem2D;
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethods;
 
@@ -17,11 +18,13 @@ public final class PhysicsEngine extends VectorSystem2D {
 
     // ============================== Fields ================================ //
     private MotionSystem motionSystem;
+    private CollisionSystem collisionSystem;
 
     // =========================== Constructors ============================= //
-    public PhysicsEngine() {
+    public PhysicsEngine(int width, int height) {
         createEntities();
         this.motionSystem = new MotionSystem();
+        this.collisionSystem = new CollisionSystem(width, height);
     }
 
     // ============================ API Methods ============================= //
@@ -31,14 +34,18 @@ public final class PhysicsEngine extends VectorSystem2D {
      * @param deltaTime time since last frame, in seconds
      */
     public void update(double deltaTime) {
+        deltaTime = Math.min(deltaTime, 0.5);
         // Loop through each subsystem in an appropriate order:
         motionSystem.applyMotionForces();
         motionSystem.calculateAccelerations(deltaTime);
         motionSystem.calculateVelocitiesAndPositions(IntegrationMethods.EULER);
+        
+        collisionSystem.update();
     }
 
     private void createEntities() {
-        Entity ball = Entities.createSolidBall(new Vector2D(10, 10), 10);
+        Entities.createSolidBall(50, 0, 5, -10, 2);
+        Entities.createSolidBall(250, 10, 1, 0, 20);
     }
 
 }

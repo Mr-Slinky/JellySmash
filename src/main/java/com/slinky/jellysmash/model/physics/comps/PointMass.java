@@ -29,12 +29,12 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * @version 2.0
- * @since   0.1.0
+ * @since 0.1.0
  *
  * @author Kheagen Haskins
  *
- * @see     Vector2D
- * @see     Component
+ * @see Vector2D
+ * @see Component
  */
 public class PointMass implements Component {
 
@@ -181,18 +181,18 @@ public class PointMass implements Component {
      */
     public PointMass(Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic) {
         throwIfNonPositive("mass", mass);
-        throwIfOutOfRange("dampining coefficient", damping, 0, 1);
-        throwIfOutOfRange("restitution", restitution, 0, 1);
-
-        this.position = position;
-        this.velocity = velocity;
+        
+        // Vectors
+        this.position     = position;
+        this.velocity     = velocity;
         this.acceleration = acceleration;
-        this.force = new Vector2D(0, 0);
+        this.force        = new Vector2D(0, 0);
 
-        this.mass = mass;
-        this.dampCoef = damping;
-        this.restitution = restitution;
-        this.isStatic = isStatic;
+        // Physics properties
+        this.mass        = mass;
+        this.dampCoef    = Math.max(0, Math.min(1, damping));
+        this.restitution = Math.max(0, Math.min(0.95, restitution)); // Currently make perfect elastic collisions impossible
+        this.isStatic    = isStatic;
     }
 
     /**
@@ -456,6 +456,7 @@ public class PointMass implements Component {
 
     /**
      * Sets the damping coefficient of the particle.
+     * 
      * <p>
      * The damping coefficient is a scalar value representing the resistive
      * force that acts against the particle's velocity. This is often used to
@@ -474,6 +475,7 @@ public class PointMass implements Component {
 
     /**
      * Sets the restitution coefficient of the particle.
+     * 
      * <p>
      * The restitution coefficient determines the elasticity of collisions. A
      * value of 1.0 indicates a perfectly elastic collision where no kinetic
@@ -492,6 +494,7 @@ public class PointMass implements Component {
 
     /**
      * Sets the static state of the particle.
+     * 
      * <p>
      * A static particle is one that does not move, regardless of any forces
      * acting on it. This can be used to represent fixed objects or boundaries
@@ -547,7 +550,77 @@ public class PointMass implements Component {
         this.force.x += force.x;
         this.force.y += force.y;
     }
-    
+
+    /**
+     * Reverses the x-component of the velocity vector of this object, applying
+     * the restitution coefficient to simulate a bounce effect.
+     *
+     * <p>
+     * This method is typically used when the object collides with a vertical
+     * surface. The restitution coefficient controls how "bouncy" the collision
+     * is, where a value of 1.0 represents a perfectly elastic collision (no
+     * energy loss), and a value of 0.0 represents a perfectly inelastic
+     * collision (no bounce).
+     * </p>
+     *
+     * <p>
+     * The x-component of the velocity is negated and scaled by the restitution
+     * factor, effectively reversing the horizontal direction of movement and
+     * reducing its magnitude according to the restitution value.
+     * </p>
+     */
+    public void bounceX() {
+        velocity.x *= restitution * -1;
+    }
+
+    /**
+     * Reverses the y-component of the velocity vector of this object, applying
+     * the restitution coefficient to simulate a bounce effect.
+     *
+     * <p>
+     * This method is typically used when the object collides with a horizontal
+     * surface. The restitution coefficient controls how "bouncy" the collision
+     * is, where a value of 1.0 represents a perfectly elastic collision (no
+     * energy loss), and a value of 0.0 represents a perfectly inelastic
+     * collision (no bounce).
+     * </p>
+     *
+     * <p>
+     * The y-component of the velocity is negated and scaled by the restitution
+     * factor, effectively reversing the vertical direction of movement and
+     * reducing its magnitude according to the restitution value.
+     * </p>
+     */
+    public void bounceY() {
+        velocity.y *= restitution * -1;
+    }
+
+    /**
+     * Returns a detailed string representation of this {@code PointMass}
+     * object, including its position, velocity, acceleration, and mass.
+     *
+     * <p>
+     * This method generates a multi-line string that provides an overview of
+     * the current state of the point mass. Each physical property (position,
+     * velocity, acceleration) is listed with its associated vector values,
+     * followed by the mass value. This detailed output is particularly useful
+     * for debugging and logging the state of a point mass in simulations.
+     * </p>
+     *
+     * @return a string representation of this {@code PointMass}, including its
+     * position, velocity, acceleration, and mass.
+     */
+    @Override
+    public String toString() {
+        StringBuilder outp = new StringBuilder();
+        outp.append("Position_").append(position).append("\n");
+        outp.append("Velocity_").append(velocity).append("\n");
+        outp.append("Acceleration_").append(acceleration).append("\n");
+        outp.append("Mass:\t\t").append(mass).append("\n");
+        return outp.toString();
+    }
+
+
     // ========================== Helper Methods ============================ //
     /**
      * Validates that a given numerical field is within a specified range, and

@@ -24,26 +24,26 @@ import static java.lang.Math.PI;
  * <p>
  * <strong>Example Usage:</strong></p>
  * <pre><code>
- // Creating a Circle object with a specific radius
- Circle circle = new Circle(5.0);
-
- // Accessing the circle's properties
- double radius = circle.radius();               // 5.0
- double diameter = circle.diameter();           // 10.0
- double circumference = circle.dircumference(); // 31.41592653589793
- double area = circle.area();                   // 78.53981633974483
-
- // Modifying the circle's radius
- circle.setRadius(10.0);
- double newRadius = circle.radius();               // 10.0
- double newDiameter = circle.diameter();           // 20.0
- double newCircumference = circle.circumference(); // 62.83185307179586
- double newArea = circle.area();                   // 314.1592653589793
- </code></pre>
+ * // Creating a Circle object with a specific radius
+ * Circle circle = new Circle(5.0);
+ *
+ * // Accessing the circle's properties
+ * double radius = circle.radius();               // 5.0
+ * double diameter = circle.diameter();           // 10.0
+ * double circumference = circle.dircumference(); // 31.41592653589793
+ * double area = circle.area();                   // 78.53981633974483
+ *
+ * // Modifying the circle's radius
+ * circle.setRadius(10.0);
+ * double newRadius = circle.radius();               // 10.0
+ * double newDiameter = circle.diameter();           // 20.0
+ * double newCircumference = circle.circumference(); // 62.83185307179586
+ * double newArea = circle.area();                   // 314.1592653589793
+ * </code></pre>
  *
  * @version 1.0
- * @since   0.1.0
- * 
+ * @since 0.1.0
+ *
  * @author Kheagen Haskins
  */
 public class Circle implements Component {
@@ -75,19 +75,20 @@ public class Circle implements Component {
 
     // =========================== Constructors ============================= //
     /**
-     * Constructs a {@code Circle} with a specified radius. 
+     * Constructs a {@code Circle} with a specified radius.
      * <p>
      * This constructor initialises the radius and calculates the corresponding
      * diameter, circumference, and area based on the provided radius.
      * </p>
      *
      * @param r the radius of the circle.
+     * @param position the position of the circle's centre.
      */
-    public Circle(double r) {
+    public Circle(/*Vector2D position, */double r) {
         if (r < 0) {
             throw new IllegalArgumentException("Radius cannot be negative");
         }
-        
+
         this.radius = r;
         this.diameter = r * 2;
         this.circumference = 2 * PI * r;
@@ -95,7 +96,6 @@ public class Circle implements Component {
     }
 
     // ============================== Getters =============================== //
-
     /**
      * Returns the area of the circle.
      *
@@ -131,7 +131,7 @@ public class Circle implements Component {
     public double radius() {
         return radius;
     }
-    
+
     // ============================== Setters =============================== //
     /**
      * Sets a new radius for the circle and recalculates the dependent
@@ -149,5 +149,26 @@ public class Circle implements Component {
         this.circumference = 2 * PI * radius;
         this.area = PI * radius * radius;
     }
+
+    /**
+     * Returns a string representation of this {@code Circle} object, including
+     * its radius and diameter.
+     *
+     * <p>
+     * This method provides a summary of the circle's key properties, formatted
+     * in a clear and concise manner. The output includes the radius (r) and
+     * diameter (d) of the circle, making it easy to understand the circle's
+     * size at a glance. This is particularly useful for debugging and logging
+     * purposes.
+     * </p>
+     *
+     * @return a string representation of this {@code Circle}, including its
+     * radius and diameter.
+     */
+    @Override
+    public String toString() {
+        return "Circle:\n\t" + "r:\t" + radius + "\n\t" + "d:\t" + diameter;
+    }
+
 
 }

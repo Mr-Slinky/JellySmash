@@ -140,6 +140,26 @@ public class Vector2D implements Component {
         return x == otherVector.x && y == otherVector.y;
     }
 
+    /**
+     * Returns a string representation of this vector in the format:
+     * {@code Vector{x, y}}.
+     *
+     * <p>
+     * This method provides a concise summary of the vector's components,
+     * showing the x and y values in a readable format. It is useful for
+     * debugging and logging purposes where a quick glance at the vector's
+     * values is needed.
+     * </p>
+     *
+     * @return a string representation of this vector, including its x and y
+     * components.
+     */
+    @Override
+    public String toString() {
+        return "Vector{" + x + ", " + y + "}";
+    }
+
+
     // ============================== Inner Classes ================================ //
     /**
      * A private inner class representing an immutable vector. The

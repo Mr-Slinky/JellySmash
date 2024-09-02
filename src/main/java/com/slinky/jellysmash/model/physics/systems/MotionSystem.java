@@ -2,8 +2,10 @@ package com.slinky.jellysmash.model.physics.systems;
 
 import com.slinky.jellysmash.model.physics.base.Entities;
 import com.slinky.jellysmash.model.physics.base.Entity;
+
 import com.slinky.jellysmash.model.physics.comps.PointMass;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
+
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethod;
 
 import java.util.ArrayList;

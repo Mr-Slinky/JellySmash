@@ -74,7 +74,7 @@ public class EntitiesTest {
         Entity e3 = Entities.newEntity();
         Entity e4 = new Entity(1000);
 
-        var allEntities = Entities.getAllEntities();
+        var allEntities = Entities.getEntityMap();
 
         assertAll(
                 () -> assertTrue(allEntities.containsValue(e1)),

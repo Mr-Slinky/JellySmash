@@ -3,6 +3,7 @@ package com.slinky.jellysmash.model.physics.systems;
 import com.slinky.jellysmash.model.physics.PhysicsEngine;
 import com.slinky.jellysmash.model.physics.base.Entities;
 import com.slinky.jellysmash.model.physics.base.Entity;
+import com.slinky.jellysmash.model.physics.base.EntityType;
 import com.slinky.jellysmash.model.physics.comps.Circle;
 import com.slinky.jellysmash.model.physics.comps.PointMass;
 
@@ -32,7 +33,7 @@ public class RenderSystem implements ISystem {
 
     // =========================== Constructors ============================= //
     public RenderSystem() {
-        List<Entity> ents = Entities.getEntitiesWith(new Class[]{PointMass.class, Circle.class});
+        List<Entity> ents = Entities.getEntitiesOfType(EntityType.BALL);
         componentCount = ents.size();
         for (Entity ent : ents) {
             ballPoints.add(ent.getComponent(PointMass.class));
@@ -41,13 +42,22 @@ public class RenderSystem implements ISystem {
     }
 
     // ============================ API Methods ============================= //
-    public void draw(GraphicsContext gc, double width, double height) {
+    public void draw(GraphicsContext gc, double gcWidth, double gcHeight) {
+        // Refresh canvas
         gc.setFill(Color.BLACK);
-        gc.fillRect(0, 0, width, height);
+        gc.fillRect(0, 0, gcWidth, gcHeight);
+        
+        // Set ball colour
         gc.setFill(Color.RED);
 
+        double x, y, d, r;
         for (int i = 0; i < componentCount; i++) {
-            gc.fillOval(ballPoints.get(i).x(), ballPoints.get(i).y(), ballBounds.get(i).diameter(), ballBounds.get(i).diameter());
+            r = ballBounds.get(i).radius();
+            d = ballBounds.get(i).diameter();
+            x = ballPoints.get(i).x();
+            y = ballPoints.get(i).y();
+
+            gc.fillOval(x - r, y - r, d, d);
         }
 
     }
