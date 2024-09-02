@@ -28,7 +28,6 @@
  * <h2>Dependencies</h2>
  * <ul>
  *   <li>JavaFX: For graphics and UI components.</li>
- *   <li>Third-party physics libraries (if any) for soft-body simulation.</li>
  * </ul>
  * 
   * <h2>Usage</h2>
@@ -54,4 +53,10 @@
 module com.slinky.jellysmash {
     requires javafx.controls;
     exports com.slinky.jellysmash;
+    exports com.slinky.jellysmash.view;
+    exports com.slinky.jellysmash.model.physics;
+    exports com.slinky.jellysmash.model.physics.base;
+    exports com.slinky.jellysmash.model.physics.comps;
+    exports com.slinky.jellysmash.model.physics.systems;
+    exports com.slinky.jellysmash.model.physics.systems.util;
 }

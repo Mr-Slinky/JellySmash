@@ -50,7 +50,7 @@ import javafx.animation.AnimationTimer;
  *
  * @see PhysicsEngine
  * @see WorldDisplay
- * @see AnimationTimer
+ * @see javafx.animation.AnimationTimer
  */
 public class GameLoop {
 

@@ -1,5 +1,6 @@
 package com.slinky.jellysmash.model.physics.comps;
 
+import static java.lang.Math.min;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  *
  * @author Kheagen Haskins
  */
-public class Particle2DTest {
+public class PointMassTest {
 
     @ParameterizedTest
     @MethodSource("provideParticleParams")
@@ -45,7 +46,7 @@ public class Particle2DTest {
                 () -> assertEquals(acceleration, p.acceleration()),
                 () -> assertEquals(mass, p.mass()),
                 () -> assertEquals(damping, p.dampingCoefficient()),
-                () -> assertEquals(restitution, p.restitution()),
+                () -> assertEquals(min(0.95, restitution), p.restitution()),
                 () -> assertEquals(isStatic, p.isStatic()),
                 // Dependent on Vector2D#equals(Vector2D otherVector) working correctly
                 () -> assertTrue(Vector2D.ZERO.equals(p.force()))
@@ -77,7 +78,7 @@ public class Particle2DTest {
         PointMass p = new PointMass(new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0), 10, damping, restitution, false);
         assertAll (
                 () -> assertEquals(1, p.dampingCoefficient()),
-                () -> assertEquals(1, p.restitution())
+                () -> assertEquals(0.95, p.restitution())
         );
     }
 

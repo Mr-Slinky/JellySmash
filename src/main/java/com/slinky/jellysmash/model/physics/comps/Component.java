@@ -19,10 +19,9 @@ package com.slinky.jellysmash.model.physics.comps;
  * </p>
  *
  * @version 1.0
- * @since   0.0.1
+ * @since   0.1.0
  * 
  * @author  Kheagen Haskins
  * 
- * @see     ComponentManager
  */
 public interface Component {}

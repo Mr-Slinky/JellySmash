@@ -7,7 +7,7 @@ import com.slinky.jellysmash.model.physics.systems.CollisionSystem;
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethods;
 
 /**
- * The main controller for all physics-based systems.
+ * The main controller for all physics-based systems. Currently a work in progress
  *
  * @author Kheagen Haskins
  */

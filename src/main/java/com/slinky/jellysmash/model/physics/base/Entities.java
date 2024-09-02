@@ -35,13 +35,12 @@ import java.util.stream.Collectors;
  * </p>
  *
  * @version 2.0
- * @since 0.1.0
+ * @since   0.1.0
  *
- * @author Kheagen Haskins
+ * @author  Kheagen Haskins
  *
- * @see Entity
- * @see ComponentManager
- * @see Vector2D
+ * @see     Entity
+ * @see     Vector2D
  */
 public class Entities {
 
@@ -74,6 +73,7 @@ public class Entities {
     // ============================== Getters =============================== //
     /**
      * Retrieves an entity by its ID.
+     * 
      * <p>
      * This method looks up and returns the entity associated with the specified
      * ID. If no entity with the given ID exists, the method returns
@@ -89,6 +89,7 @@ public class Entities {
 
     /**
      * Returns an unmodifiable view of all entities.
+     * 
      * <p>
      * This method provides an unmodifiable view of the current map of entities,
      * allowing the caller to safely access the entity data without risking
@@ -205,6 +206,7 @@ public class Entities {
     /**
      * Creates a new {@link Entity} with a unique ID and optionally adds
      * specified components to it.
+     * 
      * <p>
      * This method generates a new entity with a unique ID using an atomic
      * increment to ensure thread safety. The newly created entity is then added
@@ -212,6 +214,7 @@ public class Entities {
      * the method call, they are associated with the newly created entity using
      * the {@link ComponentManager}.
      * </p>
+     * 
      * <p>
      * The method can handle any number of components. If no components are
      * provided, the entity is created without any associated components.
@@ -249,6 +252,7 @@ public class Entities {
 
     /**
      * Destroys an entity, removing it from the system.
+     * 
      * <p>
      * This method removes the specified entity from the internal map,
      * effectively destroying the entity within the system. Any components
@@ -317,9 +321,8 @@ public class Entities {
      * collisions and other interactions within the system.
      * </p>
      *
-     * @param position the initial position of the ball, represented as a
-     * {@link Vector2D}. This determines where the ball will be placed in the
-     * simulation or game world.
+     * @param x the x coordinate of the ball's centre
+     * @param y the y coordinate of the ball's centre
      * @param mass the mass of the ball, which influences its physical
      * properties such as inertia and how it interacts with other entities. The
      * mass is also used to calculate the radius of the ball.
