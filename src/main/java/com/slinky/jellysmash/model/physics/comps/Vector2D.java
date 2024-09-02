@@ -1,7 +1,5 @@
 package com.slinky.jellysmash.model.physics.comps;
 
-import com.slinky.jellysmash.model.physics.base.Component;
-
 /**
  * Represents a two-dimensional vector component within the ECS (Entity
  * Component System) design pattern used in the JellySmash game. This class

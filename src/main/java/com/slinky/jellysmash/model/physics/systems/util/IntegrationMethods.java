@@ -50,7 +50,7 @@ public class IntegrationMethods {
      * effective for many real-time simulations, though it may not be as
      * accurate as higher-order methods for all scenarios.
      */
-    public final IntegrationMethod EULER = new EulerIntegrationFunction();
+    public static final IntegrationMethod EULER = new EulerIntegrationFunction();
 
     // ======================= Static Implementation ======================= //
     /**
@@ -96,7 +96,8 @@ public class IntegrationMethods {
 
             // Cache vOld in utility vector for position update
             utilVector.setComponents(v.x(), v.y());
-
+            
+            
             // vNew = vOld + scaled acceleration
             addTarget(v, a);
             return v;
@@ -114,7 +115,7 @@ public class IntegrationMethods {
          *
          * @param p the current position of the particle.
          * @param vNew the updated velocity vector of the particle.
-         * @param deltaTime the time step over which to update the position.
+         * @param deltaTime the time step over which to update the position. <b>IGNORED</b>
          * @return the updated position.
          */
         @Override
@@ -124,8 +125,6 @@ public class IntegrationMethods {
             // Add old and new vectors, then half them (turns utilVector from vOld to vAverage)
             addTarget(utilVector, vNew); // utilVector becomes sum of vOld and vNew
             divTarget(utilVector, 2); // Average the two velocities
-            scaleTarget(utilVector, deltaTime); // Scale average velocity
-
             addTarget(p, utilVector); // Add pOld with average velocity to get pNew
 
             return p;

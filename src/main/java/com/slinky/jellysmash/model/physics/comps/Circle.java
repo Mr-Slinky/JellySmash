@@ -46,7 +46,7 @@ import static java.lang.Math.PI;
  * 
  * @author Kheagen Haskins
  */
-public class Circle implements RenderComponent {
+public class Circle implements Component {
 
     // ============================== Fields ================================ //
     /**
