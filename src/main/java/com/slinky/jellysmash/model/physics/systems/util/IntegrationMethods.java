@@ -1,6 +1,5 @@
 package com.slinky.jellysmash.model.physics.systems.util;
 
-import com.slinky.jellysmash.model.physics.systems.VectorSystem2D;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
 
 /**
@@ -63,15 +62,13 @@ public class IntegrationMethods {
      * compute the average velocity needed for updating the particle's position.
      * </p>
      */
-    private static class EulerIntegrationFunction
-            extends VectorSystem2D // Get access to vector operations
-            implements IntegrationMethod {
+    private static class EulerIntegrationFunction implements IntegrationMethod {
 
         /**
          * A utility vector used to cache the old velocity and compute the
          * average velocity for position updates.
          */
-        private Vector2D utilVector = new Vector2D(0, 0);
+        private Vector2D vector = Vector2D.copyOf(Vector2D.ZERO);
 
         /**
          * Updates the velocity of a particle using the Euler integration
@@ -91,10 +88,10 @@ public class IntegrationMethods {
             // Implements vNew = vOld + (a * deltaTime)
 
             // Cache vOld in utility vector for position update
-            utilVector.setComponents(v.x(), v.y());
+            vector.setComponents(v.x(), v.y());
 
             // vNew = vOld + scaled acceleration
-            addTarget(v, a);
+            v.add(a);
             return v;
         }
 
@@ -116,11 +113,11 @@ public class IntegrationMethods {
         public Vector2D updatePosition(Vector2D p, Vector2D vNew) {
             // Implements pNew = pOld + (vAverage * deltaTime)
 
-            // Add old and new vectors, then half them (turns utilVector from vOld to vAverage)
-            addTarget(utilVector, vNew); // utilVector becomes sum of vOld and vNew
-            divTarget(utilVector, 2); // Average the two velocities
-            addTarget(p, utilVector); // Add pOld with average velocity to get pNew
-
+            // Add old and new vectors, then half them (turns `vector` from vOld to vAverage)
+            vector.add(vNew);    // vOld becomes sum of vOld and vNew
+            vector.scaleDown(2); // Average the two velocities
+            p.add(vector);       // Add pOld with average velocity to get pNew
+            
             return p;
         }
     }

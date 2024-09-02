@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Kheagen Haskins
  */
-public class CollisionSystem extends VectorSystem2D {
+public class CollisionSystem {
 
     // ============================== Fields ================================ //
     private int width;
@@ -61,31 +61,26 @@ public class CollisionSystem extends VectorSystem2D {
         double py = p.y(); // + r;
         boolean bounce = false;
         if (px < r) {
-//            System.out.println("-".repeat(40) + "\nHandling collision of " + p);
             p.bounceX();
             p.setX(r);
             bounce = true;
         } else if (px > width - r) {
-//            System.out.println("-".repeat(40) + "\nHandling collision of " + p);
             p.bounceX();
             p.setX(width - r);
             bounce = true;
         }
 
         if (py < r) {
-//            System.out.println("-".repeat(40) + "\nHandling collision of " + p);
             p.bounceY();
             p.setY(r);
             bounce = true;
         } else if (py > height - r) {
-//            System.out.println("-".repeat(40) + "\nHandling collision of " + p);
             p.bounceY();
             p.setY(height - r);
             bounce = true;
         }
 
         if (bounce) {
-//            System.out.println("After collision: " + p);
             handleSmallVelocity(p.velocity());
         }
     }

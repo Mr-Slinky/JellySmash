@@ -70,16 +70,16 @@ import java.util.List;
  * </code></pre>
  * </p>
  *
- * @version 1.0
- * @since 0.1.0
+ * @version  1.0
+ * @since    0.1.0
  *
- * @author Kheagen Haskins
+ * @author   Kheagen Haskins
  *
- * @see PointMass
- * @see Vector2D
- * @see IntegrationMethod
+ * @see      PointMass
+ * @see      Vector2D
+ * @see      IntegrationMethod
  */
-public class MotionSystem extends VectorSystem2D {
+public class MotionSystem {
 
     // ============================== Static ================================ //
     /**
@@ -195,7 +195,6 @@ public class MotionSystem extends VectorSystem2D {
         particles.clear();
     }
 
-
     /**
      * Updates the state of the motion system based on the elapsed time since
      * the last update. This method applies forces, calculates accelerations,
@@ -258,7 +257,7 @@ public class MotionSystem extends VectorSystem2D {
      * </p>
      *
      * @param deltaTime the amount of time that has elapsed since the last
-     * update, in seconds. Used to scale the acceleration.
+     * update, in seconds. Used to mult the acceleration.
      */
     private void calculateAccelerations(double deltaTime) {
         for (PointMass p : particles) {
@@ -271,7 +270,7 @@ public class MotionSystem extends VectorSystem2D {
 
             // a = F / m
             p.acceleration().setComponents(force.x() / mass, force.y() / mass);
-            scaleTarget(p.acceleration(), deltaTime);
+            p.acceleration().scaleUp(deltaTime);
         }
     }
 

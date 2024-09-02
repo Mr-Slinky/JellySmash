@@ -4,7 +4,6 @@ import com.slinky.jellysmash.model.physics.base.Entities;
 
 import com.slinky.jellysmash.model.physics.systems.MotionSystem;
 import com.slinky.jellysmash.model.physics.systems.CollisionSystem;
-import com.slinky.jellysmash.model.physics.systems.VectorSystem2D;
 import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethods;
 
 /**
@@ -12,7 +11,7 @@ import com.slinky.jellysmash.model.physics.systems.util.IntegrationMethods;
  *
  * @author Kheagen Haskins
  */
-public final class PhysicsEngine extends VectorSystem2D {
+public final class PhysicsEngine {
 
     // ============================== Fields ================================ //
     private MotionSystem motionSystem;
