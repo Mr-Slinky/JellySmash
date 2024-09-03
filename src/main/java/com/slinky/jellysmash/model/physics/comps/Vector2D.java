@@ -69,7 +69,7 @@ import static java.lang.Math.sqrt;
  *     Vector2D v3 = Vector2D.add(v1, v2); // v3 is (10, 13), v1 remains (6, 8)
  * </code></pre>
  * </p>
- * 
+ *
  * <p>
  * The {@code Vector2D} class provides constructors for initialising vectors and
  * methods for modifying and retrieving the x and y coordinates. This class is
@@ -79,12 +79,12 @@ import static java.lang.Math.sqrt;
  * </p>
  *
  * @version 2.0
- * @since   0.1.0
+ * @since 0.1.0
  *
- * @author  Kheagen Haskins
+ * @author Kheagen Haskins
  *
- * @see     Vector2D
- * @see     Component
+ * @see Vector2D
+ * @see Component
  */
 public class Vector2D implements Component {
 
@@ -293,15 +293,15 @@ public class Vector2D implements Component {
      * <p>
      * <b>Example Usage:</b>
      * <pre><code>
-     *     Vector2D velocity = new Vector2D(2, 3);
-     *     velocity.scaleUp(2); // Now velocity is (4, 6)
-     * </code></pre>
+     Vector2D velocity = new Vector2D(2, 3);
+     velocity.scale(2); // Now velocity is (4, 6)
+ </code></pre>
      * </p>
      *
      * @param scalar the value by which to scale the vector components.
      * @return this vector after the scaling operation.
      */
-    public Vector2D scaleUp(double scalar) {
+    public Vector2D scale(double scalar) {
         this.x *= scalar;
         this.y *= scalar;
 
@@ -394,15 +394,29 @@ public class Vector2D implements Component {
      */
     public double cross(Vector2D other) {
         return (this.x * other.y) - (this.y * other.x);
-    }
+    } // UNTESTED
 
+    /**
+     * Rotates this vector by the specified angle <b>around the origin</b>.
+     *
+     * <p>
+     * This method modifies the current vector by applying a 2D rotation
+     * transformation using the given angle. The rotation is performed
+     * counterclockwise.
+     * </p>
+     *
+     * @param angle the angle by which to rotate the vector, in radians
+     * @return the current {@code Vector2D} instance, after rotation
+     */
     public Vector2D rotate(double angle) {
         double cosTheta = Math.cos(angle);
         double sinTheta = Math.sin(angle);
+
         x = x * cosTheta - y * sinTheta;
         y = x * sinTheta + y * cosTheta;
+
         return this;
-    }
+    } // UNTESTED
 
     /**
      * Normalises this vector to have a magnitude of 1 (unit vector), preserving
@@ -425,7 +439,7 @@ public class Vector2D implements Component {
         }
 
         return this;
-    }
+    } 
 
     /**
      * Copies the components of the supplier vector into this vector.
@@ -445,7 +459,39 @@ public class Vector2D implements Component {
 
         return this;
     }
+    
+    /**
+     * Creates and returns a copy of this vector.
+     *
+     * <p>
+     * This method creates a new instance of the {@code Vector2D} class with the
+     * same x and y coordinates as the current vector. The returned vector is a
+     * separate object, meaning modifications to the copy will not affect the
+     * original vector, and vice versa.
+     * </p>
+     *
+     * <p>
+     * This method is useful when you need to duplicate a vector and perform
+     * operations on the copy without altering the original vector.
+     * </p>
+     *
+     * <p>
+     * <b>Example Usage:</b></p>
+     * <pre><code>
+     *     Vector2D original = new Vector2D(3, 4);
+     *     Vector2D copy = original.copy();
+     *     // Now, 'copy' is a new vector with the same values as 'original'.
+     *     // Modifying 'copy' will not change 'original'.
+     * </code></pre>
+     *
+     * @return a new {@code Vector2D} object with the same x and y coordinates
+     * as this vector.
+     */
+    public Vector2D copy() {
+        return new Vector2D(x, y);
+    }
 
+    
     /**
      * Compares this {@code Vector2D} object to the specified {@code Vector2D}
      * object for equality. The vectors are considered equal if both their x and
@@ -613,7 +659,7 @@ public class Vector2D implements Component {
      */
     public static double cross(Vector2D v1, Vector2D v2) {
         return (v1.x * v2.y) - (v1.y * v2.x);
-    }
+    } // UNTESTED
 
     /**
      * Linearly interpolates between two vectors.
@@ -792,6 +838,52 @@ public class Vector2D implements Component {
         public void setComponents(double x, double y) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
+
+        @Override
+        public Vector2D add(Vector2D other) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D sub(Vector2D other) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D mult(Vector2D other) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D div(Vector2D other) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D scale(double scalar) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D scaleDown(double scalar) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D rotate(double angle) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D copy(Vector2D other) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        @Override
+        public Vector2D normalize() {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
     }
 
 }

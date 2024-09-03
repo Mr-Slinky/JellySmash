@@ -270,7 +270,7 @@ public class MotionSystem {
 
             // a = F / m
             p.acceleration().setComponents(force.x() / mass, force.y() / mass);
-            p.acceleration().scaleUp(deltaTime);
+            p.acceleration().scale(deltaTime);
         }
     }
 
