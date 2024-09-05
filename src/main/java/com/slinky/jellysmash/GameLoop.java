@@ -1,7 +1,7 @@
 package com.slinky.jellysmash;
 
-import com.slinky.jellysmash.model.physics.PhysicsEngine;
-import com.slinky.jellysmash.view.WorldDisplay;
+import com.slinky.physics.PhysicsEngine2D;
+import com.slinky.jellysmash.debug.FXWorldDisplay;
 import javafx.animation.AnimationTimer;
 
 /**
@@ -13,8 +13,8 @@ import javafx.animation.AnimationTimer;
  * This class ties together the physics engine and rendering system, ensuring
  * that the game updates at a consistent frame rate. By leveraging the
  * {@link AnimationTimer}, it efficiently manages the update-render cycle,
- * calling the {@link PhysicsEngine#update(double)} method to simulate physics
- * and the {@link WorldDisplay#drawWorld()} method to render the updated game
+ * calling the {@link PhysicsEngine2D#update(double)} method to simulate physics
+ * and the {@link FXWorldDisplay#drawWorld()} method to render the updated game
  * state.
  * </p>
  *
@@ -30,8 +30,8 @@ import javafx.animation.AnimationTimer;
  * <b>Example Usage:</b></p>
  * <pre><code>
  * // Create a physics engine and world display
- * PhysicsEngine engine = new PhysicsEngine();
- * WorldDisplay display = new WorldDisplay(new RenderSystem(), 500, 800);
+ * PhysicsEngine2D engine = new PhysicsEngine2D();
+ * FXWorldDisplay display = new FXWorldDisplay(new RenderSystem(), 500, 800);
  *
  * // Create the game loop
  * GameLoop gameLoop = new GameLoop(engine, display);
@@ -48,15 +48,15 @@ import javafx.animation.AnimationTimer;
  *
  * @author Kheagen Haskins
  *
- * @see PhysicsEngine
- * @see WorldDisplay
+ * @see PhysicsEngine2D
+ * @see FXWorldDisplay
  * @see javafx.animation.AnimationTimer
  */
 public class GameLoop {
 
     // ============================== Fields ================================ //
     /**
-     * The {@link PhysicsEngine} responsible for simulating the physics of the
+     * The {@link PhysicsEngine2D} responsible for simulating the physics of the
      * game.
      * <p>
      * This engine handles the calculations related to motion, collisions,
@@ -64,18 +64,18 @@ public class GameLoop {
      * game.
      * </p>
      */
-    private PhysicsEngine engine;
+    private PhysicsEngine2D engine;
 
     /**
-     * The {@link WorldDisplay} responsible for rendering the visual
+     * The {@link FXWorldDisplay} responsible for rendering the visual
      * representation of the game world.
      * <p>
      * This component draws the game entities and background on the screen,
      * reflecting the current state of the simulation managed by the
-     * {@link PhysicsEngine}.
+     * {@link PhysicsEngine2D}.
      * </p>
      */
-    private WorldDisplay worldDisplay;
+    private FXWorldDisplay worldDisplay;
 
     /**
      * The {@link AnimationTimer} that drives the game loop, calling the
@@ -89,10 +89,15 @@ public class GameLoop {
      */
     private AnimationTimer tick;
 
+    /**
+     * A status flag indicating if the loop is currently running
+     */
+    private boolean running;
+
     // =========================== Constructors ============================= //
     /**
      * Constructs a new {@code GameLoop} with the specified
-     * {@link PhysicsEngine} and {@link WorldDisplay}.
+     * {@link PhysicsEngine2D} and {@link FXWorldDisplay}.
      *
      * <p>
      * This constructor initializes the game loop with the necessary components
@@ -103,15 +108,15 @@ public class GameLoop {
      * @param engine the physics engine responsible for updating the game state
      * @param display the world display responsible for rendering the game world
      *
-     * @see PhysicsEngine
-     * @see WorldDisplay
+     * @see PhysicsEngine2D
+     * @see FXWorldDisplay
      */
-    public GameLoop(PhysicsEngine engine, WorldDisplay display) {
+    public GameLoop(PhysicsEngine2D engine, FXWorldDisplay display) {
         this.engine = engine;
         this.worldDisplay = display;
         this.tick = configAnimationTimer();
     }
-    
+
     // ============================ API Methods ============================= //
     /**
      * Starts the game loop, beginning the update-render cycle.
@@ -124,9 +129,11 @@ public class GameLoop {
      * </p>
      *
      * @see #stop()
+     * @see #isRunning()
      */
     public void start() {
-      tick.start();
+        tick.start();
+        running = true;
     }
 
     /**
@@ -139,9 +146,22 @@ public class GameLoop {
      * </p>
      *
      * @see #start()
+     * @see #isRunning()
      */
     public void stop() {
         tick.stop();
+        running = false;
+    }
+
+    /**
+     * Returns the status flag indicating whether or not the game loop is
+     * currently running.
+     *
+     * @return {@code true} if the loop is currently running, {@code false}
+     * otherwise
+     */
+    public boolean isRunning() {
+        return running;
     }
 
     // ========================== Helper Methods ============================ //

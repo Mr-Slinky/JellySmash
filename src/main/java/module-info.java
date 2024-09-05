@@ -53,10 +53,9 @@
 module com.slinky.jellysmash {
     requires javafx.controls;
     exports com.slinky.jellysmash;
-    exports com.slinky.jellysmash.view;
-    exports com.slinky.jellysmash.model.physics;
-    exports com.slinky.jellysmash.model.physics.base;
-    exports com.slinky.jellysmash.model.physics.comps;
-    exports com.slinky.jellysmash.model.physics.systems;
-    exports com.slinky.jellysmash.model.physics.systems.util;
+    exports com.slinky.physics;
+    exports com.slinky.physics.base;
+    exports com.slinky.physics.comps;
+    exports com.slinky.physics.systems;
+    exports com.slinky.physics.systems.util;
 }

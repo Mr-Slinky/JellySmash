@@ -1,8 +1,9 @@
 package com.slinky.jellysmash;
 
-import com.slinky.jellysmash.model.physics.PhysicsEngine;
-import com.slinky.jellysmash.model.physics.systems.RenderSystem;
-import com.slinky.jellysmash.view.WorldDisplay;
+import com.slinky.physics.PhysicsEngine2D;
+import com.slinky.jellysmash.debug.DebugRenderSystem;
+import com.slinky.jellysmash.debug.FXDebugScene;
+import com.slinky.jellysmash.debug.FXWorldDisplay;
 
 import javafx.application.Application;
 
@@ -33,7 +34,7 @@ import javafx.stage.Stage;
  * <p>
  * Once the JavaFX environment is ready, the {@link #init()} method is called to
  * initialise the core components of the game, such as the
- * {@link PhysicsEngine}, {@link RenderSystem}, and {@link WorldDisplay}. These
+ * {@link PhysicsEngine2D}, {@link DebugRenderSystem}, and {@link FXWorldDisplay}. These
  * components are crucial for the game's physics calculations and rendering.
  * </p>
  *
@@ -56,81 +57,19 @@ import javafx.stage.Stage;
  * @author Kheagen Haskins
  *
  * @see Application
- * @see PhysicsEngine
- * @see WorldDisplay
+ * @see PhysicsEngine2D
+ * @see FXWorldDisplay
  * @see GameLoop
- * @see RenderSystem
+ * @see DebugRenderSystem
  * @see javafx.application.Application#launch(String...)
  * @see javafx.application.Application#init()
  * @see javafx.application.Application#start(Stage)
  */
 public class App extends Application {
 
-    /**
-     * The {@link PhysicsEngine} that manages the physics simulation in the
-     * game.
-     */
-    private PhysicsEngine engine;
-
-    /**
-     * The {@link WorldDisplay} responsible for rendering the game world.
-     */
-    private WorldDisplay worldDisplay;
-
-    /**
-     * The {@link GameLoop} that handles the timing and updates for the game,
-     * coordinating the physics engine and rendering system.
-     */
-    private GameLoop gameLoop;
-
-    private Scene scene;
-
-    /**
-     * Initialises the core components of the game, including the physics
-     * engine, rendering system, and game loop.
-     *
-     * <p>
-     * This method is called automatically by the JavaFX framework before the
-     * {@link #start(Stage)} method. It sets up the game environment by creating
-     * instances of {@link PhysicsEngine},
-     * {@link WorldDisplay}, and {@link GameLoop}. These components are
-     * essential for running the game and are used to manage the game's physics,
-     * rendering, and update loop.
-     * </p>
-     *
-     * @throws Exception if an error occurs during initialisation
-     *
-     * @see PhysicsEngine
-     * @see WorldDisplay
-     * @see GameLoop
-     */
     @Override
     public void init() throws Exception {
         super.init();
-        int width = 500;
-        int height = 800;
-
-        engine = new PhysicsEngine(width, height);
-        worldDisplay = new WorldDisplay(new RenderSystem(), width, height);
-        gameLoop = new GameLoop(engine, worldDisplay);
-
-        scene = new Scene(new StackPane(worldDisplay));
-
-        scene.setOnScroll(ev -> {
-            engine.update(0.016);
-            worldDisplay.drawWorld();
-        });
-
-        scene.setOnKeyPressed((KeyEvent ev) -> {
-            switch (ev.getCode()) {
-                case SPACE:
-                    gameLoop.stop();
-                    break;
-                case P:
-                    gameLoop.start();
-            }
-        });
-
     }
 
     /**
@@ -138,7 +77,7 @@ public class App extends Application {
      *
      * <p>
      * This method is called after {@link #init()} to configure the main window
-     * of the game. It sets the scene to display the {@link WorldDisplay}, shows
+     * of the game. It sets the scene to display the {@link FXWorldDisplay}, shows
      * the stage, and starts the {@link GameLoop} to begin the game's
      * update-render cycle.
      * </p>
@@ -149,20 +88,19 @@ public class App extends Application {
      * @see Stage
      * @see Scene
      * @see StackPane
-     * @see WorldDisplay
+     * @see FXWorldDisplay
      * @see GameLoop
      */
     @Override
     public void start(Stage stage) {
-        stage.setScene(scene);
+        stage.setScene(new FXDebugScene());
         stage.show();
-//        gameLoop.start();
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
-        gameLoop.stop();
+        System.exit(0);
     }
 
     /**
@@ -182,17 +120,6 @@ public class App extends Application {
      */
     public static void main(String[] args) {
         launch();
-//        System.out.println("Square Root increase: ");
-//        for (int i = 1; i <= 10; i++) {
-//            System.out.println(1 / Math.sqrt(i));
-//        }
-//
-//        System.out.println("\nCube Root increase: ");
-//        for (int i = 1; i <= 10; i++) {
-//            System.out.println(1 / Math.cbrt(i));
-//        }
-//
-//        System.exit(0);
     }
 
 }
