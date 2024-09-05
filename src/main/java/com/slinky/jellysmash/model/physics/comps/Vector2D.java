@@ -101,7 +101,32 @@ public class Vector2D implements Component {
      * Since this vector is immutable, any attempt to modify its components will
      * result in an {@code UnsupportedOperationException}.</p>
      */
-    public static final Vector2D ZERO = new ImmutableVector(0, 0);
+    public static final Vector2D ZERO = new ZeroVector(0, 0);
+    
+    /**
+     * A constant representing the leftward direction as a unit vector. The
+     * vector points in the negative X direction with coordinates (-1, 0).
+     */
+    public static final Vector2D LEFT = new UnitVectorConstant(-1, 0);
+
+    /**
+     * A constant representing the downward direction as a unit vector. The
+     * vector points in the positive Y direction with coordinates (0, 1).
+     */
+    public static final Vector2D DOWN = new UnitVectorConstant(0, 1);
+
+    /**
+     * A constant representing the rightward direction as a unit vector. The
+     * vector points in the positive X direction with coordinates (1, 0).
+     */
+    public static final Vector2D RIGHT = new UnitVectorConstant(1, 0);
+
+    /**
+     * A constant representing the upward direction as a unit vector. The vector
+     * points in the negative Y direction with coordinates (0, -1).
+     */
+    public static final Vector2D UP = new UnitVectorConstant(0, -1);
+
 
     // ============================== Fields ================================ //
     /**
@@ -175,21 +200,54 @@ public class Vector2D implements Component {
         this.y = y;
     }
 
+    /**
+     * Sets a new magnitude for this vector and returns the vector itself for
+     * chaining. If the desired new magnitude is zero, the vector components are
+     * set to zero. If the current magnitude of the vector is zero, an exception
+     * is thrown, as a zero vector cannot be scaled to a non-zero magnitude.
+     *
+     * This method allows method chaining by returning the modified vector
+     * instance.
+     *
+     * @param scalar The new magnitude to set for this vector.
+     * @return this vector after modifying its magnitude, allowing for method
+     * chaining.
+     * @throws IllegalStateException if the current vector is a zero vector
+     * (magnitude is zero) and an attempt is made to set a non-zero magnitude.
+     */
+    public Vector2D setMag(double scalar) {
+        double mag = mag();  // Calculate the current magnitude of the vector
+
+        if (mag == 0) {
+            throw new IllegalStateException("Cannot mutate the magnitude of a zero vector");
+        }
+
+        if (scalar == 0) {
+            x = 0;  // Set vector components to zero if new magnitude is zero
+            y = 0;
+        } else {
+            double scaleFactor = scalar / mag; 
+            x *= scaleFactor;  // Scale the x component
+            y *= scaleFactor;  // Scale the y component
+        }
+        
+        return this;
+    }
+
+
     // ============================ API Methods ============================= //
     /**
      * Adds the components of the specified {@code Vector2D} to this vector.
+     * 
      * <p>
      * This method modifies the current vector by adding the x and y components
-     * of the provided vector to the corresponding components of this vector.
-     * </p>
-     *
-     * <p>
+     * of the provided vector to the corresponding components of this vector. 
      * The operation is performed in place, meaning the current vector is
-     * updated and returned. This allows for method chaining.
+     * updated and returned, allowing for method chaining.
      * </p>
      *
      * @param other the {@code Vector2D} to add to this vector.
-     * @return this vector after the addition.
+     * @return <code>this</code> vector after the addition.
      */
     public Vector2D add(Vector2D other) {
         this.x += other.x;
@@ -293,9 +351,9 @@ public class Vector2D implements Component {
      * <p>
      * <b>Example Usage:</b>
      * <pre><code>
-     Vector2D velocity = new Vector2D(2, 3);
-     velocity.scale(2); // Now velocity is (4, 6)
- </code></pre>
+     * Vector2D velocity = new Vector2D(2, 3);
+     * velocity.scale(2); // Now velocity is (4, 6)
+     * </code></pre>
      * </p>
      *
      * @param scalar the value by which to scale the vector components.
@@ -329,16 +387,16 @@ public class Vector2D implements Component {
      * <p>
      * <b>Example Usage:</b>
      * <pre><code>
-     *     Vector2D velocity = new Vector2D(4, 6);
-     *     velocity.scaleDown(2); // Now velocity is (2, 3)
-     * </code></pre>
+     Vector2D velocity = new Vector2D(4, 6);
+     velocity.div(2); // Now velocity is (2, 3)
+ </code></pre>
      * </p>
      *
      * @param scalar the value by which to divide the vector components. If the
      * scalar is zero, the vector remains unchanged.
      * @return this vector after the scaling operation.
      */
-    public Vector2D scaleDown(double scalar) {
+    public Vector2D div(double scalar) {
         if (scalar == 0) {
             return this;
         }
@@ -351,6 +409,7 @@ public class Vector2D implements Component {
 
     /**
      * Calculates the magnitude (length) of this vector.
+     *
      * <p>
      * The magnitude is computed using the Pythagorean theorem, which is the
      * square root of the sum of the squares of the vector's x and y components.
@@ -365,6 +424,7 @@ public class Vector2D implements Component {
     /**
      * Computes the dot product of this vector and the specified
      * {@code Vector2D}.
+     *
      * <p>
      * The dot product is calculated as the sum of the products of the
      * corresponding components of the two vectors. It provides a measure of how
@@ -381,6 +441,7 @@ public class Vector2D implements Component {
     /**
      * Computes the cross product of this vector and the specified
      * {@code Vector2D}.
+     *
      * <p>
      * In 2D space, the cross product is a scalar value representing the
      * difference between the products of the x and y components of the two
@@ -439,7 +500,25 @@ public class Vector2D implements Component {
         }
 
         return this;
-    } 
+    }
+    
+    /**
+     * Negates this vector by reversing the sign of each component.
+     * 
+     * <p>
+     * This method modifies the current vector, making both the x and y
+     * components their negative counterparts. For example, if the vector's
+     * current components are (x, y), after calling this method, the components
+     * will be (-x, -y).
+     * </p>
+     *
+     * @return The current vector after negating its components.
+     */
+    public Vector2D negate() {
+        x = -(x);
+        y = -(y);
+        return this;
+    }
 
     /**
      * Copies the components of the supplier vector into this vector.
@@ -459,7 +538,7 @@ public class Vector2D implements Component {
 
         return this;
     }
-    
+
     /**
      * Creates and returns a copy of this vector.
      *
@@ -491,7 +570,6 @@ public class Vector2D implements Component {
         return new Vector2D(x, y);
     }
 
-    
     /**
      * Compares this {@code Vector2D} object to the specified {@code Vector2D}
      * object for equality. The vectors are considered equal if both their x and
@@ -578,11 +656,11 @@ public class Vector2D implements Component {
      * {@code Vector2D}.
      */
     public static Vector2D sub(Vector2D v1, Vector2D v2) {
-        return new Vector2D(v1.x() - v2.x(), v1.y() - v2.y());
+        return new Vector2D(v1.x - v2.x, v1.y - v2.y);
     }
 
     /**
-     * Creates a new {@code Vector2D} that is the result of scaling a
+     * Creates a new {@code Vector2D} that is the result of scaling the given
      * {@code Vector2D} by a given scalar value.
      *
      * <p>
@@ -596,7 +674,7 @@ public class Vector2D implements Component {
      * @return a new {@code Vector2D} with the scaled components.
      */
     public static Vector2D scale(Vector2D v, double scalar) {
-        return new Vector2D(v.x() * scalar, v.y() * scalar);
+        return new Vector2D(v.x * scalar, v.y * scalar);
     }
 
     /**
@@ -621,8 +699,8 @@ public class Vector2D implements Component {
      */
     public static Vector2D div(Vector2D v, double scalar) {
         return new Vector2D(
-                v.x() / scalar,
-                v.y() / scalar
+                v.x / scalar,
+                v.y / scalar
         );
     }
 
@@ -678,10 +756,10 @@ public class Vector2D implements Component {
      */
     public static Vector2D lerp(Vector2D v1, Vector2D v2, double t) {
         return new Vector2D(
-                v1.x() + t * (v2.x() - v1.x()),
-                v1.y() + t * (v2.y() - v1.y())
+                v1.x + t * (v2.x - v1.x),
+                v1.y + t * (v2.y - v1.y)
         );
-    }
+    } // UNTESTED
 
     /**
      * Calculates the distance between two vectors.
@@ -696,7 +774,7 @@ public class Vector2D implements Component {
      * @throws IllegalArgumentException if the vectors are not of the same type.
      */
     public static double distanceBetween(Vector2D v1, Vector2D v2) {
-        return Math.sqrt(Math.pow(v2.x() - v1.x(), 2) + Math.pow(v2.y() - v1.y(), 2));
+        return Math.sqrt(Math.pow(v2.x - v1.x, 2) + Math.pow(v2.y - v1.y, 2));
     }
 
     /**
@@ -716,8 +794,8 @@ public class Vector2D implements Component {
         double dot = v1.dot(v2);
         double magSq = pow(v2.mag(), 2);
         return new Vector2D(
-                (dot / magSq) * v2.x(),
-                (dot / magSq) * v2.y()
+                (dot / magSq) * v2.x,
+                (dot / magSq) * v2.y
         );
     }
 
@@ -755,8 +833,8 @@ public class Vector2D implements Component {
     public static Vector2D reflect(Vector2D v, Vector2D normal) {
         double dot = v.dot(normal);
         return new Vector2D(
-                v.x() - 2 * dot * normal.x(),
-                v.y() - 2 * dot * normal.y()
+                v.x - 2 * dot * normal.x,
+                v.y - 2 * dot * normal.y
         );
     }
 
@@ -800,90 +878,527 @@ public class Vector2D implements Component {
     // ============================== Inner Classes ================================ //
     /**
      * A private inner class representing an immutable vector. The
-     * {@code ImmutableVector} extends {@code Vector2D} but overrides the setter
-     * methods to prevent any modification to its components. Any attempt to
-     * change the x or y coordinates of this vector will result in an
-     * {@code UnsupportedOperationException}.
+     * {@code ZeroVector} class extends {@code Vector2D} but overrides all
+     * setter methods and operations that could alter its state, ensuring that
+     * the vector remains constant throughout its lifecycle.
      *
      * <p>
-     * This class is used to create immutable instances of {@code Vector2D},
-     * such as {@link Vector2D#ZERO}, ensuring that they remain constant and
-     * unchanged throughout their lifecycle.
+     * The {@code ZeroVector} is specifically designed to represent immutable
+     * instances of {@code Vector2D}, such as {@link Vector2D#ZERO}. Once an
+     * instance of {@code ZeroVector} is created, its components cannot be
+     * changed. Any attempt to modify the vector, either by changing its x or y
+     * coordinates or by performing operations that would alter its magnitude or
+     * direction, will result in an {@code UnsupportedOperationException}.
      * </p>
+     *
+     * <p>
+     * This design ensures that constant vectors, like {@code Vector2D#ZERO},
+     * remain unchanged and can be safely used across different parts of an
+     * application without the risk of accidental modification. For example, the
+     * {@code Vector2D#ZERO} vector represents the origin in a 2D coordinate
+     * system (0,0) and should always maintain this state.
+     * </p>
+     *
+     * <h3>Example Usage</h3>
+     * <pre>
+     * {@code
+     * Vector2D zeroVector = Vector2D.ZERO;
+     *
+     * // Attempting to modify zeroVector will result in an exception:
+     * zeroVector.setX(1); // Throws UnsupportedOperationException
+     * zeroVector.setY(1); // Throws UnsupportedOperationException
+     * }
+     * </pre>
+     *
+     * <p>
+     * Additionally, mathematical operations that would normally return a new
+     * vector with altered components, such as {@code add(Vector2D other)}, are
+     * overridden to either delegate the operation to static utility methods or
+     * throw an {@code UnsupportedOperationException} where mutation would be
+     * implied. The immutability of {@code ZeroVector} ensures its reliability
+     * in contexts where constancy is critical.
+     * </p>
+     *
+     * @see Vector2D
+     * @see Vector2D#ZERO
      */
-    private static class ImmutableVector extends Vector2D {
+    public static class ZeroVector extends Vector2D {
 
         /**
          * Constructs an immutable vector with the specified x and y
-         * coordinates.
+         * coordinates. This constructor is typically used internally to create
+         * instances of immutable vectors like {@code Vector2D#ZERO}.
          *
          * @param x the x coordinate of the vector
          * @param y the y coordinate of the vector
          */
-        public ImmutableVector(double x, double y) {
+        public ZeroVector(double x, double y) {
             super(x, y);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent modification of the vector's x
+         * coordinate. Any attempt to set a new value for x will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public void setX(double x) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent modification of the vector's y
+         * coordinate. Any attempt to set a new value for y will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public void setY(double y) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent simultaneous modification of the
+         * vector's x and y coordinates. Any attempt to set new values for both
+         * components will result in an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public void setComponents(double x, double y) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent scaling of the vector's
+         * magnitude. Since {@code ZeroVector} represents an immutable vector,
+         * any attempt to scale its magnitude will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public Vector2D setMag(double scalar) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        /**
+         * Adds another vector to this vector. Since {@code ZeroVector} is
+         * immutable, this operation returns a new vector representing the sum
+         * of this vector and the other vector.
+         *
+         * @param other the vector to be added
+         * @return a new {@code Vector2D} representing the result of the
+         * addition
+         */
         @Override
         public Vector2D add(Vector2D other) {
-            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+            return Vector2D.add(this, other);
         }
 
+        /**
+         * Subtracts another vector from this vector. Since {@code ZeroVector}
+         * is immutable, this operation returns a new vector representing the
+         * result of the subtraction.
+         *
+         * @param other the vector to be subtracted
+         * @return a new {@code Vector2D} representing the result of the
+         * subtraction
+         */
         @Override
         public Vector2D sub(Vector2D other) {
-            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+            return Vector2D.sub(this, other);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent component-wise multiplication of
+         * the vector. Any attempt to multiply this vector with another vector
+         * will result in an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public Vector2D mult(Vector2D other) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent component-wise division of the
+         * vector. Any attempt to divide this vector by another vector will
+         * result in an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public Vector2D div(Vector2D other) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent scalar division of the vector.
+         * Any attempt to divide this vector by a scalar will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public Vector2D div(double scalar) {
+            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent scaling of the vector's
+         * magnitude by a scalar. Any attempt to scale this vector will result
+         * in an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public Vector2D scale(double scalar) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
-        @Override
-        public Vector2D scaleDown(double scalar) {
-            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
-        }
-
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent rotation of the vector. Any
+         * attempt to rotate this vector will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public Vector2D rotate(double angle) {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to allow copying of this vector into
+         * another {@code Vector2D} object. The state of the current vector
+         * remains unchanged.
+         * </p>
+         *
+         * @param other the vector to be copied
+         * @return a new {@code Vector2D} representing the copied vector
+         */
         @Override
         public Vector2D copy(Vector2D other) {
-            throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
+            return other.copy();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent normalization of the vector. Any
+         * attempt to normalize this vector will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
         @Override
         public Vector2D normalize() {
             throw new UnsupportedOperationException("Vector2D.ZERO is final and cannot be mutated");
         }
 
     }
+
+    /**
+     * An inner class representing an immutable unit vector. The
+     * {@code UnitVectorConstant} class extends {@code Vector2D} but overrides
+     * all setter methods and certain operations that would alter its state,
+     * ensuring that the vector remains constant and immutable throughout its
+     * lifecycle.
+     *
+     * <p>
+     * The {@code UnitVectorConstant} is specifically designed to represent
+     * immutable direction vectors, such as {@link Vector2D#LEFT}, {@link Vector2D#RIGHT},
+     * {@link Vector2D#UP}, and {@link Vector2D#DOWN}. These vectors are
+     * typically used to represent fixed directions in 2D space and should not
+     * be modified after creation.
+     * </p>
+     *
+     * <p>
+     * Similar to the {@link ZeroVector} class, the {@code UnitVectorConstant}
+     * ensures that any attempt to alter the x or y coordinates, magnitude, or
+     * orientation of the vector will result in an
+     * {@code UnsupportedOperationException}. However, unlike
+     * {@code ZeroVector}, the immutable nature of {@code UnitVectorConstant}
+     * still allows for non-mutating operations that return new vectors based on
+     * the original.
+     * </p>
+     *
+     * <h3>Example Usage</h3>
+     * <pre>
+     * {@code
+     * Vector2D leftVector = Vector2D.LEFT;
+     *
+     * // Attempting to modify leftVector will result in an exception:
+     * leftVector.setX(0); // Throws UnsupportedOperationException
+     * leftVector.setY(1); // Throws UnsupportedOperationException
+     *
+     * // Safe operations that return a new vector:
+     * Vector2D resultVector = leftVector.add(new Vector2D(1, 0)); // Returns a new vector
+     * }
+     * </pre>
+     *
+     * <p>
+     * This design ensures that direction vectors, once created, remain
+     * unchanged and can be relied upon for consistent behavior throughout an
+     * application. Mutable operations like addition, subtraction, and scaling
+     * are allowed, but they return new {@code Vector2D} instances rather than
+     * altering the original vector.
+     * </p>
+     *
+     * @see Vector2D
+     * @see ZeroVector
+     */
+    private static class UnitVectorConstant extends Vector2D {
+
+        /**
+         * Constructs an immutable unit vector with the specified x and y
+         * coordinates. This constructor is typically used internally to create
+         * instances of immutable direction vectors, like {@code Vector2D.LEFT}.
+         *
+         * @param x the x coordinate of the vector
+         * @param y the y coordinate of the vector
+         */
+        public UnitVectorConstant(double x, double y) {
+            super(x, y);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent modification of the vector's x
+         * coordinate. Any attempt to set a new value for x will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public void setX(double x) {
+            throw new UnsupportedOperationException("Direction Vector2D instance is final and cannot be mutated");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent modification of the vector's y
+         * coordinate. Any attempt to set a new value for y will result in an
+         * {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public void setY(double y) {
+            throw new UnsupportedOperationException("Direction Vector2D instance is final and cannot be mutated");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent simultaneous modification of the
+         * vector's x and y coordinates. Any attempt to set new values for both
+         * components will result in an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public void setComponents(double x, double y) {
+            throw new UnsupportedOperationException("Direction Vector2D instance is final and cannot be mutated");
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to prevent scaling of the vector's
+         * magnitude. Since {@code UnitVectorConstant} represents a fixed
+         * direction vector, any attempt to scale its magnitude will result in
+         * an {@code UnsupportedOperationException}.
+         * </p>
+         *
+         * @throws UnsupportedOperationException if this method is called
+         */
+        @Override
+        public Vector2D setMag(double scalar) {
+            throw new UnsupportedOperationException("Direction Vector2D instance is final and cannot be mutated");
+        }
+
+        /**
+         * Adds another vector to this vector. Since {@code UnitVectorConstant}
+         * is immutable, this operation returns a new vector representing the
+         * sum of this vector and the other vector.
+         *
+         * @param other the vector to be added
+         * @return a new {@code Vector2D} representing the result of the
+         * addition
+         */
+        @Override
+        public Vector2D add(Vector2D other) {
+            return this.copy().add(other);
+        }
+
+        /**
+         * Subtracts another vector from this vector. Since
+         * {@code UnitVectorConstant} is immutable, this operation returns a new
+         * vector representing the result of the subtraction.
+         *
+         * @param other the vector to be subtracted
+         * @return a new {@code Vector2D} representing the result of the
+         * subtraction
+         */
+        @Override
+        public Vector2D sub(Vector2D other) {
+            return this.copy().sub(other);
+        }
+
+        /**
+         * Multiplies this vector by another vector. Since
+         * {@code UnitVectorConstant} is immutable, this operation returns a new
+         * vector representing the result of the multiplication.
+         *
+         * @param other the vector to be multiplied
+         * @return a new {@code Vector2D} representing the result of the
+         * multiplication
+         */
+        @Override
+        public Vector2D mult(Vector2D other) {
+            return this.copy().mult(other);
+        }
+
+        /**
+         * Divides this vector by another vector. Since
+         * {@code UnitVectorConstant} is immutable, this operation returns a new
+         * vector representing the result of the division.
+         *
+         * @param other the vector to divide by
+         * @return a new {@code Vector2D} representing the result of the
+         * division
+         */
+        @Override
+        public Vector2D div(Vector2D other) {
+            return this.copy().div(other);
+        }
+
+        /**
+         * Divides this vector by a scalar. Since {@code UnitVectorConstant} is
+         * immutable, this operation returns a new vector representing the
+         * result of the division.
+         *
+         * @param scalar the scalar value to divide by
+         * @return a new {@code Vector2D} representing the result of the
+         * division
+         */
+        @Override
+        public Vector2D div(double scalar) {
+            return this.copy().div(scalar);
+        }
+
+        /**
+         * Scales this vector by a scalar. Since {@code UnitVectorConstant} is
+         * immutable, this operation returns a new vector representing the
+         * result of the scaling.
+         *
+         * @param scalar the scalar value to scale by
+         * @return a new {@code Vector2D} representing the result of the scaling
+         */
+        @Override
+        public Vector2D scale(double scalar) {
+            return this.copy().scale(scalar);
+        }
+
+        /**
+         * Rotates this vector by a specified angle. Since
+         * {@code UnitVectorConstant} is immutable, this operation returns a new
+         * vector representing the rotated vector.
+         *
+         * @param angle the angle in radians to rotate by
+         * @return a new {@code Vector2D} representing the rotated vector
+         */
+        @Override
+        public Vector2D rotate(double angle) {
+            return this.copy().rotate(angle);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>
+         * This method is overridden to allow copying of this vector into
+         * another {@code Vector2D} object. The state of the current vector
+         * remains unchanged.
+         * </p>
+         *
+         * @param other the vector to be copied
+         * @return a new {@code Vector2D} representing the copied vector
+         */
+        @Override
+        public Vector2D copy(Vector2D other) {
+            return other.copy();
+        }
+
+        /**
+         * Normalizes this vector to have a magnitude of 1. Since
+         * {@code UnitVectorConstant} is immutable, this operation returns a new
+         * vector representing the normalized vector.
+         *
+         * @return a new {@code Vector2D} representing the normalized vector
+         */
+        @Override
+        public Vector2D normalize() {
+            return this.copy();
+        }
+
+    }
+
 
 }
