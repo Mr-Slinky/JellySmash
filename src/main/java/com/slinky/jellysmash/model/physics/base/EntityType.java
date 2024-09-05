@@ -3,6 +3,7 @@ package com.slinky.jellysmash.model.physics.base;
 import com.slinky.jellysmash.model.physics.comps.Circle;
 import com.slinky.jellysmash.model.physics.comps.Component;
 import com.slinky.jellysmash.model.physics.comps.PointMass;
+import com.slinky.jellysmash.model.physics.comps.SoftBodySprite;
 
 /**
  * The {@code EntityType} enum defines and categorises different types of
@@ -19,7 +20,7 @@ import com.slinky.jellysmash.model.physics.comps.PointMass;
  * </p>
  *
  * <p>
- * For example, the {@code BALL} entity type is associated with both the
+ * For example, the {@code SOLID_BALL} entity type is associated with both the
  * {@link PointMass} and {@link Circle} components, making it easy to filter and
  * manage all entities representing balls within the game.
  * </p>
@@ -41,12 +42,13 @@ public enum EntityType {
      * <p>
      * This entity type is associated with the {@link PointMass} and
      * {@link Circle} components, which together define the behaviour and
-     * properties of a ball within the JellySmash game. The {@code BALL} entity
+     * properties of a ball within the JellySmash game. The {@code SOLID_BALL} entity
      * type can be used to easily filter and manage all ball-related entities in
      * the game.
      * </p>
      */
-    BALL(new Class[]{PointMass.class, Circle.class}),
+    SOLID_BALL(new Class[]{PointMass.class, Circle.class}),
+    SOFT_BALL (new Class[]{SoftBodySprite.class}),
     BRICK;
 
     /**

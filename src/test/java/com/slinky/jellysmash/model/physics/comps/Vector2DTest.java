@@ -17,32 +17,43 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Kheagen Haskins
  */
 public class Vector2DTest {
-    
+
     // ============================= Providers ============================== //
+    private static final double PRECISION_THRESHOLD = 0.01;
+
     static Stream<Arguments> provideNonZeroVectorArgs() {
         return Stream.of(
-                Arguments.of(0.0001,  0.0001),
-                Arguments.of(-0.001,  0.001),
-                Arguments.of(0.01,   -0.01),
-                Arguments.of(-0.1,   -0.1),
-                Arguments.of(1.5,     2.5),
-                Arguments.of(-1,     -2),
+                Arguments.of(0.0001, 0.0001),
+                Arguments.of(-0.001, 0.001),
+                Arguments.of(0.01, -0.01),
+                Arguments.of(-0.1, -0.1),
+                Arguments.of(1.5, 2.5),
+                Arguments.of(-1, -2),
                 Arguments.of(3.14159, 2.71828),
                 Arguments.of(0.14159, 0.71828),
                 Arguments.of(5.21516, 515642.71828)
         );
     }
-    
+
     static Stream<Arguments> provideScalarArgs() {
         return Stream.of(
-            Arguments.of(1,    1,    2),
-            Arguments.of(0.5,  0.5,  4),
-            Arguments.of(-1,  -1,    3),
-            Arguments.of(1.5,  2.5,  0.5),
-            Arguments.of(1000, 2000, 0.001)
+                Arguments.of(1, 1, 2),
+                Arguments.of(0.5, 0.5, 4),
+                Arguments.of(-1, -1, 3),
+                Arguments.of(1.5, 2.5, 0.5),
+                Arguments.of(1000, 2000, 0.001)
         );
     }
-    
+
+    // =================== distanceBetween Static Method ==================== //
+    @Test
+    public void testDistanceBetween_Superficial() {
+        Vector2D v1 = Vector2D.zero();
+        Vector2D v2 = new Vector2D(3, 4);
+
+        assertEquals(5, Vector2D.distanceBetween(v1, v2));
+    }
+
     // =================== Constructor & Getter & Setter ==================== //
     @ParameterizedTest
     @MethodSource("provideNonZeroVectorArgs")
@@ -87,9 +98,9 @@ public class Vector2DTest {
         Vector2D v3 = new Vector2D(x + 10, y / 10);
 
         assertAll(
-                () -> assertTrue(v1.equals(v2)),
-                () -> assertFalse(v1.equals(v3)),
-                () -> assertFalse(v2.equals(v3))
+                () -> assertTrue(v1.matches(v2)),
+                () -> assertFalse(v1.matches(v3)),
+                () -> assertFalse(v2.matches(v3))
         );
     }
 
@@ -124,7 +135,7 @@ public class Vector2DTest {
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.div(new Vector2D(10, 10))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.copy(new Vector2D(10, 10))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.scale(10)),
-                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.scaleDown(10)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.div(10)),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.rotate(10))
         );
     }
@@ -145,7 +156,7 @@ public class Vector2DTest {
         double tolerance = 0.0001;
         assertTrue(mag <= 1 + tolerance && mag >= 1 - tolerance);
     }
-    
+
     // ========================== Vector Add Tests ========================== //
     @ParameterizedTest
     @MethodSource("provideNonZeroVectorArgs")
@@ -394,7 +405,7 @@ public class Vector2DTest {
                 () -> assertEquals(round(y * 100) / 100.0, round(v1.y * 100) / 100.0)
         );
     }
-    
+
     // ========================= Vector Scale Tests ========================== //
     @ParameterizedTest
     @MethodSource("provideScalarArgs")
@@ -423,7 +434,7 @@ public class Vector2DTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideScalarArgs")
+    @MethodSource("provideNonZeroVectorArgs")
     public void testScaleUp_ByZero(double x, double y) {
         Vector2D v1 = new Vector2D(x, y);
 
@@ -441,21 +452,20 @@ public class Vector2DTest {
         Vector2D v1 = new Vector2D(x, y);
 
         v1.scale(scalar)
-          .scale(scalar);
+                .scale(scalar);
 
         assertAll(
                 () -> assertEquals(x * scalar * scalar, v1.x(), "X coordinate should be scaled by the scalar twice."),
                 () -> assertEquals(y * scalar * scalar, v1.y(), "Y coordinate should be scaled by the scalar twice.")
         );
     }
-    
-    
+
     @ParameterizedTest
     @MethodSource("provideScalarArgs")
     public void testScaleDown_ByPositiveScalar(double x, double y, double scalar) {
         Vector2D v1 = new Vector2D(x, y);
 
-        v1.scaleDown(scalar);
+        v1.div(scalar);
 
         assertAll(
                 () -> assertEquals(x / scalar, v1.x(), "X coordinate should be scaled down by the scalar."),
@@ -468,7 +478,7 @@ public class Vector2DTest {
     public void testScaleDown_ByNegativeScalar(double x, double y, double scalar) {
         Vector2D v1 = new Vector2D(x, y);
 
-        v1.scaleDown(-scalar);
+        v1.div(-scalar);
 
         assertAll(
                 () -> assertEquals(x / -scalar, v1.x(), "X coordinate should be scaled down by the negative scalar."),
@@ -481,7 +491,7 @@ public class Vector2DTest {
     public void testScaleDown_ByZero(double x, double y) {
         Vector2D v1 = new Vector2D(x, y);
 
-        v1.scaleDown(0);
+        v1.div(0);
 
         assertAll(
                 () -> assertEquals(x, v1.x(), "X coordinate should remain unchanged when scaled down by zero."),
@@ -494,15 +504,15 @@ public class Vector2DTest {
     public void testScaleDown_ChainScaling(double x, double y, double scalar) {
         Vector2D v1 = new Vector2D(x * scalar * scalar, y * scalar * scalar);
 
-        v1.scaleDown(scalar)
-          .scaleDown(scalar);
+        v1.div(scalar)
+                .div(scalar);
 
         assertAll(
                 () -> assertEquals(x, v1.x(), "X coordinate should return to the original x after chain scaling down."),
                 () -> assertEquals(y, v1.y(), "Y coordinate should return to the original y after chain scaling down.")
         );
     }
-    
+
     // ===================== Vector Mag Function Test ======================= //
     @ParameterizedTest
     @MethodSource("provideNonZeroVectorArgs")
@@ -530,5 +540,18 @@ public class Vector2DTest {
         assertEquals(1, v1.mag(), "Magnitude of vector (1, 0) should be 1.");
         assertEquals(1, v2.mag(), "Magnitude of vector (0, 1) should be 1.");
     }
-    
+
+    @ParameterizedTest
+    @MethodSource("provideScalarArgs")
+    public void testSetMag(double x, double y, double scalar) {
+        Vector2D v = new Vector2D(x, y);
+
+        v.setMag(scalar);
+        double mag = v.mag();
+        double lowerThreshold = scalar - PRECISION_THRESHOLD;
+        double upperThreshold = scalar + PRECISION_THRESHOLD;
+
+        assertTrue(mag >= lowerThreshold && mag <= upperThreshold, mag + " outside of accepted tolerance values: " + lowerThreshold + " - " + upperThreshold);
+    }
+
 }

@@ -33,7 +33,7 @@ public class RenderSystem implements ISystem {
 
     // =========================== Constructors ============================= //
     public RenderSystem() {
-        List<Entity> ents = Entities.getEntitiesOfType(EntityType.BALL);
+        List<Entity> ents = Entities.getEntitiesOfType(EntityType.SOLID_BALL);
         componentCount = ents.size();
         for (Entity ent : ents) {
             ballPoints.add(ent.getComponent(PointMass.class));
@@ -42,22 +42,50 @@ public class RenderSystem implements ISystem {
     }
 
     // ============================ API Methods ============================= //
+    Color b1 = Color.web("0xFFFF00");
+    Color b2 = Color.web("0x00FFFF");
+    Color b3 = Color.web("0xFF00FF");
+    Color b4 = Color.PURPLE;
+    Color[] cs = {b1, b2, b3, b4};
+    int c = 0;
     public void draw(GraphicsContext gc, double gcWidth, double gcHeight) {
         // Refresh canvas
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, gcWidth, gcHeight);
+        gc.setLineWidth(2);
         
-        // Set ball colour
-        gc.setFill(Color.RED);
-
         double x, y, d, r;
         for (int i = 0; i < componentCount; i++) {
             r = ballBounds.get(i).radius();
             d = ballBounds.get(i).diameter();
-            x = ballPoints.get(i).x();
-            y = ballPoints.get(i).y();
+            x = ballPoints.get(i).x() - r; // must move to top left for rendering
+            y = ballPoints.get(i).y() - r; // must move to top left for rendering
 
-            gc.fillOval(x - r, y - r, d, d);
+            gc.setFill(cs[c = ++c % cs.length]);
+            gc.fillOval(x, y, d, d);
+//            gc.setStroke(Color.YELLOW);
+//            gc.strokeLine(
+//                    x + r,
+//                    y + r,
+//                    x + r + ballPoints.get(i).velocity().x() * 10,
+//                    y + r + ballPoints.get(i).velocity().y() * 10
+//            );
+//
+//            gc.setStroke(Color.WHITE);
+//            gc.strokeLine(
+//                    x + r,
+//                    y + r,
+//                    x + r + ballPoints.get(i).acceleration().x() * 10,
+//                    y + r + ballPoints.get(i).acceleration().y() * 10
+//            );
+//            
+//            gc.setStroke(Color.web("0x00FF00"));
+//            gc.strokeLine(
+//                    x + r,
+//                    y + r,
+//                    x + r + ballPoints.get(i).force().x() * 60,
+//                    y + r + ballPoints.get(i).force().y() * 60
+//            );
         }
 
     }

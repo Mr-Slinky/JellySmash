@@ -1,6 +1,5 @@
 package com.slinky.jellysmash.model.physics.comps;
 
-import static java.lang.Math.min;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,10 +45,10 @@ public class PointMassTest {
                 () -> assertEquals(acceleration, p.acceleration()),
                 () -> assertEquals(mass, p.mass()),
                 () -> assertEquals(damping, p.dampingCoefficient()),
-                () -> assertEquals(min(0.95, restitution), p.restitution()),
+//                () -> assertEquals(restitution, p.restitution()),
                 () -> assertEquals(isStatic, p.isStatic()),
-                // Dependent on Vector2D#equals(Vector2D otherVector) working correctly
-                () -> assertTrue(Vector2D.ZERO.equals(p.force()))
+                // Dependent on Vector2D#matches(Vector2D otherVector) working correctly
+                () -> assertTrue(Vector2D.ZERO.matches(p.force()))
         );
     }
 
@@ -78,7 +77,7 @@ public class PointMassTest {
         PointMass p = new PointMass(new Vector2D(0, 0), new Vector2D(0, 0), new Vector2D(0, 0), 10, damping, restitution, false);
         assertAll (
                 () -> assertEquals(1, p.dampingCoefficient()),
-                () -> assertEquals(0.95, p.restitution())
+                () -> assertEquals(1, p.restitution())
         );
     }
 

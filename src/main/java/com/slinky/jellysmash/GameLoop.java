@@ -111,7 +111,7 @@ public class GameLoop {
         this.worldDisplay = display;
         this.tick = configAnimationTimer();
     }
-
+    
     // ============================ API Methods ============================= //
     /**
      * Starts the game loop, beginning the update-render cycle.
@@ -126,7 +126,7 @@ public class GameLoop {
      * @see #stop()
      */
     public void start() {
-        tick.start();
+      tick.start();
     }
 
     /**
@@ -183,8 +183,8 @@ public class GameLoop {
             @Override
             public void handle(long currentTime) {
                 if (previousTime > 0) {
-                    engine.update((currentTime - previousTime) / 1_000_000_000.0);
                     worldDisplay.drawWorld();
+                    engine.update((currentTime - previousTime) / 1_000_000_000.0);
                 }
 
                 previousTime = currentTime;

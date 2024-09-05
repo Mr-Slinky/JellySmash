@@ -1,5 +1,8 @@
 package com.slinky.jellysmash.model.physics.comps;
 
+import static java.lang.Math.pow;
+import java.util.Objects;
+
 /**
  * Represents a 2-dimensional particle in the physics engine.
  *
@@ -28,13 +31,13 @@ package com.slinky.jellysmash.model.physics.comps;
  * the ECS framework.
  * </p>
  *
- * @version 2.0
- * @since 0.1.0
+ * @version  2.0
+ * @since    0.1.0
  *
- * @author Kheagen Haskins
+ * @author   Kheagen Haskins
  *
- * @see Vector2D
- * @see Component
+ * @see      Vector2D
+ * @see      Component
  */
 public class PointMass implements Component {
 
@@ -191,7 +194,7 @@ public class PointMass implements Component {
         // Physics properties
         this.mass        = mass;
         this.dampCoef    = Math.max(0, Math.min(1, damping));
-        this.restitution = Math.max(0, Math.min(0.95, restitution)); // Currently make perfect elastic collisions impossible
+        this.restitution = Math.max(0, Math.min(1, restitution)); 
         this.isStatic    = isStatic;
     }
 
@@ -263,6 +266,7 @@ public class PointMass implements Component {
     // ============================== Getters =============================== //
     /**
      * Retrieves the mass of the particle.
+     * 
      * <p>
      * The mass is a fundamental property of the particle, determining its
      * resistance to acceleration when a force is applied. It is typically
@@ -277,6 +281,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the current position of the particle in 2D space.
+     * 
      * <p>
      * The position is represented as a {@link Vector2D}, which contains the x
      * and y coordinates of the particle. This determines the particle's
@@ -291,6 +296,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the x-coordinate of the particle's position in 2D space.
+     * 
      * <p>
      * This method returns the horizontal position (x) of the particle, which is
      * a fundamental aspect of its location in the simulation space. The
@@ -306,6 +312,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the y-coordinate of the particle's position in 2D space.
+     * 
      * <p>
      * This method returns the vertical position (y) of the particle, which is a
      * fundamental aspect of its location in the simulation space. The
@@ -321,6 +328,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the current velocity of the particle.
+     * 
      * <p>
      * The velocity is represented as a {@link Vector2D}, indicating the speed
      * and direction of the particle's motion. It is the rate of change of the
@@ -335,6 +343,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the current acceleration of the particle.
+     * 
      * <p>
      * The acceleration is represented as a {@link Vector2D}, reflecting the
      * rate of change of the particle's velocity with respect to time. It is
@@ -349,6 +358,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the net force currently acting on the particle.
+     * 
      * <p>
      * The acting force is represented as a {@link Vector2D} and is the sum of
      * all forces applied to the particle. According to Newton's Second Law of
@@ -361,9 +371,22 @@ public class PointMass implements Component {
     public Vector2D force() {
         return force;
     }
+    
+    /**
+     * <b>Calculates</b> the momentum of an object based on its velocity and
+     * mass. Momentum is defined as the product of an object's mass and its
+     * velocity. This method returns a <b>new</b> {@code Vector2D} object
+     * representing the momentum vector.
+     *
+     * @return a {@code Vector2D} representing the momentum of the object.
+     */
+    public Vector2D momentum() {
+        return Vector2D.scale(velocity, mass);
+    }
 
     /**
      * Retrieves the damping coefficient of the particle.
+     * 
      * <p>
      * The damping coefficient is a scalar value that represents the resistive
      * force acting against the particle's velocity. This is often used to
@@ -378,6 +401,7 @@ public class PointMass implements Component {
 
     /**
      * Retrieves the restitution coefficient of the particle.
+     * 
      * <p>
      * The restitution coefficient, also known as the coefficient of restitution
      * (CoR), is a scalar value that determines the elasticity of collisions. A
@@ -390,9 +414,21 @@ public class PointMass implements Component {
     public double restitution() {
         return restitution;
     }
-
+    
+    /**
+     * Calculates the kinetic energy of an object based on its mass and
+     * velocity. Kinetic energy is given by the formula KE = 0.5 * m * v^2,
+     * where m is the mass of the object and v is the magnitude of its velocity.
+     *
+     * @return the kinetic energy of the object as a double.
+     */
+    public double kineticEnergy() {
+        return (mass * pow(velocity.mag(), 2)) / 2;
+    }
+    
     /**
      * Checks if the particle is static.
+     * 
      * <p>
      * A static particle is one that does not move, regardless of forces acting
      * upon it. This may be used to represent fixed objects or boundaries in the
@@ -409,6 +445,7 @@ public class PointMass implements Component {
     // ============================== Setters =============================== //
     /**
      * Sets the x-coordinate of the particle's position in 2D space.
+     * 
      * <p>
      * This method updates the horizontal position (x) of the particle within
      * the simulation space. Adjusting the x-coordinate can be used to move the
@@ -424,6 +461,7 @@ public class PointMass implements Component {
 
     /**
      * Sets the y-coordinate of the particle's position in 2D space.
+     * 
      * <p>
      * This method updates the vertical position (y) of the particle within the
      * simulation space. Adjusting the y-coordinate can be used to move the
@@ -439,6 +477,7 @@ public class PointMass implements Component {
 
     /**
      * Sets the mass of the particle.
+     * 
      * <p>
      * The mass is a fundamental property of the particle that determines its
      * resistance to acceleration when a force is applied. It is typically
@@ -510,47 +549,11 @@ public class PointMass implements Component {
     }
 
     // ============================ API Methods ============================= //
-    /**
-     * Applies an external force to the particle, contributing to its motion in
-     * the simulation.
-     *
-     * <p>
-     * This method directly adds the components of the given force vector to the
-     * internal force accumulator of the particle, effectively "pushing" the
-     * particle in a direction specified by the force vector. The accumulated
-     * force is used later in the physics simulation to calculate acceleration,
-     * velocity, and position updates according to Newton's Second Law of
-     * Motion.
-     * </p>
-     *
-     * <p>
-     * <b>Example Usage:</b>
-     * <pre><code>
-     *     // Create a force vector representing a force of 10 units in the x-direction
-     *     Vector2D force = new Vector2D(10, 0);
-     *
-     *     // Apply this force to the particle
-     *     particle.applyForce(force);
-     * </code></pre>
-     * </p>
-     *
-     * <p>
-     * <b>Note:</b> This method modifies the internal state of the particle by
-     * altering the force accumulator. It does not immediately result in visible
-     * movement but instead influences the physics calculations that will
-     * determine the particle's subsequent motion.
-     * </p>
-     *
-     * @param force the {@link Vector2D} representing the force to be applied to
-     * this particle. The vector's components (x and y) are added to the
-     * particle's current accumulated force.
-     *
-     */
-    public void applyForce(Vector2D force) {
-        this.force.x += force.x;
-        this.force.y += force.y;
+    public void addForce(Vector2D force) {
+        this.force.x += force.x; 
+        this.force.y += force.y; 
     }
-
+    
     /**
      * Reverses the x-component of the velocity vector of this object, applying
      * the restitution coefficient to simulate a bounce effect.
@@ -593,6 +596,25 @@ public class PointMass implements Component {
      */
     public void bounceY() {
         velocity.y *= restitution * -1;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.mass) ^ (Double.doubleToLongBits(this.mass) >>> 32));
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.dampCoef) ^ (Double.doubleToLongBits(this.dampCoef) >>> 32));
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.restitution) ^ (Double.doubleToLongBits(this.restitution) >>> 32));
+        hash = 53 * hash + (this.isStatic ? 1 : 0);
+        hash = 53 * hash + Objects.hashCode(this.position);
+        hash = 53 * hash + Objects.hashCode(this.velocity);
+        hash = 53 * hash + Objects.hashCode(this.acceleration);
+        hash = 53 * hash + Objects.hashCode(this.force);
+        return hash;
     }
 
     /**

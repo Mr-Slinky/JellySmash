@@ -12,98 +12,73 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The {@code MotionSystem} class is a specialised physics system within the
- * JellySmash game that handles the calculation and application of motion forces
- * on particles, particularly focusing on updating their acceleration, velocity,
- * and position. This class is a core component of the game's physics engine,
- * simulating realistic movement by integrating gravitational forces and other
- * potential forces acting on the particles.
+ * A core component of the JellySmash physics engine, responsible for
+ * calculating and applying
+ * <a href="https://en.wikipedia.org/wiki/Kinematics">kinematic</a> equations to
+ * simulate realistic motion of entities within the game.
  *
  * <p>
- * The primary responsibility of the {@code MotionSystem} is to manage the
- * motion of {@code PointMass} components by applying the Earth's gravitational
- * force, represented by the constant {@link #GRAVITY_EARTH}, and updating their
- * positions and velocities over time. The system operates under the assumption
- * that the acceleration and velocity of particles are the final steps in their
- * state updates, meaning any external forces should be applied before invoking
- * this system to ensure accurate and realistic motion calculations.
+ * This system primarily manages the motion of objects represented as
+ * {@link PointMass} components. Upon construction, the {@code MotionSystem}
+ * automatically fetches the relevant entities through the {@link Entities}
+ * utility class, which are created earlier during the initialisation process.
  * </p>
  *
  * <p>
- * This class is designed to be flexible and extendable, allowing for the
- * integration of additional forces beyond gravity by external systems or
- * classes. The class is structured to handle both static and dynamic particles,
- * with static particles being ignored in the motion calculations.
+ * A {@link #add(PointMass...)} method is available to dynamically add new
+ * particles to the system. Its primary role is convenience, allowing particles
+ * to be added during runtime if needed. However, the system's primary operation
+ * relies on the pre-fetched entities, making it immediately ready to update the
+ * physics state of these entities after construction.
  * </p>
  *
  * <p>
- * One of the key features of the {@code MotionSystem} is its reliance on an
- * {@code IntegrationMethod} for updating velocities and positions. This method
- * is injected as a dependency during instantiation. For example, you can choose
- * to use the Euler method by selecting
- * {@code IntegrationMethod integrator = IntegrationMethod.EULER;} and passing
- * this integrator to the constructor method. This approach provides a high
- * degree of flexibility and precision in the way the physics system handles
- * updates, making it adaptable to a variety of scenarios within the game.
+ * The {@code MotionSystem} is integrated into the broader physics engine, and
+ * its update sequence is carefully controlled by the engine's
+ * {@link PhysicsEngine#update(double)} method. In this sequence, the
+ * {@code MotionSystem} is invoked after force calculations are performed by
+ * other systems, ensuring that all forces are correctly applied before motion
+ * updates occur. This structured approach guarantees the integrity and
+ * consistency of the physics simulation, preventing issues such as unstable or
+ * incorrect updates.
  * </p>
  *
  * <p>
- * Calling the {@code update()} method of this system invokes the following
- * three-step process:
- * <ol>
- * <li>Apply motion forces (e.g., gravity) using the {@link #applyMotionForces}
- * method.</li>
- * <li>Calculate accelerations based on the accumulated forces using
- * {@link #calculateAccelerations}.</li>
- * <li>Update velocities and positions using the specified
- * {@link IntegrationMethod} through
- * {@link #calculateVelocitiesAndPositions}.</li>
- * </ol>
- * This ensures a clear and consistent update sequence, crucial for maintaining
- * the integrity of the physics simulation.
+ * The {@code MotionSystem} uses an injected {@link IntegrationMethod} to
+ * calculate the motion of particles. This allows the system to employ different
+ * numerical integration techniques, such as Euler or Verlet, depending on the
+ * needs of the simulation. This flexibility provides precise control over how
+ * motion is calculated, allowing the system to adapt to various scenarios and
+ * requirements within the game.
  * </p>
  *
  * <p>
- * <b>Instantiation Example</b>
+ * A typical usage pattern of the {@code MotionSystem} involves constructing the
+ * system with a chosen {@link IntegrationMethod} and then allowing the physics
+ * engine to manage its update process. The system will automatically manage the
+ * motion of all relevant entities, updating their state based on the forces
+ * applied during each update cycle.
+ * </p>
+ *
+ * <p>
+ * <b>Example Usage:</b>
  * <pre><code>
- *     MotionSystem ms = new MotionSystem(IntegrationMethods.EULER);
+ *     MotionSystem motionSystem = new MotionSystem(IntegrationMethod.EULER);
  * </code></pre>
  * </p>
  *
- * @version  1.0
- * @since    0.1.0
+ * @version 2.0
+ * @since 0.1.0
  *
- * @author   Kheagen Haskins
+ * @author Kheagen Haskins
  *
- * @see      PointMass
- * @see      Vector2D
- * @see      IntegrationMethod
+ * @see PointMass
+ * @see Vector2D
+ * @see IntegrationMethod
  */
 public class MotionSystem {
 
-    // ============================== Static ================================ //
-    /**
-     * Represents the acceleration due to Earth's gravity in metres per second
-     * squared ( m/s² ). This constant is used to apply a gravitational force to
-     * particles within the {@code MotionSystem}. The value is set to 9.81,
-     * which is the standard gravitational acceleration on Earth.
-     */
-    public static final double GRAVITY_EARTH = 9.81;
-
     // ============================== Fields ================================ //
-    /**
-     * The gravitational force vector applied to particles within the
-     * {@code MotionSystem}. This vector is initialised with a downward force
-     * equivalent to Earth's gravity, where the x-component is 0 and the
-     * y-component is {@code GRAVITY_EARTH}.
-     *
-     * <p>
-     * This vector is scaled based on the time step when applying motion forces
-     * to particles.
-     * </p>
-     */
-    private final Vector2D FG = new Vector2D(0, GRAVITY_EARTH);
-
     /**
      * The integration method used for calculating the motion of particles. This
      * determines how the motion equations are applied during the update.
@@ -143,6 +118,25 @@ public class MotionSystem {
     }
 
     // ============================ API Methods ============================= //
+    /**
+     * Updates the state of the motion system based on the elapsed time since
+     * the last update. This method applies forces, calculates accelerations,
+     * and updates velocities and positions for all particles in the system.
+     *
+     * <p>
+     * <b>Note:</b> Static particles are ignored as they do not undergo motion.
+     * </p>
+     *
+     * @param deltaTime the amount of time elapsed since the last update, in
+     * seconds
+     */
+    public void update(double deltaTime) {
+//        Entities.debug_DisplayTotalKEandMomentum("Before kinematics: "); // DEBUG
+        updateAccelerations();
+        updateVelocitiesAndPositions(deltaTime);
+//        Entities.debug_DisplayTotalKEandMomentum("After kinematics: ");  // DEBGU
+    }
+    
     /**
      * Adds one or more {@code PointMass} objects to the motion system for
      * management.
@@ -195,47 +189,7 @@ public class MotionSystem {
         particles.clear();
     }
 
-    /**
-     * Updates the state of the motion system based on the elapsed time since
-     * the last update. This method applies forces, calculates accelerations,
-     * and updates velocities and positions for all particles in the system.
-     *
-     * <p>
-     * <b>Note:</b> Static particles are ignored as they do not undergo motion.
-     * </p>
-     *
-     * @param deltaTime the amount of time elapsed since the last update, in
-     * seconds
-     */
-    public void update(double deltaTime) {
-        applyMotionForces();
-        calculateAccelerations(deltaTime);
-        calculateVelocitiesAndPositions();
-    }
-
     // ========================== Helper Methods ============================ //
-    /**
-     * Applies all motion forces, including gravity, to the internal list of
-     * particles. This method updates each particle's acting force by adding the
-     * gravitational force vector ({@link #FG}) and any other applicable forces.
-     *
-     *
-     */
-    private void applyMotionForces() {
-        for (PointMass p : particles) {
-            if (p.isStatic()) {
-                continue;
-            }
-
-            // Fg = mg
-            p.force().setComponents(
-                    FG.x() * p.mass(),
-                    FG.y() * p.mass()
-            );
-            // Other possible forces
-        }
-    }
-
     /**
      * Calculates and updates the acceleration of each particle in the specified
      * list based on the formula {@code a = F/m}, where {@code F} is the total
@@ -256,10 +210,8 @@ public class MotionSystem {
      * values.
      * </p>
      *
-     * @param deltaTime the amount of time that has elapsed since the last
-     * update, in seconds. Used to mult the acceleration.
      */
-    private void calculateAccelerations(double deltaTime) {
+    private void updateAccelerations() {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
@@ -270,29 +222,24 @@ public class MotionSystem {
 
             // a = F / m
             p.acceleration().setComponents(force.x() / mass, force.y() / mass);
-            p.acceleration().scale(deltaTime);
+            // nullify force so that it cannot contribute to any future acceleration calculations
+            // Might result in unintended side effect if force is needed elsewhere!
+            p.force().setComponents(0, 0); 
         }
     }
 
     /**
      * Calculates and updates the velocities and positions of the specified
-     * particles based on their current accelerations and velocities.
-     *
-     * <p>
-     * This method uses the injected {@link IntegrationMethod} to perform the
-     * calculations, allowing for different numerical integration techniques
-     * (e.g., Euler, Verlet) to be used depending on the specific needs of the
-     * simulation.
-     * </p>
+     * particles based on their current accelerations and velocities using the
+     * internal {@link IntegrationMethod} instance.
      */
-    private void calculateVelocitiesAndPositions() {
+    private void updateVelocitiesAndPositions(double deltaTime) {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
             }
 
-            iFunc.updateVelocity(p.velocity(), p.acceleration());
-            iFunc.updatePosition(p.position(), p.velocity());
+            iFunc.updateParticle(p, deltaTime);
         }
     }
 

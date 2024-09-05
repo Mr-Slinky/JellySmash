@@ -582,13 +582,30 @@ public class Vector2D implements Component {
      * when comparing vectors with known discrete values.
      * </p>
      *
-     * @param otherector the {@code Vector2D} object to be compared with this
+     * @param otherVector the {@code Vector2D} object to be compared with this
      * vector
      * @return {@code true} if the x and y coordinates of both vectors are
      * equal; {@code false} otherwise
      */
-    public boolean equals(Vector2D otherector) {
-        return x == otherector.x && y == otherector.y;
+    public boolean matches(Vector2D otherVector) {
+        return x == otherVector.x && y == otherVector.y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof Vector2D)) {
+            return false;
+        }
+        
+        return this == obj;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 97 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+        return hash;
     }
 
     /**
@@ -1399,6 +1416,5 @@ public class Vector2D implements Component {
         }
 
     }
-
 
 }

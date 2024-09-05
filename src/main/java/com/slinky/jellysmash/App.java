@@ -7,6 +7,7 @@ import com.slinky.jellysmash.view.WorldDisplay;
 import javafx.application.Application;
 
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 
 import javafx.stage.Stage;
@@ -50,7 +51,7 @@ import javafx.stage.Stage;
  * </p>
  *
  * @version 1.1
- * @since   0.1.0
+ * @since 0.1.0
  *
  * @author Kheagen Haskins
  *
@@ -82,6 +83,8 @@ public class App extends Application {
      */
     private GameLoop gameLoop;
 
+    private Scene scene;
+
     /**
      * Initialises the core components of the game, including the physics
      * engine, rendering system, and game loop.
@@ -106,10 +109,28 @@ public class App extends Application {
         super.init();
         int width = 500;
         int height = 800;
-        
+
         engine = new PhysicsEngine(width, height);
         worldDisplay = new WorldDisplay(new RenderSystem(), width, height);
         gameLoop = new GameLoop(engine, worldDisplay);
+
+        scene = new Scene(new StackPane(worldDisplay));
+
+        scene.setOnScroll(ev -> {
+            engine.update(0.016);
+            worldDisplay.drawWorld();
+        });
+
+        scene.setOnKeyPressed((KeyEvent ev) -> {
+            switch (ev.getCode()) {
+                case SPACE:
+                    gameLoop.stop();
+                    break;
+                case P:
+                    gameLoop.start();
+            }
+        });
+
     }
 
     /**
@@ -133,11 +154,9 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) {
-        stage.setScene(new Scene(new StackPane(worldDisplay)));
+        stage.setScene(scene);
         stage.show();
-        gameLoop.start();
-//        engine.update(1);
-//        worldDisplay.drawWorld();
+//        gameLoop.start();
     }
 
     @Override
@@ -145,7 +164,7 @@ public class App extends Application {
         super.stop();
         gameLoop.stop();
     }
-    
+
     /**
      * The main entry point for the application.
      *
@@ -163,6 +182,17 @@ public class App extends Application {
      */
     public static void main(String[] args) {
         launch();
+//        System.out.println("Square Root increase: ");
+//        for (int i = 1; i <= 10; i++) {
+//            System.out.println(1 / Math.sqrt(i));
+//        }
+//
+//        System.out.println("\nCube Root increase: ");
+//        for (int i = 1; i <= 10; i++) {
+//            System.out.println(1 / Math.cbrt(i));
+//        }
+//
+//        System.exit(0);
     }
 
 }

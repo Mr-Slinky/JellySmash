@@ -4,6 +4,7 @@ import com.slinky.jellysmash.model.physics.comps.Circle;
 import com.slinky.jellysmash.model.physics.comps.Component;
 import com.slinky.jellysmash.model.physics.comps.PointMass;
 import com.slinky.jellysmash.model.physics.comps.Vector2D;
+import static java.lang.Math.cbrt;
 import static java.lang.Math.sqrt;
 
 import java.util.Collections;
@@ -350,15 +351,60 @@ public class Entities {
         return newEntity(pointMass, new Circle(sqrt(mass) * 10));
     }
 
+    // ========================== Helper Methods ============================ //
     /**
      *
      * @param mass The input number to be scaled.
      * @return A number between 0 and 1.
      */
     private static double normalise(double mass) {
-        double val = 2 / sqrt(mass);
-        System.out.println("Mass of " + mass + " = " + val);
+        double val = 1 / Math.max(1, cbrt(mass));
         return val;
     }
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // =========================== Debug Methods ============================ //
+    public static double debug_displayTotalKE() {
+        double keTotal = 0;
+        for (Entity ent : Entities.getEntitiesWith(PointMass.class)) {
+            keTotal += ent.getComponent(PointMass.class).kineticEnergy();
+        }
+        System.out.println("Total Kinetic Energy:\t" + keTotal);
+        
+        return keTotal;
+    }
+    
+    public static double debug_displayTotalMomentum() {
+        double momentumTotal = 0;
+        for (Entity ent : Entities.getEntitiesWith(PointMass.class)) {
+            momentumTotal += ent.getComponent(PointMass.class).momentum().mag();
+        }
+        System.out.println("Total System Momenutm:\t" + momentumTotal);
+        
+        return momentumTotal;
+    }
+    
+    public static double debug_DisplayTotalKEandMomentum(String preText) {
+        System.out.println(preText);
+        debug_displayTotalKE();
+        
+        return debug_displayTotalMomentum();
+    }
+    
 }
