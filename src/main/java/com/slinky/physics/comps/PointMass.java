@@ -147,6 +147,8 @@ public class PointMass implements Component {
      * </p>
      */
     private Vector2D force;
+    
+    private double terminalVelSq = 8 * 8; // squared
 
     // =========================== Constructors ============================= //
     /**
@@ -189,12 +191,58 @@ public class PointMass implements Component {
         this.position     = position;
         this.velocity     = velocity;
         this.acceleration = acceleration;
-        this.force        = new Vector2D(0, 0);
+        this.force        = Vector2D.zero();
 
         // Physics properties
         this.mass        = mass;
         this.dampCoef    = Math.max(0, Math.min(1, damping));
-        this.restitution = 0.99999999999999999999999; // Math.max(0, Math.min(1, restitution)); 
+        this.restitution = Math.max(0, Math.min(1, restitution));
+        this.isStatic    = isStatic;
+    }
+    
+    /**
+     * Constructs a new {@code Particle2D} with specified position, velocity,
+     * mass, damping coefficient, restitution, and static flag.
+     *
+     * <p>
+     * This constructor allows for full customization of the particle's physical
+     * properties, making it ideal for scenarios where precise control over the
+     * particle's behaviour is required. All physical properties are validated
+     * to ensure they are non-negative. This constructor is particularly useful
+     * when initialising particles with specific attributes in a physics
+     * simulation.
+     * </p>
+     *
+     * @param position the initial position of the particle in the simulation
+     * space, represented as a {@link Position}.
+     * @param velocity the initial velocity of the particle, determining its
+     * speed and direction of movement, represented as a {@link Vector2D}.
+     * @param mass the mass of the particle, which must be a non-negative value.
+     * @param damping the damping coefficient, controlling how quickly the
+     * particle's motion decays, which must be a non-negative value.
+     * @param restitution the restitution (bounciness) of the particle,
+     * determining how much kinetic energy is conserved in collisions, which
+     * must be a non-negative value.
+     * @param isStatic a flag indicating whether the particle is static
+     * (immovable). If {@code true}, the particle will not respond to forces or
+     * acceleration.
+     *
+     * @throws IllegalArgumentException if mass, damping, or restitution are
+     * negative.
+     */
+    public PointMass(Vector2D position, Vector2D velocity, double mass, double damping, double restitution, boolean isStatic) {
+        throwIfNonPositive("mass", mass);
+
+        // Vectors
+        this.position     = position;
+        this.velocity     = velocity;
+        this.acceleration = Vector2D.zero();
+        this.force        = Vector2D.zero();
+
+        // Physics properties
+        this.mass        = mass;
+        this.dampCoef    = Math.max(0, Math.min(1, damping));
+        this.restitution = Math.max(0, Math.min(1, restitution));
         this.isStatic    = isStatic;
     }
 
@@ -549,11 +597,152 @@ public class PointMass implements Component {
     }
 
     // ============================ API Methods ============================= //
+    /**
+     * Adds the given force vector to the current force acting on this
+     * {@code PointMass}.
+     * <p>
+     * This method modifies the current force vector by adding the x and y
+     * components of the provided {@code force} vector to the respective
+     * components of the current force. It allows for applying multiple forces
+     * to the {@code PointMass} in a cumulative manner.
+     * </p>
+     *
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre><code>
+     *     PointMass pm = new PointMass(new Vector2D(0, 0), new Vector2D(1, 1), 5.0);
+     *     pm.addForce(new Vector2D(2, 3));  // Adds (2, 3) to the current force
+     * </code></pre>
+     *
+     * <p>
+     * This method updates the force in place and allows cumulative forces to be
+     * applied over time:
+     * </p>
+     * 
+     * <pre><code>
+     *     pm.addForce(new Vector2D(2, 3)).addForce(new Vector2D(-1, -1));  // Cumulative force on the point mass
+     * </code></pre>
+     *
+     * @param force The {@code Vector2D} representing the force to be added to
+     * this {@code PointMass}.
+     */
     public void addForce(Vector2D force) {
-        this.force.x += force.x; 
-        this.force.y += force.y; 
+        this.force.x += force.x;
+        this.force.y += force.y;
     }
     
+    /**
+     * Adds the specified x and y components to the current force acting on this
+     * {@code PointMass}.
+     * <p>
+     * This method allows for directly adding force to the x and y components of
+     * the current force vector. It is useful for applying multiple forces
+     * incrementally to the {@code PointMass} without the need to create a new
+     * {@code Vector2D} object.
+     * </p>
+     *
+     * @param x The value to be added to the x-component of the current force.
+     * @param y The value to be added to the y-component of the current force.
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * PointMass pm = new PointMass(new Vector2D(0, 0), new Vector2D(1, 1), 5.0);
+     * pm.addForce(2, 3);  // Adds (2, 3) to the current force
+     * </pre>
+     *
+     * <p>
+     * This method modifies the force in place, allowing for multiple forces to
+     * be accumulated over time:</p>
+     * <pre>
+     * pm.addForce(2, 3).addForce(-1, -1);  // Cumulative force of (1, 2) applied to the point mass
+     * </pre>
+     */
+    public void addForce(double x, double y) {
+        this.force.x += x;
+        this.force.y += y;
+    }
+
+
+    /**
+     * Increases the velocity of the {@code PointMass} by the specified x and y
+     * increments while enforcing terminal velocity.
+     * <p>
+     * This method updates the velocity by adding the provided {@code vx} and
+     * {@code vy} increments to the x and y components of the current velocity.
+     * After updating the velocity, it checks if the squared magnitude of the
+     * velocity exceeds the squared terminal velocity. If the limit is exceeded,
+     * the velocity is scaled down to match the terminal velocity.
+     * </p>
+     *
+     * @param vx The amount by which to increase the x-component of the
+     * velocity.
+     * @param vy The amount by which to increase the y-component of the
+     * velocity.
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * PointMass pm = new PointMass(new Vector2D(0, 0), new Vector2D(1, 1), 5.0, 10.0);  // 10.0 is terminal velocity
+     * pm.increaseSpeed(3, 4);  // Increases velocity by (3, 4), but enforces the terminal velocity limit
+     * </pre>
+     *
+     * <p>
+     * This method modifies the velocity in place and ensures that the terminal
+     * velocity is not exceeded, which is useful for simulating friction or air
+     * resistance:</p>
+     * <pre>
+     * pm.increaseSpeed(5, 6).increaseSpeed(1, 2);  // Terminal velocity constraint applied after each increase
+     * </pre>
+     */
+    public void increaseSpeed(double vx, double vy) {
+        velocity.add(vx, vy);
+
+        // Check if the squared magnitude of the velocity exceeds the squared terminal velocity
+        double velocitySquared = vx * vx + vy * vy;
+
+        if (velocitySquared > terminalVelSq) {
+            // Scale the velocity to match the terminal velocity
+            double scaleFactor = Math.sqrt(terminalVelSq / velocitySquared);
+            velocity = velocity.scale(scaleFactor);
+        }
+    }
+
+    /**
+     * Increases the velocity of the {@code PointMass} by a specified speed
+     * vector while enforcing terminal velocity.
+     * <p>
+     * This method provides an overload of {@code increaseSpeed} that accepts a
+     * {@code Vector2D} for speed increment. The x and y components of the
+     * {@code speedIncrease} vector are added to the respective components of
+     * the velocity, and the terminal velocity limit is enforced in the same way
+     * as the scalar version.
+     * </p>
+     *
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre><code>
+     *     PointMass pm = new PointMass(new Vector2D(0, 0), new Vector2D(1, 1), 5.0, 10.0);  // 10.0 is terminal velocity
+     *     pm.increaseSpeed(new Vector2D(3, 4));  // Increases velocity by (3, 4), but enforces terminal velocity
+     * </code></pre>
+     *
+     * <p>
+     * This method modifies the velocity in place, allowing for speed increases
+     * via vector arithmetic while ensuring the terminal velocity is not
+     * exceeded:</p>
+     * <pre><code>
+     *     pm.increaseSpeed(new Vector2D(5, 6)).increaseSpeed(new Vector2D(1, 2));  // Terminal velocity constraint applied after each increase
+     * </code></pre>
+     *
+     * @param speedIncrease The {@code Vector2D} representing the amount to
+     * increase the velocity in the x and y directions.
+     */
+    public void increaseSpeed(Vector2D speedIncrease) {
+        increaseSpeed(speedIncrease.x, speedIncrease.y);
+    }
+
     /**
      * Reverses the x-component of the velocity vector of this object, applying
      * the restitution coefficient to simulate a bounce effect.
@@ -598,16 +787,24 @@ public class PointMass implements Component {
         velocity.y *= restitution * -1;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     */
     @Override
     public boolean equals(Object obj) {
         return this == obj;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     */
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.mass) ^ (Double.doubleToLongBits(this.mass) >>> 32));
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.dampCoef) ^ (Double.doubleToLongBits(this.dampCoef) >>> 32));
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.mass)        ^ (Double.doubleToLongBits(this.mass)        >>> 32));
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.dampCoef)    ^ (Double.doubleToLongBits(this.dampCoef)    >>> 32));
         hash = 53 * hash + (int) (Double.doubleToLongBits(this.restitution) ^ (Double.doubleToLongBits(this.restitution) >>> 32));
         hash = 53 * hash + (this.isStatic ? 1 : 0);
         hash = 53 * hash + Objects.hashCode(this.position);
