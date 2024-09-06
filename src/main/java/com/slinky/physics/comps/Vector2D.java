@@ -31,18 +31,18 @@ import static java.lang.Math.sqrt;
  *     Vector2D v1 = new Vector2D(10, 10);
  *     Vector2D v2 = new Vector2D(20, 20);
  *
- *     // Chain multiple operations: mult, add, and normalize the vector
+ *     // Chain multiple operations: mult, add, and normalise the vector
  *     v1.mult(2)       // doubles the x and y components of v1 (20, 20)
  *       .add(v2)       // Adds the x and y components of v2 to v1 (40, 40)
  *       .normalize();  // (0.71, 0.71)
  *
- *     // The resulting vector 'velocity' will be scaled, adjusted, and normalized in sequence
+ *     // The resulting vector 'velocity' will be scaled, adjusted, and normalised in sequence
  *     System.out.println(velocity);  // Output: Vector{x, y} (based on the operations)
  * </code></pre>
  *
  * <p>
  * In this example, the vector's x and y components are first scaled, then
- * adjusted by adding another vector, and finally normalized to unit length, all
+ * adjusted by adding another vector, and finally normalised to unit length, all
  * in one fluent chain of method calls. This improves code readability and
  * maintains a clear and concise style.
  * </p>
@@ -74,17 +74,16 @@ import static java.lang.Math.sqrt;
  * The {@code Vector2D} class provides constructors for initialising vectors and
  * methods for modifying and retrieving the x and y coordinates. This class is
  * designed to be extendable and reusable across different systems that require
- * two-dimensional vector data, making it a core part of the physics engine in
- * JellySmash.
+ * two-dimensional vector data, making it a core part of the physics engine.
  * </p>
  *
  * @version 2.0
- * @since 0.1.0
+ * @since   0.1.0
  *
- * @author Kheagen Haskins
+ * @author  Kheagen Haskins
  *
- * @see Vector2D
- * @see Component
+ * @see     Vector2D
+ * @see     Component
  */
 public class Vector2D implements Component {
 
@@ -255,6 +254,43 @@ public class Vector2D implements Component {
 
         return this;
     }
+    
+    /**
+     * Adds the given x and y values to the respective components of this
+     * vector.
+     * <p>
+     * This method allows for directly modifying the x and y components of the
+     * current vector without creating a new {@code Vector2D} object. It is
+     * useful for optimising performance by avoiding unnecessary object
+     * creation, especially in scenarios where frequent vector manipulation is
+     * needed.
+     * </p>
+     *
+     * @param x The value to be added to the x-component of this vector.
+     * @param y The value to be added to the y-component of this vector.
+     * @return The current {@code Vector2D} instance, with the x and y
+     * components updated.
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * Vector2D vec = new Vector2D(3, 4);
+     * vec.add(2, 1);  // vec is now (5, 5)
+     * </pre>
+     *
+     * <p>
+     * This method modifies the vector in place and returns the modified
+     * instance, enabling method chaining:</p>
+     * <pre>
+     * vec.add(1, 1).sub(0.5, 0.5);  // Chained operations on the same vector
+     * </pre>
+     */
+    public Vector2D add(double x, double y) {
+        this.x += x;
+        this.y += y;
+
+        return this;
+    }
 
     /**
      * Subtracts the components of the specified {@code Vector2D} from this
@@ -279,6 +315,42 @@ public class Vector2D implements Component {
 
         return this;
     }
+    
+    /**
+     * Subtracts the given x and y values from the respective components of this
+     * vector.
+     * <p>
+     * This method directly modifies the x and y components of the current
+     * vector, allowing for efficient vector manipulation without the overhead
+     * of creating a new {@code Vector2D} object. It is especially useful in
+     * performance-sensitive applications, such as physics simulations.
+     * </p>
+     *
+     * @param x The value to be subtracted from the x-component of this vector.
+     * @param y The value to be subtracted from the y-component of this vector.
+     * @return The current {@code Vector2D} instance, with the x and y
+     * components updated.
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * Vector2D vec = new Vector2D(5, 5);
+     * vec.sub(2, 1);  // vec is now (3, 4)
+     * </pre>
+     *
+     * <p>
+     * This method modifies the vector in place and returns the modified
+     * instance, enabling method chaining:</p>
+     * <pre>
+     * vec.sub(1, 1).add(0.5, 0.5);  // Chained operations on the same vector
+     * </pre>
+     */
+    public Vector2D sub(double x, double y) {
+        this.x -= x;
+        this.y -= y;
+
+        return this;
+    }
 
     /**
      * Multiplies the components of this vector by the components of the
@@ -300,6 +372,41 @@ public class Vector2D implements Component {
     public Vector2D mult(Vector2D other) {
         this.x *= other.x;
         this.y *= other.y;
+
+        return this;
+    }
+
+    /**
+     * Multiplies the x and y components of this vector by the specified values,
+     * allowing for independent scaling.
+     * <p>
+     * This method modifies the current vector in place by scaling the x and y
+     * components individually by the provided factors. It is particularly
+     * useful when you need non-uniform scaling along different axes, unlike the
+     * {@code scale} method, which applies a uniform scaling factor.
+     * </p>
+     *
+     * @param x The value by which to multiply the x-component of this vector.
+     * @param y The value by which to multiply the y-component of this vector.
+     * @return The current {@code Vector2D} instance, with the x and y
+     * components scaled.
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * Vector2D vec = new Vector2D(3, 4);
+     * vec.mult(2, 3);  // vec is now (6, 12)
+     * </pre>
+     *
+     * <p>
+     * This method modifies the vector in place and allows method chaining:</p>
+     * <pre>
+     * vec.mult(2, 3).add(1, 1);  // Chained operations on the same vector
+     * </pre>
+     */
+    public Vector2D mult(double x, double y) {
+        this.x *= x;
+        this.y *= y;
 
         return this;
     }
@@ -336,6 +443,83 @@ public class Vector2D implements Component {
     }
 
     /**
+     * Scales down the components of this vector by the specified scalar value.
+     * <p>
+     * This method divides both the x and y components of the vector by the
+     * provided scalar value, effectively reducing the magnitude of the vector
+     * by that factor.
+     * </p>
+     *
+     * <p>
+     * If the scalar value is zero, the method returns the vector unchanged,
+     * avoiding division by zero errors.
+     * </p>
+     *
+     * <p>
+     * The operation is performed in place, meaning the current vector is
+     * updated and returned. This allows for method chaining.
+     * </p>
+     *
+     * <p>
+     * <b>Example Usage:</b>
+     * <pre><code>
+     * Vector2D velocity = new Vector2D(4, 6);
+     * velocity.div(2); // Now velocity is (2, 3)
+     * </code></pre>
+     * </p>
+     *
+     * @param scalar the value by which to divide the vector components. If the
+     * scalar is zero, the vector remains unchanged.
+     * @return this vector after the scaling operation.
+     */
+    public Vector2D div(double scalar) {
+        if (scalar == 0) {
+            return this;
+        }
+
+        this.x /= scalar;
+        this.y /= scalar;
+
+        return this;
+    }
+    
+    /**
+     * Divides the x and y components of this vector by the specified values,
+     * allowing for independent scaling down.
+     * <p>
+     * This method modifies the current vector in place by dividing the x and y
+     * components individually by the provided divisors. If either divisor is
+     * zero, the corresponding component will be set to zero to avoid division
+     * by zero errors.
+     * </p>
+
+     *
+     * <p>
+     * Example usage:</p>
+     * <pre>
+     * Vector2D vec = new Vector2D(6, 12);
+     * vec.div(2, 3);  // vec is now (3, 4)
+     * </pre>
+     *
+     * <p>
+     * This method modifies the vector in place and allows method chaining:</p>
+     * <pre>
+     * vec.div(2, 3).add(1, 1);  // Chained operations on the same vector
+     * </pre>
+     *
+     * @param x The value by which to divide the x-component of this vector.
+     * @param y The value by which to divide the y-component of this vector.
+     * @return The current {@code Vector2D} instance, with the x and y
+     * components divided.
+     */
+    public Vector2D div(double x, double y) {
+        this.x = x == 0 ? 0 : this.x / x;
+        this.y = y == 0 ? 0 : this.y / y;
+
+        return this;
+    }
+    
+    /**
      * Scales up the components of this vector by the specified scalar value.
      * <p>
      * This method multiplies both the x and y components of the vector by the
@@ -367,47 +551,6 @@ public class Vector2D implements Component {
     }
 
     /**
-     * Scales down the components of this vector by the specified scalar value.
-     * <p>
-     * This method divides both the x and y components of the vector by the
-     * provided scalar value, effectively reducing the magnitude of the vector
-     * by that factor.
-     * </p>
-     *
-     * <p>
-     * If the scalar value is zero, the method returns the vector unchanged,
-     * avoiding division by zero errors.
-     * </p>
-     *
-     * <p>
-     * The operation is performed in place, meaning the current vector is
-     * updated and returned. This allows for method chaining.
-     * </p>
-     *
-     * <p>
-     * <b>Example Usage:</b>
-     * <pre><code>
-     Vector2D velocity = new Vector2D(4, 6);
-     velocity.div(2); // Now velocity is (2, 3)
- </code></pre>
-     * </p>
-     *
-     * @param scalar the value by which to divide the vector components. If the
-     * scalar is zero, the vector remains unchanged.
-     * @return this vector after the scaling operation.
-     */
-    public Vector2D div(double scalar) {
-        if (scalar == 0) {
-            return this;
-        }
-
-        this.x /= scalar;
-        this.y /= scalar;
-
-        return this;
-    }
-
-    /**
      * Calculates the magnitude (length) of this vector.
      *
      * <p>
@@ -418,7 +561,8 @@ public class Vector2D implements Component {
      * @return the magnitude of this vector.
      */
     public double mag() {
-        return sqrt(x * x + y * y);
+        double sqrt = sqrt(x * x + y * y); // DEBUG
+        return sqrt;
     }
 
     /**
@@ -650,7 +794,7 @@ public class Vector2D implements Component {
     public static Vector2D add(Vector2D v1, Vector2D v2) {
         return new Vector2D(v1.x + v2.x, v1.y + v2.y);
     }
-
+    
     /**
      * Creates a new {@code Vector2D} representing the difference between the
      * components of two {@code Vector2D} instances.
@@ -861,7 +1005,7 @@ public class Vector2D implements Component {
      * <p>
      * This method is useful for representing a neutral vector, where no
      * movement or force is applied in either direction. It can be used in
-     * various scenarios, such as initializing vectors or resetting vector
+     * various scenarios, such as initialising vectors or resetting vector
      * values to a default state.
      * </p>
      *
@@ -882,7 +1026,7 @@ public class Vector2D implements Component {
      * Creates a new vector that is a copy of the supplier vector.
      * <p>
      * This method creates and returns a new {@code Vector2D} instance,
-     * initialized with the components of the provided {@code supplierVector}.
+     * initialised with the components of the provided {@code supplierVector}.
      * </p>
      *
      * @param v the vector to copy
@@ -1147,8 +1291,8 @@ public class Vector2D implements Component {
          * {@inheritDoc}
          *
          * <p>
-         * This method is overridden to prevent normalization of the vector. Any
-         * attempt to normalize this vector will result in an
+         * This method is overridden to prevent normalisation of the vector. Any
+         * attempt to normalise this vector will result in an
          * {@code UnsupportedOperationException}.
          * </p>
          *
@@ -1404,11 +1548,11 @@ public class Vector2D implements Component {
         }
 
         /**
-         * Normalizes this vector to have a magnitude of 1. Since
+         * Normalises this vector to have a magnitude of 1. Since
          * {@code UnitVectorConstant} is immutable, this operation returns a new
-         * vector representing the normalized vector.
+         * vector representing the normalised vector.
          *
-         * @return a new {@code Vector2D} representing the normalized vector
+         * @return a new {@code Vector2D} representing the normalised vector
          */
         @Override
         public Vector2D normalize() {
