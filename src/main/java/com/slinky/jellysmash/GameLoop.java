@@ -3,6 +3,9 @@ package com.slinky.jellysmash;
 import com.slinky.physics.PhysicsEngine2D;
 import com.slinky.jellysmash.debug.FXWorldDisplay;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
 
 /**
  * The {@code GameLoop} class is responsible for managing the core loop of the
@@ -89,6 +92,8 @@ public class GameLoop {
      */
     private AnimationTimer tick;
 
+    private Series energySeries;
+
     /**
      * A status flag indicating if the loop is currently running
      */
@@ -111,13 +116,20 @@ public class GameLoop {
      * @see PhysicsEngine2D
      * @see FXWorldDisplay
      */
-    public GameLoop(PhysicsEngine2D engine, FXWorldDisplay display) {
+    public GameLoop(PhysicsEngine2D engine, FXWorldDisplay display, Series energySeries) {
         this.engine = engine;
         this.worldDisplay = display;
+        this.energySeries = energySeries;
         this.tick = configAnimationTimer();
     }
 
     // ============================ API Methods ============================= //
+    public void update(double deltaTime) {
+        worldDisplay.drawWorld();
+        engine.update(deltaTime);
+        updateEnergyChart(PhysicsEngine2D.getTotalSystemKE());
+    }
+
     /**
      * Starts the game loop, beginning the update-render cycle.
      *
@@ -203,12 +215,18 @@ public class GameLoop {
             @Override
             public void handle(long currentTime) {
                 if (previousTime > 0) {
-                    worldDisplay.drawWorld();
-                    engine.update((currentTime - previousTime) / 1_000_000_000.0);
+                    update((currentTime - previousTime) / 1_000_000_000.0);
                 }
 
                 previousTime = currentTime;
             }
         };
+    }
+
+    private void updateEnergyChart(double energy) {
+        Platform.runLater(() -> {
+            int count = energySeries.getData().size();
+            energySeries.getData().add(new XYChart.Data<>(count, energy));
+        });
     }
 }

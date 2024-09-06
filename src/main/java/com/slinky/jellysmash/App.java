@@ -8,7 +8,6 @@ import com.slinky.jellysmash.debug.FXWorldDisplay;
 import javafx.application.Application;
 
 import javafx.scene.Scene;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 
 import javafx.stage.Stage;
@@ -51,8 +50,8 @@ import javafx.stage.Stage;
  * and rendering loop.
  * </p>
  *
- * @version 1.1
- * @since 0.1.0
+ * @version 2.0
+ * @since   0.1.0
  *
  * @author Kheagen Haskins
  *
@@ -66,7 +65,10 @@ import javafx.stage.Stage;
  * @see javafx.application.Application#start(Stage)
  */
 public class App extends Application {
-
+    
+    private Stage chartStage;
+    private FXDebugScene debugDisplay;
+    
     @Override
     public void init() throws Exception {
         super.init();
@@ -93,13 +95,19 @@ public class App extends Application {
      */
     @Override
     public void start(Stage stage) {
-        stage.setScene(new FXDebugScene());
+        chartStage = new Stage();
+        debugDisplay = new FXDebugScene();
+        stage.setScene(debugDisplay);
+        chartStage.setScene(new Scene(FXDebugScene.getLineChart(), 800, 600));
+        
+        chartStage.show();
         stage.show();
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+        chartStage.close();
         System.exit(0);
     }
 

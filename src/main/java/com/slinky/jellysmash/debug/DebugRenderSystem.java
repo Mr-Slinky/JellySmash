@@ -45,12 +45,14 @@ public class DebugRenderSystem {
     Color b1 = Color.web("0xFFFF00");
     Color b2 = Color.web("0x00FFFF");
     Color b3 = Color.web("0xFF00FF");
-    Color b4 = Color.PURPLE;
-    Color[] cs = {b1, b2};
+    Color b4 = Color.web("0x00FF00");
+    Color b5 = Color.web("0xFF0000");
+    
+    Color[] cs = {b1, b2, b3, b4};
     int c = 0;
     public void draw(GraphicsContext gc, double gcWidth, double gcHeight) {
         // Refresh canvas
-        gc.setFill(Color.BLACK);
+        gc.setFill(Color.web("0x111111"));
         gc.fillRect(0, 0, gcWidth, gcHeight);
         gc.setLineWidth(2);
         

@@ -362,27 +362,4 @@ public class Entities {
         return val;
     }
     
-    // =========================== Debug Methods ============================ //
-    public static double debug_getTotalSystemKE() {
-        double keTotal = 0;
-        for (Entity ent : Entities.getEntitiesWith(PointMass.class)) {
-            keTotal += ent.getComponent(PointMass.class).kineticEnergy();
-        }
-        return keTotal;
-    }
-    
-    public static double getTotalSystemMomentum() {
-        double momentumTotal = 0;
-        for (Entity ent : Entities.getEntitiesWith(PointMass.class)) {
-            momentumTotal += ent.getComponent(PointMass.class).momentum().mag();
-        }
-        return momentumTotal;
-    }
-    
-    public static void debug_DisplayTotalKEandMomentum(String preText) {
-        System.out.println(preText);
-        System.out.println("Total KE:\t" + debug_getTotalSystemKE());
-        System.out.println("Total P: \t" + getTotalSystemMomentum());
-    }
-    
 }
