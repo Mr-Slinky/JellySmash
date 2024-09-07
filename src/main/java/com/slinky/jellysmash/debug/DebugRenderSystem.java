@@ -42,13 +42,13 @@ public class DebugRenderSystem {
     }
 
     // ============================ API Methods ============================= //
-    Color b1 = Color.web("0xFFFF00");
-    Color b2 = Color.web("0x00FFFF");
+    Color b1 = Color.web("0x00FFFF");
+    Color b2 = Color.web("0xFFFF00");
     Color b3 = Color.web("0xFF00FF");
     Color b4 = Color.web("0x00FF00");
     Color b5 = Color.web("0xFF0000");
     
-    Color[] cs = {b1, b2, b3, b4};
+    Color[] cs = {b1, b2};
     int c = 0;
     public void draw(GraphicsContext gc, double gcWidth, double gcHeight) {
         // Refresh canvas
@@ -65,7 +65,7 @@ public class DebugRenderSystem {
 
             gc.setFill(cs[c = ++c % cs.length]);
             gc.fillOval(x, y, d, d);
-            gc.setStroke(Color.YELLOW);
+            gc.setStroke(Color.WHITE);
             gc.strokeLine(
                     x + r,
                     y + r,
@@ -73,7 +73,7 @@ public class DebugRenderSystem {
                     y + r + ballPoints.get(i).velocity().y() * 10
             );
 
-            gc.setStroke(Color.WHITE);
+            gc.setStroke(Color.web("0x00FF00"));
             gc.strokeLine(
                     x + r,
                     y + r,
@@ -81,7 +81,7 @@ public class DebugRenderSystem {
                     y + r + ballPoints.get(i).acceleration().y() * 10
             );
             
-            gc.setStroke(Color.web("0x00FF00"));
+            gc.setStroke(Color.RED);
             gc.strokeLine(
                     x + r,
                     y + r,

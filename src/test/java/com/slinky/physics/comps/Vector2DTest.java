@@ -1,6 +1,5 @@
 package com.slinky.physics.comps;
 
-import com.slinky.physics.comps.Vector2D;
 import static java.lang.Math.abs;
 import static java.lang.Math.round;
 import java.util.stream.Stream;
@@ -11,7 +10,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.Arguments;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -105,6 +109,161 @@ public class Vector2DTest {
         );
     }
 
+    // ======================== Vector Cosntant Tests ======================= //
+    @Test
+    public void testConstants_UnitVectorValues() {
+        assertAll(
+                () -> assertEquals(0,  Vector2D.DOWN.x),
+                () -> assertEquals(0,  Vector2D.UP.x),
+                () -> assertEquals(0,  Vector2D.LEFT.y),
+                () -> assertEquals(0,  Vector2D.RIGHT.y),
+                () -> assertEquals(-1, Vector2D.LEFT.x),
+                () -> assertEquals(-1, Vector2D.UP.y),
+                () -> assertEquals(1,  Vector2D.RIGHT.x),
+                () -> assertEquals(1,  Vector2D.DOWN.y),
+                () -> assertEquals(1,  Vector2D.UP.mag()),
+                () -> assertEquals(1,  Vector2D.DOWN.mag()),
+                () -> assertEquals(1,  Vector2D.LEFT.mag()),
+                () -> assertEquals(1,  Vector2D.RIGHT.mag())
+        );
+    }
+
+    @Test
+    public void testConstants_Mutability() {
+        assertAll(
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.UP.setX(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.UP.setY(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.UP.setComponents(1, 1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.UP.setMag(2)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.DOWN.setX(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.DOWN.setY(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.DOWN.setComponents(1, 1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.DOWN.setMag(2)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.LEFT.setX(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.LEFT.setY(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.LEFT.setComponents(1, 1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.LEFT.setMag(2)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.RIGHT.setX(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.RIGHT.setY(1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.RIGHT.setComponents(1, 1)),
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.RIGHT.setMag(2)),
+                // Operations allowed but the return value is a new or different Vector
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.copy(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.cross(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.div(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.add(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.sub(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.div(7)),
+                () -> assertNotSame(Vector2D.UP,    Vector2D.UP.scale(7)),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.copy(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.cross(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.div(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.add(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.sub(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.div(7)),
+                () -> assertNotSame(Vector2D.DOWN,  Vector2D.DOWN.scale(7)),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.copy(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.cross(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.div(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.add(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.sub(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.div(7)),
+                () -> assertNotSame(Vector2D.LEFT,  Vector2D.LEFT.scale(7)),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.copy(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.cross(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.div(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.add(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.sub(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.div(7)),
+                () -> assertNotSame(Vector2D.RIGHT, Vector2D.RIGHT.scale(7)),
+                // Remain unchanged
+                () -> assertEquals(0,  Vector2D.DOWN.x),
+                () -> assertEquals(0,  Vector2D.UP.x),
+                () -> assertEquals(0,  Vector2D.LEFT.y),
+                () -> assertEquals(0,  Vector2D.RIGHT.y),
+                () -> assertEquals(-1, Vector2D.LEFT.x),
+                () -> assertEquals(-1, Vector2D.UP.y),
+                () -> assertEquals(1,  Vector2D.RIGHT.x),
+                () -> assertEquals(1,  Vector2D.DOWN.y),
+                () -> assertEquals(1,  Vector2D.UP.mag()),
+                () -> assertEquals(1,  Vector2D.DOWN.mag()),
+                () -> assertEquals(1,  Vector2D.LEFT.mag()),
+                () -> assertEquals(1,  Vector2D.RIGHT.mag())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNonZeroVectorArgs")
+    public void testConstants_AddOperation_RemainUnchanged(double x, double y) {
+        Vector2D.UP   .add(new Vector2D(x, y));
+        Vector2D.DOWN .add(new Vector2D(x, y));
+        Vector2D.LEFT .add(new Vector2D(x, y));
+        Vector2D.RIGHT.add(new Vector2D(x, y));
+        
+        assertAll(
+                () -> assertEquals(0,  Vector2D.DOWN.x),
+                () -> assertEquals(0,  Vector2D.UP.x),
+                () -> assertEquals(0,  Vector2D.LEFT.y),
+                () -> assertEquals(0,  Vector2D.RIGHT.y),
+                () -> assertEquals(-1, Vector2D.LEFT.x),
+                () -> assertEquals(-1, Vector2D.UP.y),
+                () -> assertEquals(1,  Vector2D.RIGHT.x),
+                () -> assertEquals(1,  Vector2D.DOWN.y),
+                () -> assertEquals(1,  Vector2D.UP.mag()),
+                () -> assertEquals(1,  Vector2D.DOWN.mag()),
+                () -> assertEquals(1,  Vector2D.LEFT.mag()),
+                () -> assertEquals(1,  Vector2D.RIGHT.mag())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNonZeroVectorArgs")
+    public void testConstants_SubOperation_RemainUnchanged(double x, double y) {
+        Vector2D.UP   .sub(new Vector2D(x, y));
+        Vector2D.DOWN .sub(new Vector2D(x, y));
+        Vector2D.LEFT .sub(new Vector2D(x, y));
+        Vector2D.RIGHT.sub(new Vector2D(x, y));
+        
+        assertAll(
+                () -> assertEquals(0,  Vector2D.DOWN.x),
+                () -> assertEquals(0,  Vector2D.UP.x),
+                () -> assertEquals(0,  Vector2D.LEFT.y),
+                () -> assertEquals(0,  Vector2D.RIGHT.y),
+                () -> assertEquals(-1, Vector2D.LEFT.x),
+                () -> assertEquals(-1, Vector2D.UP.y),
+                () -> assertEquals(1,  Vector2D.RIGHT.x),
+                () -> assertEquals(1,  Vector2D.DOWN.y),
+                () -> assertEquals(1,  Vector2D.UP.mag()),
+                () -> assertEquals(1,  Vector2D.DOWN.mag()),
+                () -> assertEquals(1,  Vector2D.LEFT.mag()),
+                () -> assertEquals(1,  Vector2D.RIGHT.mag())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideNonZeroVectorArgs")
+    public void testConstants_ScaleOperation_RemainUnchanged(double x) {
+        Vector2D.UP   .scale(x);
+        Vector2D.DOWN .scale(x);
+        Vector2D.LEFT .scale(x);
+        Vector2D.RIGHT.scale(x);
+        
+        assertAll(
+                () -> assertEquals(0,  Vector2D.DOWN.x),
+                () -> assertEquals(0,  Vector2D.UP.x),
+                () -> assertEquals(0,  Vector2D.LEFT.y),
+                () -> assertEquals(0,  Vector2D.RIGHT.y),
+                () -> assertEquals(-1, Vector2D.LEFT.x),
+                () -> assertEquals(-1, Vector2D.UP.y),
+                () -> assertEquals(1,  Vector2D.RIGHT.x),
+                () -> assertEquals(1,  Vector2D.DOWN.y),
+                () -> assertEquals(1,  Vector2D.UP.mag()),
+                () -> assertEquals(1,  Vector2D.DOWN.mag()),
+                () -> assertEquals(1,  Vector2D.LEFT.mag()),
+                () -> assertEquals(1,  Vector2D.RIGHT.mag())
+        );
+    }
+
     // ========================== Vector Zero Tests ========================= //
     @Test
     public void testZeroVectorConstant_ZeroValues() {
@@ -130,14 +289,15 @@ public class Vector2DTest {
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.setX(1)),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.setY(1)),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.setComponents(1, 1)),
-                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.add(new Vector2D(10, 10))),
-                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.sub(new Vector2D(10, 10))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.mult(new Vector2D(10, 10))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.div(new Vector2D(10, 10))),
-                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.copy(new Vector2D(10, 10))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.scale(10)),
                 () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.div(10)),
-                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.rotate(10))
+                () -> assertThrows(UnsupportedOperationException.class, () -> Vector2D.ZERO.rotate(10)),
+                // Operations allowed but the return value is a new or different Vector
+                () -> assertNotSame(Vector2D.ZERO, Vector2D.ZERO.copy(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.ZERO, Vector2D.ZERO.add(new Vector2D(10, 10))),
+                () -> assertNotSame(Vector2D.ZERO, Vector2D.ZERO.sub(new Vector2D(10, 10)))
         );
     }
 

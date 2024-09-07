@@ -4,7 +4,6 @@ import com.slinky.physics.comps.Circle;
 import com.slinky.physics.comps.Component;
 import com.slinky.physics.comps.PointMass;
 import com.slinky.physics.comps.Vector2D;
-import static java.lang.Math.cbrt;
 import static java.lang.Math.sqrt;
 
 import java.util.Collections;
@@ -312,54 +311,89 @@ public class Entities {
 
     // ========================== Factory Methods =========================== //
     /**
-     * Creates an entity that represents a solid, movable (non-static) ball at
-     * rest, using the provided position components and mass.
-     *
+     * Creates a solid ball entity with specified position, velocity, mass,
+     * damping, restitution, radius, and static state.
      * <p>
-     * The ball is constructed using the specified position and mass, with an
-     * initial velocity and acceleration of zero. The resulting ball is dynamic
-     * (not static) and can participate in physics simulations, such as
-     * collisions and other interactions within the system.
+     * This method allows full control over the properties of the ball, such as
+     * its initial position, velocity, mass, damping (which controls the energy
+     * loss over time), restitution (which governs how much the ball bounces
+     * upon collisions), radius, and whether it is static (immovable). It
+     * returns an {@link Entity} that combines a {@link PointMass} for the
+     * physics and a {@link Circle} for the visual representation.
      * </p>
      *
-     * @param x the x coordinate of the ball's centre
-     * @param y the y coordinate of the ball's centre
-     * @param mass the mass of the ball, which influences its physical
-     * properties such as inertia and how it interacts with other entities. The
-     * mass is also used to calculate the radius of the ball.
-     *
-     * @return an {@link Entity} representing the newly created solid ball,
-     * ready to be added to the entity-component system.
-     *
-     * @throws IllegalArgumentException if {@code mass} is negative.
+     * @param x         The initial x-coordinate of the ball's position.
+     * @param y         The initial y-coordinate of the ball's position.
+     * @param vx        The initial velocity in the x-direction (horizontal velocity)
+     *                  of the ball.
+     * @param vy        The initial velocity in the y-direction (vertical velocity) of
+     *                  the ball.
+     * @param mass      The mass of the ball, which affects its inertia and
+     *                  resistance to acceleration.
+     * @param damping   The damping factor, which simulates friction or air
+     *                  resistance that gradually reduces the velocity.
+     * @param rest      The restitution coefficient, which determines how elastic
+     *                  (bouncy) the collisions are (1 is perfectly elastic, 0 is perfectly
+     *                  inelastic).
+     * @param radius    The radius of the ball, used for collision detection and
+     *                  rendering.
+     * @param isStatic  A boolean flag that indicates whether the ball is static
+     *                  (true) or dynamic (false). A static ball does not move.
+     * 
+     * @return An {@link Entity} representing a solid ball in the physics
+     * engine, composed of a {@link PointMass} for physics and a {@link Circle}
+     * for rendering.
      */
-    public static Entity createSolidBall(double x, double y, double mass) {
-        return createSolidBall(x, y, 0, 0, mass);
-    }
-
-    public static Entity createSolidBall(double x, double y, double vx, double vy, double mass) {
+    public static Entity createSolidBall(double x, double y, double vx, double vy, double mass, double damping, double rest, double radius, boolean isStatic) {
         PointMass pointMass = new PointMass(
                 new Vector2D(x, y),
                 new Vector2D(vx, vy),
                 new Vector2D(0, 0),
                 mass,
-                0, // damping
-                normalise(mass), // restitution
-                false
+                damping,
+                rest,
+                isStatic
         );
 
-        return newEntity(pointMass, new Circle(sqrt(mass) * 10));
+        return newEntity(pointMass, new Circle(radius));
     }
 
-    // ========================== Helper Methods ============================ //
     /**
+     * Creates a solid ball entity with default velocity, damping, restitution,
+     * radius, and static state, but specified position and mass.
+     * <p>
+     * This overloaded method simplifies the creation of a ball by only
+     * requiring the position and mass. The ball is created with default values
+     * for velocity (stationary), damping (no energy loss), restitution
+     * (perfectly elastic collisions), and radius (calculated based on the
+     * square root of the mass). The ball is dynamic (not static) by default.
+     * </p>
      *
-     * @param mass The input number to be scaled.
-     * @return A number between 0 and 1.
+     * @param x     The initial x-coordinate of the ball's position.
+     * @param y     The initial y-coordinate of the ball's position.
+     * @param mass  The mass of the ball, which affects its inertia and
+     *              resistance to acceleration.
+     * 
+     * @return An {@link Entity} representing a solid ball in the physics
+     * engine, composed of a {@link PointMass} for physics and a {@link Circle}
+     * for rendering, with default velocity, damping, and restitution values.
+     *
+     * @see #createSolidBall(double, double, double, double, double, double,
+     * double, double, boolean) for full customisation of the ball's properties.
      */
-    private static double normalise(double mass) {
-        double val = 1 / Math.max(1, cbrt(mass));
-        return val;
+    public static Entity createSolidBall(double x, double y, double mass) {
+        return createSolidBall(
+                x, y, // position
+                0, 0, // velocity (at rest)
+                mass, // mass
+                0, // damping
+                1, // restitution
+                sqrt(mass) * 10, // radius (calculated based on mass)
+                false // is dynamic (not static)
+        );
     }
+
+
+    // ========================== Helper Methods ============================ //
     
 }

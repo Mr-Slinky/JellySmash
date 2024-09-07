@@ -1,7 +1,5 @@
 package com.slinky.physics.comps;
 
-import com.slinky.physics.comps.Vector2D;
-import com.slinky.physics.comps.PointMass;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.params.ParameterizedTest;

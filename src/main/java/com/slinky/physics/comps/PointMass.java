@@ -1,7 +1,6 @@
 package com.slinky.physics.comps;
 
 import static java.lang.Math.pow;
-import java.util.Objects;
 
 /**
  * Represents a 2-dimensional particle in the physics engine.
@@ -148,7 +147,18 @@ public class PointMass implements Component {
      */
     private Vector2D force;
     
-    private double terminalVelSq = 8 * 8; // squared
+    /**
+     * The squared terminal velocity of the particle. This value is squared to
+     * optimise performance by avoiding the need to calculate the square root
+     * during velocity comparisons or calculations.
+     *
+     * <p>
+     * The terminal velocity is set to 30 units, resulting in a squared value of
+     * 900.
+     * </p>
+     */
+    private double terminalVelSq = 15 * 15; // squared
+
 
     // =========================== Constructors ============================= //
     /**
@@ -580,6 +590,40 @@ public class PointMass implements Component {
     }
 
     /**
+     * Returns the square of the terminal velocity for an entity.
+     *
+     * <p>
+     * The terminal velocity is the maximum velocity an object can reach under
+     * the influence of forces such as gravity and air resistance. This method
+     * returns the square of the terminal velocity value, which is often used in
+     * physics calculations to avoid repeated square root operations and to
+     * simplify comparisons.</p>
+     *
+     * @return the square of the terminal velocity ({@code terminalVelSq})
+     */
+    public double getTerminalVelocitySquared() {
+        return terminalVelSq;
+    }
+
+    /**
+     * Sets the terminal velocity for an entity and updates the square of this
+     * value.
+     *
+     * <p>
+     * This method takes the terminal velocity as input and computes its square,
+     * storing it in the {@code terminalVelSq} field. The square of the terminal
+     * velocity is useful in various calculations, such as drag force
+     * simulations, without requiring frequent use of square root
+     * operations.</p>
+     *
+     * @param terminalVelocity the terminal velocity to set for the entity
+     */
+    public void setTerminalVelocity(double terminalVelocity) {
+        this.terminalVelSq = terminalVelocity * terminalVelocity;
+    }
+
+    
+    /**
      * Sets the static state of the particle.
      * 
      * <p>
@@ -796,23 +840,23 @@ public class PointMass implements Component {
         return this == obj;
     }
 
-    /**
-     * {@inheritDoc}
-     * 
-     */
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.mass)        ^ (Double.doubleToLongBits(this.mass)        >>> 32));
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.dampCoef)    ^ (Double.doubleToLongBits(this.dampCoef)    >>> 32));
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.restitution) ^ (Double.doubleToLongBits(this.restitution) >>> 32));
-        hash = 53 * hash + (this.isStatic ? 1 : 0);
-        hash = 53 * hash + Objects.hashCode(this.position);
-        hash = 53 * hash + Objects.hashCode(this.velocity);
-        hash = 53 * hash + Objects.hashCode(this.acceleration);
-        hash = 53 * hash + Objects.hashCode(this.force);
-        return hash;
-    }
+//    /**
+//     * {@inheritDoc}
+//     * 
+//     */
+//    @Override
+//    public int hashCode() {
+//        int hash = 7;
+//        hash = 101 * hash + (int) (Double.doubleToLongBits(this.mass)        ^ (Double.doubleToLongBits(this.mass)        >>> 32));
+//        hash = 101 * hash + (int) (Double.doubleToLongBits(this.dampCoef)    ^ (Double.doubleToLongBits(this.dampCoef)    >>> 32));
+//        hash = 101 * hash + (int) (Double.doubleToLongBits(this.restitution) ^ (Double.doubleToLongBits(this.restitution) >>> 32));
+//        hash = 101 * hash + (this.isStatic ? 1 : 0);
+//        hash = 101 * hash + Objects.hashCode(this.position);
+//        hash = 101 * hash + Objects.hashCode(this.velocity);
+//        hash = 101 * hash + Objects.hashCode(this.acceleration);
+//        hash = 101 * hash + Objects.hashCode(this.force);
+//        return hash;
+//    }
 
     /**
      * Returns a detailed string representation of this {@code PointMass}

@@ -87,24 +87,26 @@ public class EulerIntegrationFunction implements IntegrationMethod {
      * over the time interval.
      * </p>
      *
-     * @param particle   The {@link PointMass} object whose state is to be updated.
+     * @param p          The {@link PointMass} object whose state is to be updated.
      *                   This object must not be {@code null}.
      * @param deltaTime  The time step to be used for updating the state, representing
      *                   how much time passes in the simulation for this update cycle.
      *                   This value should be positive and represent a small fraction of time.
      */
     @Override
-    public void updateParticle(PointMass particle, double deltaTime) {
+    public void updateParticle(PointMass p, double deltaTime) {
         // Update Velocity
-        Vector2D vOld = particle.velocity().copy(); // Make a copy of the current velocity to use in position update
-        particle.velocity().add(particle.acceleration().copy().scale(deltaTime)); // Scale acceleration by deltaTime and add to current velocity
+        Vector2D vOld = p.velocity().copy(); // Make a copy of the current velocity to use in position update
+        // call increase speed instead of add() to enforce terminal velocity
+        p.velocity().add(p.acceleration().copy().scale(deltaTime)); // Scale acceleration by deltaTime and add to current velocity
+//        p.increaseSpeed(p.acceleration().copy().scale(deltaTime)); // Scale acceleration by deltaTime and add to current velocity
 
         // Update Position
         vOld.scale(deltaTime); // Scale the old velocity by deltaTime to get displacement due to initial velocity
-        Vector2D a = particle.acceleration().copy(); // Copy the acceleration to use in position update
-        a.div(2) // Divide the acceleration by 2 for the 1/2 factor in the displacement equation
+        Vector2D a = p.acceleration().copy(); // Copy the acceleration to use in position update
+        a.div(2)                        // Divide the acceleration by 2 for the 1/2 factor in the displacement equation
          .scale(deltaTime * deltaTime); // Scale by deltaTime squared to get displacement due to acceleration
-        particle.position().add(vOld).add(a); // Add both displacements to the current position to get the new position
+        p.position().add(vOld).add(a);  // Add both displacements to the current position to get the new position
     }
 
 }

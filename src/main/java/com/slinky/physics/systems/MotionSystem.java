@@ -131,10 +131,8 @@ public class MotionSystem {
      * seconds
      */
     public void update(double deltaTime) {
-//        Entities.debug_DisplayTotalKEandMomentum("Before kinematics: "); // DEBUG
         updateAccelerations();
         updateVelocitiesAndPositions(deltaTime);
-//        Entities.debug_DisplayTotalKEandMomentum("After kinematics: ");  // DEBGU
     }
     
     /**
@@ -211,7 +209,7 @@ public class MotionSystem {
      * </p>
      *
      */
-    private void updateAccelerations() {
+    public void updateAccelerations() {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;
@@ -232,8 +230,10 @@ public class MotionSystem {
      * Calculates and updates the velocities and positions of the specified
      * particles based on their current accelerations and velocities using the
      * internal {@link IntegrationMethod} instance.
+     *
+     * @param deltaTime the time passed in seconds
      */
-    private void updateVelocitiesAndPositions(double deltaTime) {
+    public void updateVelocitiesAndPositions(double deltaTime) {
         for (PointMass p : particles) {
             if (p.isStatic()) {
                 continue;

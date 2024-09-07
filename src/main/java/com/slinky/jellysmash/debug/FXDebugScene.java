@@ -2,14 +2,18 @@ package com.slinky.jellysmash.debug;
 
 import com.slinky.jellysmash.GameLoop;
 import com.slinky.physics.PhysicsEngine2D;
+import com.slinky.physics.base.Entities;
+import com.slinky.physics.base.Entity;
+import com.slinky.physics.base.EntityType;
+import com.slinky.physics.comps.PointMass;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.StackPane;
 
 import static javafx.scene.input.KeyCode.SPACE;
+import javafx.scene.layout.BorderPane;
 
 /**
  *
@@ -40,11 +44,18 @@ public class FXDebugScene extends Scene {
      * coordinating the physics engine and rendering system.
      */
     private static final GameLoop gameLoop;
-
+    
+    private static final BorderPane borderPane;
+    
+    private static final InformationPanel infoPanel;
+    
     static {
+        borderPane = new BorderPane();
         engine = new PhysicsEngine2D(WIDTH, HEIGHT);
+        engine.setGravityOn(false);
         worldDisplay = new FXWorldDisplay(new DebugRenderSystem(), WIDTH, HEIGHT);
-
+        infoPanel = new InformationPanel();
+        
         // Axes setup
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Collisions Count or Time");
@@ -64,16 +75,24 @@ public class FXDebugScene extends Scene {
             data.getNode().setStyle("-fx-padding: 1px; -fx-background-radius: 1px;");
         }
         
-        gameLoop = new GameLoop(engine, worldDisplay, energySeries);
-
+        gameLoop = new GameLoop(engine, worldDisplay, energySeries, infoPanel);
+        
+        for (Entity e : Entities.getEntitiesOfType(EntityType.SOLID_BALL)) {
+            infoPanel.add(e.getComponent(PointMass.class));
+        }
+        
+        borderPane.setCenter(worldDisplay);
+        borderPane.setBottom(infoPanel);
     }
-
+    
+    
+    
     // =========================== Constructors ============================= //
     public FXDebugScene() {
-        super(new StackPane(worldDisplay));
+        super(borderPane);
+        
         setOnScroll(ev -> {
-            engine.update(0.016);
-            worldDisplay.drawWorld();
+            gameLoop.update(1);
         });
 
         setOnKeyPressed((KeyEvent ev) -> {
@@ -87,8 +106,8 @@ public class FXDebugScene extends Scene {
                     break;
             }
         });
-
-        gameLoop.start();
+        
+        worldDisplay.drawWorld();
     }
     
     

@@ -2,6 +2,7 @@ package com.slinky.jellysmash;
 
 import com.slinky.physics.PhysicsEngine2D;
 import com.slinky.jellysmash.debug.FXWorldDisplay;
+import com.slinky.jellysmash.debug.InformationPanel;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
@@ -93,7 +94,9 @@ public class GameLoop {
     private AnimationTimer tick;
 
     private Series energySeries;
-
+    
+    private  InformationPanel infoPanel;
+    
     /**
      * A status flag indicating if the loop is currently running
      */
@@ -116,18 +119,21 @@ public class GameLoop {
      * @see PhysicsEngine2D
      * @see FXWorldDisplay
      */
-    public GameLoop(PhysicsEngine2D engine, FXWorldDisplay display, Series energySeries) {
+    public GameLoop(PhysicsEngine2D engine, FXWorldDisplay display, Series energySeries, InformationPanel infoPanel) {
         this.engine = engine;
         this.worldDisplay = display;
         this.energySeries = energySeries;
+        this.infoPanel = infoPanel;
+        
         this.tick = configAnimationTimer();
     }
 
     // ============================ API Methods ============================= //
     public void update(double deltaTime) {
-        worldDisplay.drawWorld();
         engine.update(deltaTime);
-        updateEnergyChart(PhysicsEngine2D.getTotalSystemKE());
+        infoPanel.update();
+//        updateEnergyChart(ke);
+        worldDisplay.drawWorld();
     }
 
     /**

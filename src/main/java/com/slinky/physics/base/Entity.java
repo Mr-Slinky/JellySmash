@@ -4,9 +4,9 @@ import com.slinky.physics.comps.Component;
 import java.util.Map;
 
 /**
- * Represents a unique entity within the JellySmash backend ECS system that is
- * associated with various {@link Component} implementations upon instantiation.
- * The creation and management of entities are handled by the {@link Entities}
+ * Represents a unique entity within the backend ECS system that is associated
+ * with various {@link Component} implementations upon instantiation. The
+ * creation and management of entities are handled by the {@link Entities}
  * utility class, which provides functionality for creating, retrieving, and
  * destroying entities within the system.
  *

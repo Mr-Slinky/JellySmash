@@ -1,7 +1,5 @@
 package com.slinky.physics.base;
 
-import com.slinky.physics.base.Entities;
-import com.slinky.physics.base.Entity;
 import com.slinky.physics.comps.Component;
 
 import org.junit.jupiter.api.RepeatedTest;
@@ -26,14 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 public class EntitiesTest {
 
-    private class ComponentMock1 implements Component {
-    }
-
-    private class ComponentMock2 implements Component {
-    }
-
-    private class ComponentMock3 implements Component {
-    }
+    private class ComponentMock1 implements Component {}
+    private class ComponentMock2 implements Component {}
+    private class ComponentMock3 implements Component {}
 
     private ComponentMock1 comp1A;
     private ComponentMock1 comp1B;
@@ -93,19 +86,19 @@ public class EntitiesTest {
 
     @Test
     public void testCreateEntity_WithComponents_AllDifferent() {
-        Entity e1 = Entities.newEntity(comp1A, comp2A, comp3A);
+        Entity e = Entities.newEntity(comp1A, comp2A, comp3A);
         assertAll(
-                () -> assertSame(comp1A, e1.getComponent(comp1A.getClass())),
-                () -> assertSame(comp2A, e1.getComponent(comp2B.getClass())),
-                () -> assertSame(comp3A, e1.getComponent(ComponentMock3.class))
+                () -> assertSame(comp1A, e.getComponent(comp1A.getClass())),
+                () -> assertSame(comp2A, e.getComponent(comp2B.getClass())),
+                () -> assertSame(comp3A, e.getComponent(ComponentMock3.class))
         );
     }
 
     @Test
     public void testCreateEntity_WithNull_ThrowsError() {
         assertAll(
-                () -> assertThrows(IllegalArgumentException.class, () -> Entities.newEntity(null, comp2A, comp3A)),
-                () -> assertThrows(IllegalArgumentException.class, () -> Entities.newEntity(comp1A, null, comp3A)),
+                () -> assertThrows(IllegalArgumentException.class, () -> Entities.newEntity(null,   comp2A, comp3A)),
+                () -> assertThrows(IllegalArgumentException.class, () -> Entities.newEntity(comp1A, null,   comp3A)),
                 () -> assertThrows(IllegalArgumentException.class, () -> Entities.newEntity(comp1A, comp2A, null))
         );
     }
@@ -113,8 +106,7 @@ public class EntitiesTest {
     @Test
     public void testDestroyEntity() {
         Entity e1 = Entities.newEntity(comp1A, comp2A, comp3A);
-        Entity e2 = Entities.newEntity(comp1B, comp2B, comp3B);
-
+        /* e2 <- */ Entities.newEntity(comp1B, comp2B, comp3B);
         Entities.destroyEntity(e1);
 
         assertAll(
