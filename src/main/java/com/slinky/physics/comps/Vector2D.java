@@ -140,6 +140,25 @@ public class Vector2D implements Component {
 
     // =========================== Constructors ============================= //
     /**
+     * Creates a new {@code Vector2D} instance with the specified x and y
+     * components.
+     *
+     * <p>
+     * This method provides a cleaner alternative to the constructor for
+     * creating {@code Vector2D} objects. It functions identically to the
+     * constructor.
+     * </p>
+     * 
+     * @param x the x component of the vector
+     * @param y the y component of the vector
+     * @return a new {@code Vector2D} instance with the given x and y components
+     */
+    public static Vector2D of(double x, double y) {
+        return new Vector2D(x, y);
+    }
+
+    
+    /**
      * Constructs a {@code Position2D} with the specified x and y coordinates.
      *
      * @param x the x coordinate of the position
