@@ -1,6 +1,7 @@
 package com.slinky.physics.comps;
 
 import static java.lang.Math.max;
+import javafx.scene.canvas.GraphicsContext;
 
 /**
  * Models a physical spring, connecting two <code>PointMass</code> objects in a
@@ -200,15 +201,6 @@ public class Spring implements Component {
      */
     private boolean active;
 
-    /**
-     * A cached displacement vector representing the difference in position
-     * between <code>pointA</code> and <code>pointB</code>. This cache avoids
-     * recalculating the displacement vector for every calculation, improving
-     * performance. The displacement is recalculated when the positions of
-     * <code>pointA</code> or <code>pointB</code> change.
-     */
-    private Vector2D displacement;
-
     // =========================== Constructors ============================= //
     /**
      * Constructs a new <code>Spring</code> object between two
@@ -227,14 +219,15 @@ public class Spring implements Component {
     private Spring(PointMass a, PointMass b, double springConstant) {
         if (a == null || b == null) {
             throw new IllegalArgumentException("Cannot instantiate a Spring object with null arguments");
+        } else if (a == b) {
+            throw new IllegalArgumentException("Anchor and Bob cannot be the same PointMass instance");
         }
 
         this.pointA = a;
         this.pointB = b;
         this.k      = max(0.001, springConstant);  // Ensure spring constant is non-zero
 
-        this.displacement = Vector2D.sub(b.position(), a.position());
-        this.restLength   = displacement.mag();   // Set rest length to initial displacement
+        this.restLength   = Vector2D.sub(b.position(), a.position()).mag(); // this.displacement.mag()  // Set rest length to initial displacement
         this.active       = true;                 // Default active state
     }
 
@@ -312,9 +305,8 @@ public class Spring implements Component {
      * displacement
      */
     public Vector2D calculateDisplacement() {
-        displacement.copy(pointB.position()).sub(pointA.position());
-        
-        return displacement.copy();
+//        displacement.copy(pointB.position()).sub(pointA.position());
+        return Vector2D.sub(pointB.position(), pointA.position());
     }
 
     
@@ -405,8 +397,7 @@ public class Spring implements Component {
      * @return the updated <code>Spring</code> object, enabling method chaining
      */
     public Spring relax() {
-        this.displacement = Vector2D.sub(pointB.position(), pointA.position());
-        this.restLength   = displacement.mag();
+        this.restLength   = Vector2D.sub(pointB.position(), pointA.position()).mag();
 
         return this;
     }
@@ -441,8 +432,40 @@ public class Spring implements Component {
      */
     public Vector2D force() {
         Vector2D d = calculateDisplacement();
-        
-        return d.normalize().scale(-k * (displacement.mag() - restLength));
+        double stretch
+                = Vector2D.sub(pointB.position(), pointA.position())
+                          .mag() - restLength;
+        return d.normalize().scale(-k * (stretch));
     }
-
+    
+    /**
+     * Applies the spring force to both <code>PointMass</code> objects connected
+     * by the spring. The force is calculated using Hooke's Law, and the spring
+     * applies equal and opposite forces to <code>pointA</code> and
+     * <code>pointB</code>.
+     * <p>
+     * The force is calculated using the <code>{@link #force()}</code> method,
+     * which returns the force vector. This force is added to
+     * <code>pointA</code>, and the negated version of the force is applied to
+     * <code>pointB</code>, ensuring that the spring follows Newton's third law
+     * (equal and opposite forces).
+     * </p>
+     *
+     * <p>
+     * The method modifies the internal state of both <code>PointMass</code>
+     * objects, applying the spring forces to them during each physics update.
+     * </p>
+     */
+    public void applySpringForce() {
+        Vector2D force = force();
+        pointB.addForce(force);
+        pointA.addForce(force.copy().negate());
+    }
+    
+    
+    // FOR DEBUG, REMOVE
+    public void draw(GraphicsContext gc) {
+        gc.strokeLine(pointA.x(), pointA.y(), pointB.x(), pointB.y());
+    }
+    
 }

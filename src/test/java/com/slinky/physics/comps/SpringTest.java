@@ -30,18 +30,18 @@ public class SpringTest {
     private static Stream<Arguments> providePointMasses() {
         return Stream.of(
                 Arguments.of(
-                        new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false),
-                        new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false)
+                        PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false),
+                        PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false)
                 ),
                 
                 Arguments.of(
-                        new PointMass(Vector2D.zero(),       Vector2D.zero(), 1, 0.5, 1, false),
-                        new PointMass(Vector2D.of(-25, 5.2), Vector2D.zero(), 1, 0.5, 1, false)
+                        PointMass.of(Vector2D.zero(),       Vector2D.zero(), 1, 1, false),
+                        PointMass.of(Vector2D.of(-25, 5.2), Vector2D.zero(), 1, 1, false)
                 ),
                 
                 Arguments.of(
-                        new PointMass(Vector2D.of(20, -5), Vector2D.zero(), 5,  0.2, 1, true),
-                        new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false)
+                        PointMass.of(Vector2D.of(20, -5), Vector2D.zero(), 5,  1, true),
+                        PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false)
                 )
         );
     }
@@ -111,10 +111,10 @@ public class SpringTest {
     
     @Test
     public void testDisplacement_EdgeCase_Zero() {
-        PointMass p1 = new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p2 = new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p3 = new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p4 = new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false);
+        PointMass p1 = PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false);
+        PointMass p2 = PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false);
+        PointMass p3 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
+        PointMass p4 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
         
         Spring spring1 = Spring.between(p1, p2);
         Spring spring2 = Spring.between(p3, p4);
@@ -312,8 +312,8 @@ public class SpringTest {
 
     @Test
     public void testForce_PositiveStretch_NegativeForce() {
-        PointMass p1 = new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p2 = new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false);
+        PointMass p1 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
+        PointMass p2 = PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false);
         Spring spring = Spring.between(p1, p2);
 
         // Stretch the spring beyond its rest length
@@ -329,8 +329,8 @@ public class SpringTest {
     
     @Test
     public void testForce_NegativeStretch_PositiveForce() {
-        PointMass p1 = new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p2 = new PointMass(Vector2D.of(10, 10), Vector2D.zero(), 10, 0.5, 1, false);
+        PointMass p1 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
+        PointMass p2 = PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false);
         Spring spring = Spring.between(p1, p2);
 
         p2.move(-5, -5); // compress points
@@ -344,8 +344,8 @@ public class SpringTest {
 
     @Test
     public void testForce_MagnitudeConsistency() {
-        PointMass p1 = new PointMass(Vector2D.zero(),     Vector2D.zero(), 10, 0.5, 1, false);
-        PointMass p2 = new PointMass(Vector2D.of(50, 50), Vector2D.zero(), 10, 0.5, 1, false);
+        PointMass p1 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
+        PointMass p2 = PointMass.of(Vector2D.of(50, 50), Vector2D.zero(), 10, 1, false);
         Spring spring = Spring.between(p1, p2);
         double initialForceMagnitude = spring.force().mag();
 
@@ -373,6 +373,12 @@ public class SpringTest {
         assertAll(
                 () -> assertTrue(force.mag() > 0, "Force magnitude should be small but non-zero for very small stretch")
         );
+    }
+    
+    @Test
+    public void testForce_CorrectCaluclations() {
+        PointMass p1 = PointMass.of(Vector2D.zero(),     Vector2D.zero(), 10, 1, false);
+        PointMass p2 = PointMass.of(Vector2D.of(10, 10), Vector2D.zero(), 10, 1, false);
     }
 
     // ============================ Relax Tests ============================= //

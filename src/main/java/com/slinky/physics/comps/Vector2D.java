@@ -751,7 +751,7 @@ public class Vector2D implements Component {
      * equal; {@code false} otherwise
      */
     public boolean matches(Vector2D otherVector) {
-        return x == otherVector.x && y == otherVector.y;
+        return (Double.compare(x, otherVector.x) == 0) && (Double.compare(y, otherVector.y) == 0);
     }
 
     @Override

@@ -45,11 +45,6 @@ public class PointMassView extends VBox {
     private Label lblVelociity;
 
     /**
-     * Label to display the current acceleration of the {@link PointMass}.
-     */
-    private Label lblAcceleration;
-
-    /**
      * Label to display the current force acting on the {@link PointMass}.
      */
     private Label lblForce;
@@ -74,14 +69,12 @@ public class PointMassView extends VBox {
         // Initialize labels for position, velocity, acceleration, and force
         lblPosition = createLabel("Position", particle.position());
         lblVelociity = createLabel("Velocity", particle.velocity());
-        lblAcceleration = createLabel("Acceleration", particle.acceleration());
         lblForce = createLabel("Force", particle.force());
 
         // Add labels to the VBox's children
         var children = getChildren();
         children.add(lblPosition);
         children.add(lblVelociity);
-        children.add(lblAcceleration);
         children.add(lblForce);
     }
 
@@ -97,10 +90,9 @@ public class PointMassView extends VBox {
      * position, velocity, acceleration, and force.</p>
      */
     public void update() {
-        lblPosition.setText(format(p.position(), "Position"));
+        lblPosition .setText(format(p.position(), "Position"));
         lblVelociity.setText(format(p.velocity(), "Velocity"));
-        lblAcceleration.setText(format(p.acceleration(), "Acceleration"));
-        lblForce.setText(format(p.force(), "Froce"));
+        lblForce    .setText(format(p.force(),    "Force"));
     }
 
     // ========================== Helper Methods ============================ //

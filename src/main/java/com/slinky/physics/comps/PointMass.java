@@ -1,46 +1,291 @@
 package com.slinky.physics.comps;
 
 import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
 
 /**
- * Represents a 2-dimensional particle in the physics ECS.
+ * Represents a 2-dimensional point mass within the physics ECS, providing a
+ * fluid API for flexible interaction.
  *
  * <p>
- * This class encapsulates the core physical properties of a particle, including
- * its mass, damping coefficient, restitution, position, velocity, acceleration,
- * and whether it is static. These properties are crucial for simulating
- * realistic physical behaviours, such as motion, collisions, and force
- * interactions, within a 2D space.
+ * The {@code PointMass} class models a particle in a 2D physics simulation,
+ * encapsulating key physical properties such as mass, position, velocity,
+ * acceleration, damping, and restitution. Designed according to the Entity
+ * Component System (ECS) pattern, it serves as a versatile and reusable
+ * component for a physics engine, supporting simulations that involve motion,
+ * force accumulation, and collision handling.
  * </p>
+ *
+ * <h3>Key Features:</h3>
+ * <ul>
+ *     <li><b>Fluent API:</b> Supports method chaining for configuring and
+ *     manipulating the particle’s state, allowing for streamlined interactions
+ *     (e.g., <code>setMass()</code>, <code>move()</code>,
+ *     <code>addForce()</code>).</li>
+ *     <li><b>Momentum and Kinetic Energy:</b> Provides methods to calculate the
+ *     particle's momentum and kinetic energy based on its mass and velocity, useful
+ *     for dynamic simulations.</li>
+ *     <li><b>Restitution:</b> Allows configuration of elasticity and friction to
+ *     simulate how the particle bounces and slows down after collisions, enhancing
+ *     realism.</li>
+ *     <li><b>Terminal Velocity:</b> Implements limits on the particle’s velocity,
+ *     ensuring realistic behaviour when exposed to forces like gravity and air
+ *     resistance.</li>
+ * </ul>
  *
  * <p>
- * The {@code PointMass} class is designed to be flexible and extensible,
- * allowing it to be used in various types of physics simulations, from simple
- * point masses to more complex physical objects. The class ensures that all
- * physical properties are initialised with valid, non-negative values, throwing
- * an exception if any invalid values are provided.
+ * The class provides a set of static factory methods using the {@code of()}
+ * pattern, offering multiple pathways to create {@code PointMass} objects with
+ * varying configurations. These factory methods simplify object creation by
+ * allowing users to specify only the necessary properties, while default values
+ * are applied where appropriate.
  * </p>
+ *
+ * <h3>Constructor Patterns:</h3>
+ * <ul>
+ *     <li><b>Full Parameterisation:</b> Users can define position, velocity, mass,
+ *     restitution, and whether the particle is static.
+ *     <br>Example:
+ *     {@code PointMass.of(position, velocity, mass, restitution, isStatic);}</li>
+ *     <li><b>Partial Parameterisation:</b> Simplified constructors with default
+ *     values for omitted parameters.
+ *     <br>Example: {@code PointMass.of(x, y, mass);}</li>
+ *     <li><b>Mass-Only:</b> A minimal constructor requiring only mass, with all
+ *     other properties set to defaults (e.g., zero position and velocity,
+ *     restitution of 1).
+ *     <br>Example: {@code PointMass.of(mass);}</li>
+ * </ul>
  *
  * <p>
- * This class is essential for implementing a 2D physics engine using the Entity
- * Component System (ECS) pattern, as it provides the basic building blocks for
- * creating and manipulating physical entities within the simulation. By
- * adhering to the {@link PointMass} interface, {@code PointMass} ensures
- * compatibility and interoperability with other components and systems within
- * the ECS framework.
+ * These patterns make object creation more intuitive, reducing the need for
+ * multiple constructors and improving code readability by minimising clutter
+ * from overloaded constructors.
  * </p>
  *
- * @version  2.0
- * @since    0.1.0
+ * <h3>Example Usage:</h3>
+ * <pre><code>
+ *    PointMass pm1 = PointMass.of(Vector2D.of(5, 5), Vector2D.of(2, 2), 10, 0.8, false); // Full configuration
+ *    PointMass pm2 = PointMass.of(5, 5, 10); // Partial configuration with default values
+ *    PointMass pm3 = PointMass.of(15); // Minimal setup with mass only
+ * </code></pre>
  *
- * @author   Kheagen Haskins
+ * <p>
+ * This flexible approach enhances code clarity and allows users to control the
+ * level of detail they require when creating instances of {@code PointMass}.
+ * </p>
  *
- * @see      Vector2D
- * @see      Component
+ * <h3>Additional Features:</h3>
+ * <p>
+ * The {@code PointMass} class includes several utility methods for interacting
+ * with the particle in a physics simulation. Users can dynamically update
+ * properties such as position, velocity, and mass, while the class handles
+ * force accumulation and collision responses efficiently.
+ * </p>
+ *
+ * <h3>Important Notes:</h3>
+ * <ul>
+ *     <li><b>Validation:</b> All properties are validated to ensure they are within
+ *     acceptable ranges. For example, <code>setMass()</code> will throw an
+ *     {@code IllegalArgumentException} if an invalid value (e.g., negative mass) is
+ *     supplied.</li>
+ * </ul>
+ * 
+ * @version 3.1
+ * @since   0.1.0
+ * 
+ * @author  Kheagen Haskins
+ * 
+ * @see     Vector2D
+ * @see     Component
  */
-@SuppressWarnings("EqualsAndHashcode")
 public class PointMass implements Component {
 
+    // ============================== Static ================================ //
+    /**
+     * The squared terminal velocity of the particle. This value is squared to
+     * optimise performance by avoiding the need to calculate the square root
+     * during velocity comparisons or calculations.
+     *
+     * <p>
+     * The terminal velocity is set to 20 units, resulting in a squared value of
+     * 400.
+     * </p>
+     */
+    public static final double TERMINAL_VELOCITY_SQ = 20 * 20;
+    
+    public static final double  DEFAULT_MASS = 1;
+    public static final double  DEFAULT_REST = 1;
+    public static final boolean DEFAULT_STAT = false;
+
+    /**
+     * Creates a new {@link PointMass} object with the given position, velocity,
+     * mass, restitution, and static state.
+     *
+     * @param position The initial {@link Vector2D} position of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param velocity The initial {@link Vector2D} velocity of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @param restitution The restitution coefficient, a value between 0 and 1
+     * representing the elasticity of collisions for this {@link PointMass}. A
+     * value of 1 means perfectly elastic, while 0 means inelastic.
+     * @param isStatic A boolean indicating whether this {@link PointMass} is
+     * static. Static point masses do not move in response to forces.
+     * @return A new {@link PointMass} object initialised with the specified
+     * attributes.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(Vector2D position, Vector2D velocity, double mass, double restitution, boolean isStatic) {
+        return new PointMass(position, velocity, mass, restitution, isStatic);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position,
+     * velocity, mass, restitution, and static state, using individual x and y
+     * coordinates for position and velocity.
+     *
+     * @param x The x-coordinate of the initial position.
+     * @param y The y-coordinate of the initial position.
+     * @param vx The x-component of the initial velocity.
+     * @param vy The y-component of the initial velocity.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @param restitution The restitution coefficient, a value between 0 and 1.
+     * @param isStatic A boolean indicating whether this {@link PointMass} is
+     * static.
+     * @return A new {@link PointMass} object initialised with the given values.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(double x, double y, double vx, double vy, double mass, double restitution, boolean isStatic) {
+        return new PointMass(Vector2D.of(x, y), Vector2D.of(vx, vy), mass, restitution, isStatic);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position, mass,
+     * restitution, and static state, with the initial velocity set to zero.
+     *
+     * @param x The x-coordinate of the initial position.
+     * @param y The y-coordinate of the initial position.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @param restitution The restitution coefficient, a value between 0 and 1.
+     * @param isStatic A boolean indicating whether this {@link PointMass} is
+     * static.
+     * @return A new {@link PointMass} object initialised with the given values.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(double x, double y, double mass, double restitution, boolean isStatic) {
+        return new PointMass(Vector2D.of(x, y), Vector2D.zero(), mass, restitution, isStatic);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position,
+     * velocity, mass, and restitution, with the static state set to false by
+     * default.
+     *
+     * @param position The initial {@link Vector2D} position of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param velocity The initial {@link Vector2D} velocity of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @param restitution The restitution coefficient, a value between 0 and 1.
+     * @return A new {@link PointMass} object initialised with the specified
+     * attributes.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(Vector2D position, Vector2D velocity, double mass, double restitution) {
+        return new PointMass(position, velocity, mass, restitution, DEFAULT_STAT);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position, mass,
+     * and restitution, with velocity set to zero and static state set to false.
+     *
+     * @param position The initial {@link Vector2D} position of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @param restitution The restitution coefficient, a value between 0 and 1.
+     * @return A new {@link PointMass} object initialised with the given values.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(Vector2D position, double mass, double restitution) {
+        return new PointMass(position, Vector2D.zero(), mass, restitution, DEFAULT_STAT);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position and
+     * mass, with velocity set to zero, restitution set to 1, and static state
+     * set to false.
+     *
+     * @param position The initial {@link Vector2D} position of the
+     * {@link PointMass}. This value must not be {@code null}.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @return A new {@link PointMass} object initialised with the given values.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(Vector2D position, double mass) {
+        return new PointMass(position, Vector2D.zero(), mass, DEFAULT_REST, DEFAULT_STAT);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified position and
+     * mass, with velocity set to zero, restitution set to 1, and static state
+     * set to false, using individual x and y coordinates for the position.
+     *
+     * @param x The x-coordinate of the initial position.
+     * @param y The y-coordinate of the initial position.
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * @return A new {@link PointMass} object initialised with the given values.
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(double x, double y, double mass) {
+        return new PointMass(Vector2D.of(x, y), Vector2D.zero(), mass, DEFAULT_REST, DEFAULT_STAT);
+    }
+
+    /**
+     * Creates a new {@link PointMass} object with the specified mass, with
+     * position and velocity set to zero, restitution set to 1, and static state
+     * set to true. 
+     *
+     * @param mass The mass of the {@link PointMass}. This value must be greater
+     * than zero.
+     * 
+     * @return A new static {@link PointMass} object initialised with the given
+     * mass.
+     * 
+     * @throws IllegalArgumentException if {@code mass} is less than or equal to
+     * zero.
+     */
+    public static PointMass of(double mass) {
+        return new PointMass(Vector2D.zero(), Vector2D.zero(), mass, DEFAULT_REST, DEFAULT_STAT);
+    }
+    
+    /**
+     * Creates a new {@link PointMass} object at the specified coordinates, with
+     * position and velocity set to zero, restitution and mass set to 1, and
+     * static state set to true.
+     *
+     * @param x The x-coordinate of the initial position.
+     * @param y The y-coordinate of the initial position.
+     * 
+     * @return A new static {@link PointMass} object.
+     */
+    public static PointMass at(double x, double y) {
+        return new PointMass(Vector2D.of(x, y), Vector2D.zero(), DEFAULT_MASS, DEFAULT_REST, DEFAULT_STAT);
+    }
+    
     // ============================== Fields ================================ //
     /**
      * The mass of the particle, representing the amount of matter it contains.
@@ -54,19 +299,6 @@ public class PointMass implements Component {
      * </p>
      */
     private double mass;
-
-    /**
-     * The damping coefficient of the particle, controlling the rate at which
-     * its motion decreases over time.
-     *
-     * <p>
-     * Damping simulates the effects of friction or resistance, gradually
-     * reducing the particle's velocity and bringing it to rest. A higher
-     * damping coefficient results in faster decay of motion. This value must be
-     * non-negative and is validated during initialisation.
-     * </p>
-     */
-    private double dampCoef;
 
     /**
      * The restitution (bounciness) of the particle, determining how much
@@ -123,19 +355,6 @@ public class PointMass implements Component {
     private Vector2D velocity;
 
     /**
-     * The acceleration of the particle, represented as a {@link Vector2D}.
-     *
-     * <p>
-     * The acceleration represents the rate of change of velocity over time and
-     * is influenced by the forces acting on the particle. It is a key factor in
-     * simulating realistic motion, as it dictates how quickly the particle
-     * speeds up or slows down. The acceleration is typically influenced by
-     * external forces like gravity or user-applied forces in the simulation.
-     * </p>
-     */
-    private Vector2D acceleration;
-
-    /**
      * The resultant force vector representing the cumulative effect of all
      * forces acting on this particle within the current physics tick.
      *
@@ -152,22 +371,16 @@ public class PointMass implements Component {
      * The squared terminal velocity of the particle. This value is squared to
      * optimise performance by avoiding the need to calculate the square root
      * during velocity comparisons or calculations.
-     *
-     * <p>
-     * The terminal velocity is set to 20 units, resulting in a squared value of
-     * 400.
-     * </p>
      */
-    private double terminalVelSq = 20 * 20; // squared
-
-
+    private double terminalVelocitySq = TERMINAL_VELOCITY_SQ;
+    
     // =========================== Constructors ============================= //
     /**
      * Constructs a new {@code Particle2D} with specified position, velocity,
-     * acceleration, mass, damping coefficient, restitution, and static flag.
+     * mass, restitution, and static flag.
      *
      * <p>
-     * This constructor allows for full customization of the particle's physical
+     * This constructor allows for full customisation of the particle's physical
      * properties, making it ideal for scenarios where precise control over the
      * particle's behaviour is required. All physical properties are validated
      * to ensure they are non-negative. This constructor is particularly useful
@@ -179,12 +392,7 @@ public class PointMass implements Component {
      * space, represented as a {@link Position}.
      * @param velocity the initial velocity of the particle, determining its
      * speed and direction of movement, represented as a {@link Vector2D}.
-     * @param acceleration the initial acceleration of the particle,
-     * representing the rate of change of velocity, represented as a
-     * {@link Vector2D}.
      * @param mass the mass of the particle, which must be a non-negative value.
-     * @param damping the damping coefficient, controlling how quickly the
-     * particle's motion decays, which must be a non-negative value.
      * @param restitution the restitution (bounciness) of the particle,
      * determining how much kinetic energy is conserved in collisions, which
      * must be a non-negative value.
@@ -192,137 +400,25 @@ public class PointMass implements Component {
      * (immovable). If {@code true}, the particle will not respond to forces or
      * acceleration.
      *
-     * @throws IllegalArgumentException if mass, damping, or restitution are
-     * negative.
+     * @throws IllegalArgumentException if mass is negative or vector arguments
+     * are {@code null}.
      */
-    public PointMass(
-            Vector2D position, Vector2D velocity, Vector2D acceleration, double mass, double damping, double restitution, boolean isStatic
+    private PointMass(
+            Vector2D position, Vector2D velocity, double mass, double restitution, boolean isStatic
     ) {
-        throwIfNonPositive("mass", mass);
+        throwIfNonPositive(mass,     "mass");
+        throwIfNull       (position, "Position Vector");
+        throwIfNull       (velocity, "Velocity Vector");
         
         // Vectors
         this.position     = position;
         this.velocity     = velocity;
-        this.acceleration = acceleration;
         this.force        = Vector2D.zero();
 
         // Physics properties
         this.mass        = mass;
-        this.dampCoef    = Math.max(0, Math.min(1, damping));
         this.restitution = Math.max(0, Math.min(1, restitution));
         this.isStatic    = isStatic;
-    }
-    
-    /**
-     * Constructs a new {@code Particle2D} with specified position, velocity,
-     * mass, damping coefficient, restitution, and static flag.
-     *
-     * <p>
-     * This constructor allows for full customization of the particle's physical
-     * properties, making it ideal for scenarios where precise control over the
-     * particle's behaviour is required. All physical properties are validated
-     * to ensure they are non-negative. This constructor is particularly useful
-     * when initialising particles with specific attributes in a physics
-     * simulation.
-     * </p>
-     *
-     * @param position the initial position of the particle in the simulation
-     * space, represented as a {@link Position}.
-     * @param velocity the initial velocity of the particle, determining its
-     * speed and direction of movement, represented as a {@link Vector2D}.
-     * @param mass the mass of the particle, which must be a non-negative value.
-     * @param damping the damping coefficient, controlling how quickly the
-     * particle's motion decays, which must be a non-negative value.
-     * @param restitution the restitution (bounciness) of the particle,
-     * determining how much kinetic energy is conserved in collisions, which
-     * must be a non-negative value.
-     * @param isStatic a flag indicating whether the particle is static
-     * (immovable). If {@code true}, the particle will not respond to forces or
-     * acceleration.
-     *
-     * @throws IllegalArgumentException if mass, damping, or restitution are
-     * negative.
-     */
-    public PointMass(Vector2D position, Vector2D velocity, double mass, double damping, double restitution, boolean isStatic) {
-        throwIfNonPositive("mass", mass);
-
-        // Vectors
-        this.position     = position;
-        this.velocity     = velocity;
-        this.acceleration = Vector2D.zero();
-        this.force        = Vector2D.zero();
-
-        // Physics properties
-        this.mass        = mass;
-        this.dampCoef    = Math.max(0, Math.min(1, damping));
-        this.restitution = Math.max(0, Math.min(1, restitution));
-        this.isStatic    = isStatic;
-    }
-
-    /**
-     * Constructs a new {@code Particle2D} with a specified mass and default
-     * values for other physical properties.
-     *
-     * <p>
-     * This constructor initialises a static particle with the given mass and
-     * default values for position, velocity, and acceleration. The particle's
-     * damping coefficient is set to 0 and its restitution is set to 1,
-     * indicating no decay in motion and total elasticity, respectively. The
-     * position is initialised at the origin (0, 0), and both the velocity and
-     * acceleration vectors are initialised to zero, indicating no movement or
-     * change in movement. This constructor is particularly useful for creating
-     * simple, static particles or objects that do not interact dynamically
-     * within the simulation.
-     * </p>
-     *
-     * @param mass the mass of the particle, which must be a non-negative value.
-     *
-     * @throws IllegalArgumentException if mass is negative.
-     */
-    public PointMass(double mass) {
-        this(
-                Vector2D.zero(),
-                Vector2D.zero(),
-                Vector2D.zero(),
-                mass, 0, 1, false
-        );
-    }
-
-    /**
-     * Constructs a new {@code Particle2D} with a specified mass and static
-     * flag, initialising the particle's position at the origin and setting its
-     * velocity and acceleration to zero.
-     *
-     * <p>
-     * This constructor provides a convenient way to create a particle with
-     * default motion parameters, while allowing for the specification of mass
-     * and whether the particle is static. The position is initialised at (0,
-     * 0), and both the velocity and acceleration vectors are set to zero,
-     * indicating no movement or change in movement. The damping coefficient and
-     * restitution are set to zero, meaning the particle experiences no decay in
-     * motion and does not bounce.
-     * </p>
-     *
-     * <p>
-     * This constructor is useful for quickly creating particles that are either
-     * static or dynamic with a specified mass, but do not require initial
-     * movement or complex interactions in the simulation.
-     * </p>
-     *
-     * @param mass the mass of the particle, which must be a non-negative value.
-     * @param isStatic a flag indicating whether the particle is static
-     * (immovable). If {@code true}, the particle will not respond to forces or
-     * acceleration.
-     *
-     * @throws IllegalArgumentException if mass is negative.
-     */
-    public PointMass(double mass, boolean isStatic) {
-        this(
-                Vector2D.zero(),
-                Vector2D.zero(),
-                Vector2D.zero(),
-                mass, 0, 0, isStatic
-        );
     }
 
     // ============================== Getters =============================== //
@@ -360,10 +456,10 @@ public class PointMass implements Component {
      * Retrieves the x-coordinate of the particle's position in 2D space.
      * 
      * <p>
-     * This method returns the horizontal position (x) of the particle, which is
+     * This method returns the horisontal position (x) of the particle, which is
      * a fundamental aspect of its location in the simulation space. The
      * x-coordinate is typically used to determine the particle's interactions
-     * with other entities along the horizontal axis.
+     * with other entities along the horisontal axis.
      * </p>
      *
      * @return The x-coordinate of the particle's position as a {@code double}.
@@ -404,21 +500,6 @@ public class PointMass implements Component {
     }
 
     /**
-     * Retrieves the current acceleration of the particle.
-     * 
-     * <p>
-     * The acceleration is represented as a {@link Vector2D}, reflecting the
-     * rate of change of the particle's velocity with respect to time. It is
-     * directly influenced by the forces acting on the particle and its mass.
-     * </p>
-     *
-     * @return The current acceleration of the particle as a {@link Vector2D}.
-     */
-    public Vector2D acceleration() {
-        return acceleration;
-    }
-
-    /**
      * Retrieves the net force currently acting on the particle.
      * 
      * <p>
@@ -444,21 +525,6 @@ public class PointMass implements Component {
      */
     public Vector2D momentum() {
         return Vector2D.scale(velocity, mass);
-    }
-
-    /**
-     * Retrieves the damping coefficient of the particle.
-     * 
-     * <p>
-     * The damping coefficient is a scalar value that represents the resistive
-     * force acting against the particle's velocity. This is often used to
-     * simulate friction or air resistance in a simulation.
-     * </p>
-     *
-     * @return The damping coefficient of the particle.
-     */
-    public double dampingCoefficient() {
-        return dampCoef;
     }
 
     /**
@@ -503,48 +569,63 @@ public class PointMass implements Component {
     public boolean isStatic() {
         return isStatic;
     }
-    
+   
     /**
-     * Returns the square of the terminal velocity for an entity.
-     *
+     * Retrieves the square of the terminal velocity for this PointMass object.
+     * 
      * <p>
-     * The terminal velocity is the maximum velocity an object can reach under
-     * the influence of forces such as gravity and air resistance. This method
-     * returns the square of the terminal velocity value, which is often used in
-     * physics calculations to avoid repeated square root operations and to
-     * simplify comparisons.
+     * This method is more efficient than {@link #terminalVelocity()} because it
+     * simply returns the precomputed value of the terminal velocity squared,
+     * avoiding the computational cost of calculating a square root.
      * </p>
      *
-     * @return the square of the terminal velocity ({@code terminalVelSq})
+     * @return the square of the terminal velocity.
      */
-    public double getTerminalVelocitySquared() {
-        return terminalVelSq;
+    public double terminalVelocitySquared() {
+        return terminalVelocitySq;
     }
+
+    /**
+     * Retrieves the terminal velocity for this PointMass object.
+     * 
+     * <p>
+     * This method calculates the terminal velocity by taking the square root of
+     * the precomputed terminal velocity squared. Since calculating the square
+     * root is computationally more expensive, use this method only when the
+     * actual terminal velocity value (as opposed to the squared value) is
+     * required.
+     * </p>
+     *
+     * @return the terminal velocity.
+     */
+    public double terminalVelocity() {
+        return sqrt(terminalVelocitySq);
+    }
+
     
-   // ============================== Setters =============================== //
+    // ============================== Setters =============================== //
     /**
      * Sets the x-coordinate of the particle's position in 2D space.
      *
      * <p>
-     * This method updates the horizontal position (x) of the particle within
+     * This method updates the horisontal position (x) of the particle within
      * the simulation space. Adjusting the x-coordinate can be used to move the
-     * particle along the horizontal axis, influencing its interactions with
+     * particle along the horisontal axis, influencing its interactions with
      * other entities and boundaries in the simulation.
      * </p>
      *
      * <p>
      * <strong>Fluent API Example:</strong></p>
      * <pre><code>
-     *     PointMass particle = new PointMass().setX(10.5);
+     *     PointMass particle = PointMass.of(1).setX(10.5);
      * </code></pre>
      *
      * <p>
      * Chaining example:</p>
      * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0);
+     *     PointMass particle = PointMass.of(10)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3);
      * </code></pre>
      *
      * @param x The new x-coordinate for the particle's position.
@@ -569,16 +650,15 @@ public class PointMass implements Component {
      * <p>
      * <strong>Fluent API Example:</strong></p>
      * <pre><code>
-     *     PointMass particle = new PointMass().setY(20.3);
+     *     PointMass particle = PointMass.of(1).setY(20.3);
      * </code></pre>
      *
      * <p>
      * Chaining example:</p>
      * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0);
+     *     PointMass particle = PointMass.of(1)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3);
      * </code></pre>
      *
      * @param y The new y-coordinate for the particle's position.
@@ -586,9 +666,81 @@ public class PointMass implements Component {
      * chaining.
      */
     public PointMass setY(double y) {
-        position.setY(y);
+        position.y = y;
         return this;
     }
+
+    /**
+     * Sets the x-component of the particle's velocity in 2D space.
+     *
+     * <p>
+     * This method updates the horizontal velocity (vx) of the particle within
+     * the simulation space. Adjusting the x-component of the velocity affects
+     * how the particle moves horizontally and can influence its interactions
+     * with other objects, forces, and boundaries in the simulation.
+     * </p>
+     *
+     * <p>
+     * <strong>Fluent API Example:</strong></p>
+     * <pre><code>
+     *     PointMass particle = PointMass.of(1).setVx(15.7);
+     * </code></pre>
+     *
+     * <p>
+     * Chaining example:</p>
+     * <pre><code>
+     *     PointMass particle = PointMass.of(1)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3)
+     *                                   <b>.setVx(15.7)</b>
+     *                                   .setVy(-5.2);
+     * </code></pre>
+     *
+     * @param vx The new x-component of the particle's velocity.
+     * @return The current instance of {@code PointMass} to allow for method
+     * chaining.
+     */
+    public PointMass setVx(double vx) {
+        velocity.x = vx;
+        return this;
+    }
+
+    /**
+     * Sets the y-component of the particle's velocity in 2D space.
+     *
+     * <p>
+     * This method updates the vertical velocity (vy) of the particle within the
+     * simulation space. Adjusting the y-component of the velocity impacts the
+     * particle's movement along the vertical axis and can affect interactions
+     * with external forces such as gravity and other particles or boundaries.
+     * </p>
+     *
+     * <p>
+     * <strong>Fluent API Example:</strong></p>
+     * <pre><code>
+     *     PointMass particle = PointMass.of(1).setVy(-5.2);
+     * </code></pre>
+     *
+     * <p>
+     * Chaining example:
+     * </p>
+     * <pre><code>
+     *     PointMass particle = PointMass.of(1)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3)
+     *                                   .setVx(15.7)
+     *                                   <b>.setVy(-5.2)</b>;
+     * </code></pre>
+     *
+     * @param vy The new y-component of the particle's velocity.
+     * @return The current instance of {@code PointMass} to allow for method
+     * chaining.
+     */
+    public PointMass setVy(double vy) {
+        velocity.y = vy;
+        return this;
+    }
+
 
     /**
      * Sets the mass of the particle.
@@ -604,16 +756,15 @@ public class PointMass implements Component {
      * <p>
      * <strong>Fluent API Example:</strong></p>
      * <pre><code>
-     *     PointMass particle = new PointMass().setMass(5.0);
+     *     PointMass particle = PointMass.at(10, -5).setMass(5.0);
      * </code></pre>
      *
      * <p>
-     * Chaining example:</p>
+     * Chaining example:
+     * </p>
      * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0);
+     *     PointMass particle = PointMass.at(0, 0)
+     *                                   .setMass(5.0);
      * </code></pre>
      *
      * @param mass The new mass of the particle. Must be non-negative.
@@ -622,45 +773,8 @@ public class PointMass implements Component {
      * @throws IllegalArgumentException if {@code mass} is zero or negative.
      */
     public PointMass setMass(double mass) {
-        throwIfNonPositive("mass", mass);
+        throwIfNonPositive(mass, "mass");
         this.mass = mass;
-        return this;
-    }
-
-    /**
-     * Sets the damping coefficient of the particle.
-     *
-     * <p>
-     * The damping coefficient is a scalar value representing the resistive
-     * force that acts against the particle's velocity. This is often used to
-     * simulate friction or air resistance. Higher values of the damping
-     * coefficient will result in greater resistance to motion, effectively
-     * slowing the particle down more rapidly.
-     * </p>
-     *
-     * <p>
-     * <strong>Fluent API Example:</strong></p>
-     * <pre><code>
-     *     PointMass particle = new PointMass().setDampingCoefficient(0.85);
-     * </code></pre>
-     *
-     * <p>
-     * Chaining example:</p>
-     * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0)
-     *                              .setDampingCoefficient(0.85);
-     * </code></pre>
-     *
-     * @param damping The new damping coefficient for the particle. Typically a
-     * value between 0 and 1.
-     * @return The current instance of {@code PointMass} to allow for method
-     * chaining.
-     */
-    public PointMass setDampingCoefficient(double damping) {
-        this.dampCoef = Math.max(0, Math.min(1, damping));
         return this;
     }
 
@@ -678,17 +792,17 @@ public class PointMass implements Component {
      * <p>
      * <strong>Fluent API Example:</strong></p>
      * <pre><code>
-     *     PointMass particle = new PointMass().setRestitution(0.6);
+     *     PointMass particle = PointMass.of(1).setRestitution(0.6);
      * </code></pre>
      *
      * <p>
-     * Chaining example:</p>
+     * Chaining example:
+     * </p>
      * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0)
-     *                              .setRestitution(0.6);
+     *     PointMass particle = PointMass.of(10)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3)
+     *                                   .setRestitution(0.6);
      * </code></pre>
      *
      * @param restitution The new restitution coefficient for the particle.
@@ -707,7 +821,7 @@ public class PointMass implements Component {
      *
      * <p>
      * This method takes the terminal velocity as input and computes its square,
-     * storing it in the {@code terminalVelSq} field. The square of the terminal
+     * storing it in the {@code TERMINAL_VELOCITY_SQ} field. The square of the terminal
      * velocity is useful in various calculations, such as drag force
      * simulations, without requiring frequent use of square root operations.
      * </p>
@@ -715,17 +829,17 @@ public class PointMass implements Component {
      * <p>
      * <strong>Fluent API Example:</strong></p>
      * <pre><code>
-     *     PointMass particle = new PointMass().setTerminalVelocity(50.0);
+     *     PointMass particle = PointMass.of(1).setTerminalVelocity(50.0);
      * </code></pre>
      *
      * <p>
-     * Chaining example:</p>
+     * Chaining example:
+     * </p>
      * <pre><code>
-     *     PointMass particle = new PointMass()
-     *                              .setX(10.5)
-     *                              .setY(20.3)
-     *                              .setMass(5.0)
-     *                              .setTerminalVelocity(50.0);
+     *     PointMass particle = PointMass.of(10)
+     *                                   .setX(10.5)
+     *                                   .setY(20.3)
+     *                                   .setTerminalVelocity(50.0);
      * </code></pre>
      *
      * @param terminalVelocity The terminal velocity to set for the entity.
@@ -733,10 +847,12 @@ public class PointMass implements Component {
      * chaining.
      */
     public PointMass setTerminalVelocity(double terminalVelocity) {
-        this.terminalVelSq = terminalVelocity * terminalVelocity;
+        this.terminalVelocitySq = terminalVelocity * terminalVelocity;
+        if (velocity.mag() > terminalVelocity) {
+            this.velocity.setMag(terminalVelocity);
+        }
         return this;
     }
-
 
     /**
      * Sets the static state of the particle.
@@ -914,9 +1030,9 @@ public class PointMass implements Component {
         // Check if the squared magnitude of the velocity exceeds the squared terminal velocity
         double velocitySquared = vx * vx + vy * vy;
 
-        if (velocitySquared > terminalVelSq) {
+        if (velocitySquared > terminalVelocitySq) {
             // Scale the velocity to match the terminal velocity
-            double scaleFactor = Math.sqrt(terminalVelSq / velocitySquared);
+            double scaleFactor = Math.sqrt(terminalVelocitySq / velocitySquared);
             velocity = velocity.scale(scaleFactor);
         }
 
@@ -938,7 +1054,7 @@ public class PointMass implements Component {
      * <p>
      * Example usage:</p>
      * <pre><code>
-     *     PointMass pm = new PointMass(new Vector2D(0, 0), new Vector2D(1, 1), 5.0, 10.0);  // 10.0 is terminal velocity
+     *     PointMass pm = PointMass.of(0, 0, 0, 0, 5.0, 10.0);  // 10.0 is terminal velocity
      *     pm.increaseSpeed(new Vector2D(3, 4));  // Increases velocity by (3, 4), but enforces terminal velocity
      * </code></pre>
      *
@@ -947,7 +1063,8 @@ public class PointMass implements Component {
      * via vector arithmetic while ensuring the terminal velocity is not
      * exceeded:</p>
      * <pre><code>
-     *     pm.increaseSpeed(new Vector2D(5, 6)).increaseSpeed(new Vector2D(1, 2));  // Terminal velocity constraint applied after each increase
+     *     pm.increaseSpeed(new Vector2D(5, 6))
+     *       .increaseSpeed(new Vector2D(1, 2));  // Terminal velocity constraint applied after each increase
      * </code></pre>
      *
      * @param speedIncrease The {@code Vector2D} representing the amount to
@@ -975,7 +1092,7 @@ public class PointMass implements Component {
      *
      * <p>
      * The x-component of the velocity is negated and scaled by the restitution
-     * factor, effectively reversing the horizontal direction of movement and
+     * factor, effectively reversing the horisontal direction of movement and
      * reducing its magnitude according to the restitution value.
      * </p>
      * 
@@ -992,7 +1109,7 @@ public class PointMass implements Component {
      * the restitution coefficient to simulate a bounce effect.
      *
      * <p>
-     * This method is typically used when the object collides with a horizontal
+     * This method is typically used when the object collides with a horisontal
      * surface. The restitution coefficient controls how "bouncy" the collision
      * is, where a value of 1.0 represents a perfectly elastic collision (no
      * energy loss), and a value of 0.0 represents a perfectly inelastic
@@ -1010,14 +1127,6 @@ public class PointMass implements Component {
     public PointMass bounceY() {
         velocity.y *= restitution * -1;
         return this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(Object obj) {
-        return this == obj;
     }
 
     /**
@@ -1039,29 +1148,26 @@ public class PointMass implements Component {
     public String toString() {
         StringBuilder outp = new StringBuilder();
         
-        outp.append("Position_")    .append(position)    .append("\n");
-        outp.append("Velocity_")    .append(velocity)    .append("\n");
-        outp.append("Acceleration_").append(acceleration).append("\n");
-        outp.append("Mass:\t\t")    .append(mass)        .append("\n");
+        outp.append("Position_").append(position).append("\n");
+        outp.append("Velocity_").append(velocity).append("\n");
+        outp.append("Force_")   .append(force)   .append("\n");
+        outp.append("Mass:\t\t").append(mass)    .append("\n");
         
         return outp.toString();
+        
     }
 
 
     // ========================== Helper Methods ============================ //
-    /**
-     * Throws an {@link IllegalArgumentException} if the specified field is
-     * non-positive.
-     *
-     * @param varName the name of the variable to include in the exception
-     * message
-     * @param field the value to check; if this value is less than or equal to
-     * 0, an exception is thrown
-     * @throws IllegalArgumentException if the field is non-positive
-     */
-    private void throwIfNonPositive(String varName, double field) {
+    private void throwIfNonPositive(double field, String varName) {
         if (field <= 0) {
             throw new IllegalArgumentException(varName + " must be positive (" + field + ")");
+        }
+    }
+    
+    private void throwIfNull(Object o, String fieldName) {
+        if (o == null) {
+            throw new IllegalArgumentException(fieldName + " cannot be null.");
         }
     }
 
